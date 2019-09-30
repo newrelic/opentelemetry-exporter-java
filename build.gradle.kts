@@ -4,6 +4,14 @@ buildscript {
     }
 }
 
+repositories {
+    maven("https://oss.jfrog.org/artifactory/oss-snapshot-local") {
+        mavenContent {
+            snapshotsOnly()
+        }
+    }
+}
+
 allprojects {
     group = "com.newrelic.telemetry"
     version = project.findProperty("releaseVersion") as String
@@ -32,6 +40,8 @@ googleJavaFormat {
 
 dependencies {
     api("com.newrelic.telemetry:telemetry:0.3.1")
+    implementation("io.opentelemetry:opentelemetry-sdk:0.1.0-SNAPSHOT")
+    implementation("com.newrelic.telemetry:telemetry-http-okhttp:0.3.1")
 
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.4.2")
     testRuntimeOnly("org.slf4j:slf4j-simple:1.7.26")
@@ -101,8 +111,7 @@ configure<PublishingExtension> {
                 val releasesRepoUrl = uri("http://localhost:8081/repository/maven-releases/")
                 val snapshotsRepoUrl = uri("http://localhost:8081/repository/maven-snapshots/")
                 url = if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl
-            }
-            else {
+            } else {
                 val releasesRepoUrl = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
                 val snapshotsRepoUrl = uri("https://oss.sonatype.org/content/repositories/snapshots/")
                 url = if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl
