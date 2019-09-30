@@ -9,6 +9,7 @@ import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 import com.newrelic.telemetry.Attributes;
+import com.newrelic.telemetry.spans.Span;
 import com.newrelic.telemetry.spans.Span.SpanBuilder;
 import com.newrelic.telemetry.spans.SpanBatch;
 import io.opentelemetry.common.Timestamp;
@@ -18,10 +19,9 @@ import io.opentelemetry.trace.AttributeValue;
 import io.opentelemetry.trace.SpanId;
 import io.opentelemetry.trace.Status;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 class SpanBatchAdapter {
@@ -33,10 +33,11 @@ class SpanBatchAdapter {
   }
 
   SpanBatch adaptToSpanBatch(List<SpanData> openTracingSpans) {
-    Collection<com.newrelic.telemetry.spans.Span> newRelicSpans = new HashSet<>();
-    for (SpanData openTelemetrySpan : openTracingSpans) {
-      newRelicSpans.add(makeNewRelicSpan(openTelemetrySpan));
-    }
+    Collection<Span> newRelicSpans =
+        openTracingSpans
+            .stream()
+            .map(SpanBatchAdapter::makeNewRelicSpan)
+            .collect(Collectors.toSet());
     return new SpanBatch(newRelicSpans, commonAttributes);
   }
 
@@ -44,7 +45,7 @@ class SpanBatchAdapter {
     SpanBuilder spanBuilder =
         com.newrelic.telemetry.spans.Span.builder(span.getSpanId().toLowerBase16())
             .name(span.getName().isEmpty() ? null : span.getName())
-            .parentId(makeSpanId(span.getParentSpanId()))
+            .parentId(makeParentSpanId(span.getParentSpanId()))
             .traceId(span.getTraceId().toLowerBase16())
             .attributes(generateSpanAttributes(span));
 
@@ -54,7 +55,7 @@ class SpanBatchAdapter {
   }
 
   @Nullable
-  private static String makeSpanId(SpanId parentSpanId) {
+  private static String makeParentSpanId(SpanId parentSpanId) {
     if (parentSpanId.isValid()) {
       return parentSpanId.toLowerBase16();
     }
@@ -69,25 +70,24 @@ class SpanBatchAdapter {
 
   private static Attributes createIntrinsicAttributes(SpanData span) {
     Attributes attributes = new Attributes();
-    Map<String, io.opentelemetry.trace.AttributeValue> originalAttributes = span.getAttributes();
-    for (Entry<String, io.opentelemetry.trace.AttributeValue> stringAttributeValueEntry :
-        originalAttributes.entrySet()) {
-      AttributeValue value = stringAttributeValueEntry.getValue();
-      switch (value.getType()) {
-        case STRING:
-          attributes.put(stringAttributeValueEntry.getKey(), value.getStringValue());
-          break;
-        case LONG:
-          attributes.put(stringAttributeValueEntry.getKey(), value.getLongValue());
-          break;
-        case BOOLEAN:
-          attributes.put(stringAttributeValueEntry.getKey(), value.getBooleanValue());
-          break;
-        case DOUBLE:
-          attributes.put(stringAttributeValueEntry.getKey(), value.getDoubleValue());
-          break;
-      }
-    }
+    Map<String, AttributeValue> originalAttributes = span.getAttributes();
+    originalAttributes.forEach(
+        (key, value) -> {
+          switch (value.getType()) {
+            case STRING:
+              attributes.put(key, value.getStringValue());
+              break;
+            case LONG:
+              attributes.put(key, value.getLongValue());
+              break;
+            case BOOLEAN:
+              attributes.put(key, value.getBooleanValue());
+              break;
+            case DOUBLE:
+              attributes.put(key, value.getDoubleValue());
+              break;
+          }
+        });
     return attributes;
   }
 
@@ -103,9 +103,7 @@ class SpanBatchAdapter {
     Resource resource = span.getResource();
     if (resource != null) {
       Map<String, String> labelsMap = resource.getLabels();
-      for (Entry<String, String> resourceLabel : labelsMap.entrySet()) {
-        attributes.put(resourceLabel.getKey(), resourceLabel.getValue());
-      }
+      labelsMap.forEach(attributes::put);
     }
     return attributes;
   }
