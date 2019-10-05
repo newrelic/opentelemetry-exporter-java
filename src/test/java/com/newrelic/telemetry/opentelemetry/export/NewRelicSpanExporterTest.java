@@ -53,7 +53,7 @@ class NewRelicSpanExporterTest {
     SpanBatch batch = new SpanBatch(Collections.emptyList(), new Attributes());
     when(adapter.adaptToSpanBatch(spans)).thenReturn(batch);
 
-    ResultCode result = testClass.exportSpanData(spans);
+    ResultCode result = testClass.export(spans);
     assertEquals(ResultCode.SUCCESS, result);
   }
 
@@ -106,8 +106,7 @@ class NewRelicSpanExporterTest {
     when(adapter.adaptToSpanBatch(ArgumentMatchers.anyList())).thenReturn(spanBatch);
     when(sender.sendBatch(isA(SpanBatch.class))).thenThrow(exceptionClass);
 
-    ResultCode result =
-        testClass.exportSpanData(Collections.singletonList(createMinimalSpanData()));
+    ResultCode result = testClass.export(Collections.singletonList(createMinimalSpanData()));
     assertEquals(resultCode, result);
   }
 }
