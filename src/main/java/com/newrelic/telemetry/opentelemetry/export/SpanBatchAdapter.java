@@ -22,7 +22,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 
 class SpanBatchAdapter {
 
@@ -54,7 +53,6 @@ class SpanBatchAdapter {
     return spanBuilder.build();
   }
 
-  @Nullable
   private static String makeParentSpanId(SpanId parentSpanId) {
     if (parentSpanId.isValid()) {
       return parentSpanId.toLowerBase16();

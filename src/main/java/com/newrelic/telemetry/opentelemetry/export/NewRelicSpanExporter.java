@@ -13,7 +13,6 @@ import com.newrelic.telemetry.exceptions.RetryWithRequestedWaitException;
 import com.newrelic.telemetry.spans.SpanBatch;
 import com.newrelic.telemetry.spans.SpanBatchSender;
 import com.newrelic.telemetry.spans.SpanBatchSenderBuilder;
-import io.opentelemetry.proto.trace.v1.Span;
 import io.opentelemetry.sdk.trace.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.util.List;
@@ -51,8 +50,8 @@ public class NewRelicSpanExporter implements SpanExporter {
    * @param openTelemetrySpans A list of spans to export to New Relic trace ingest API
    * @return A ResultCode that indicates the execution status of the export operation
    */
-  //  @Override
-  public ResultCode exportSpanData(List<SpanData> openTelemetrySpans) {
+  @Override
+  public ResultCode export(List<SpanData> openTelemetrySpans) {
     try {
       SpanBatch spanBatch = adapter.adaptToSpanBatch(openTelemetrySpans);
       spanBatchSender.sendBatch(spanBatch);
@@ -62,11 +61,6 @@ public class NewRelicSpanExporter implements SpanExporter {
     } catch (ResponseException e) {
       return ResultCode.FAILED_NOT_RETRYABLE;
     }
-  }
-
-  @Override
-  public ResultCode export(List<Span> spans) {
-    throw new UnsupportedOperationException("this is the old API...switch to the new one!");
   }
 
   @Override
