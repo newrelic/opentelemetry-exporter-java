@@ -33,8 +33,8 @@ TracerSdk tracerSdk = new TracerSdk();
 ```
 implementation("com.newrelic.telemetry:opentelemetry-exporters-newrelic:0.1.0-SNAPSHOT")
 implementation("io.opentelemetry:opentelemetry-sdk:0.1.0-SNAPSHOT")
-implementation("com.newrelic.telemetry:telemetry-core:0.3.1")
-implementation("com.newrelic.telemetry:telemetry-http-okhttp:0.3.1")
+implementation("com.newrelic.telemetry:telemetry-core:0.3.2")
+implementation("com.newrelic.telemetry:telemetry-http-okhttp:0.3.2")
 ```
 
 ### Building
