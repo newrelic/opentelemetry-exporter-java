@@ -6,37 +6,36 @@ please visit [the exporter specs documentation repo]()
 
 ### How To Use
 
-Manual Instrumentation - we are currently manually creating the jar and including it in the lib directory of our sample app. 
+In order to send spans to New Relic, you will need an Insights Insert API Key. Please see [New Relic Api Keys](https://docs.newrelic.com/docs/insights/insights-data-sources/custom-data/introduction-event-api#) for more information.
 
-SampleAppConfig looks important. Although its a Spring app so this seems specific to Spring. 
+1. Create a `NewRelicSpanExporter`
+```
+NewRelicSpanExporter.newBuilder()
+        .apiKey(System.getenv("INSIGHTS_INSERT_KEY"))
+        .enableAuditLogging()
+        .commonAttributes(new Attributes().put("service.name", "best service ever")).build();
+```
 
+2. Build the OpenTelemetry `BatchSpansProcessor` with the `NewRelicSpanExporter` 
+```
+BatchSpansProcessor.newBuilder(exporter).build();
+```
 
-Assuming manual instrumented with OTel, just use NR Otel exporter. First iteration of Oscarrifc app.
-
-Using OpenTracing Shim + Otel SDK. This was sort of manual and targeted tracing at OkHttp. OkHttp already autoinstrumented by OT but we did have to add the tracerShim as a TraceInterceptor
-
-
-App->specialagent-> NR Tracer Plugin + NR Otel exporter (this thing)
+3. Create the OpenTelemetry `TracerSdk` and add the `BatchSpanProcessor` to the tracerSdk.  
+```
+TracerSdk tracerSdk = new TracerSdk();
+    tracerSdk.addSpanProcessor(spanProcessor);
+```
 
 ##### Gradle
 `build.gradle:`
 
 ```
-implementation(":opentelemetry-exporters-newrelic:0.1.0-SNAPSHOT")
+implementation("com.newrelic.telemetry:opentelemetry-exporters-newrelic:0.1.0-SNAPSHOT")
 implementation("io.opentelemetry:opentelemetry-sdk:0.1.0-SNAPSHOT")
 implementation("com.newrelic.telemetry:telemetry-core:0.3.1")
 implementation("com.newrelic.telemetry:telemetry-http-okhttp:0.3.1")
 ```
-
-if trying to use with Open Tracing, add these as well
-```
-implementation("io.opentelemetry:opentelemetry-opentracing-shim:0.1.0-SNAPSHOT")
-implementation("io.opentelemetry:opentelemetry-contrib-trace-utils:0.1.0-SNAPSHOT")
-```
-
-### New Relic Insights Inserts Key
-In order to send spans to New Relic, you will also need an Insights Insert API Key. Please see [New Relic Api Keys](https://docs.newrelic.com/docs/insights/insights-data-sources/custom-data/introduction-event-api#) for more information.
-
 
 ### Building
 CI builds are run on Azure Pipelines: [![Build Status](https://dev.azure.com/NRAzurePipelines/Java%20CI/_apis/build/status/PR%20Build%20for%20OpenTelemetry%20Exporters?branchName=master)](https://dev.azure.com/NRAzurePipelines/Java%20CI/_build/latest?definitionId=11&branchName=master)
