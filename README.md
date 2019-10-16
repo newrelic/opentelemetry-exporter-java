@@ -1,8 +1,6 @@
 # New Relic OpenTelemetry Span Exporter
 An [OpenTelemetry](https://github.com/open-telemetry/opentelemetry-java) reporter for sending spans to New Relic using the New Relic Java Telemetry SDK.
-For the juicy details on how OpenTelemetry spans are mapped to New Relic spans
-please visit [the exporter specs documentation repo]()
-//TODO need to make the spec documentation repo). 
+For the juicy details on how OpenTelemetry spans are mapped to New Relic spans...[coming soon - the exporter specs documentation repo!]()
 
 ### How To Use
 
@@ -12,7 +10,6 @@ In order to send spans to New Relic, you will need an Insights Insert API Key. P
 ```
 NewRelicSpanExporter.newBuilder()
         .apiKey(System.getenv("INSIGHTS_INSERT_KEY"))
-        .enableAuditLogging()
         .commonAttributes(new Attributes().put("service.name", "best service ever")).build();
 ```
 
