@@ -24,8 +24,16 @@ TracerSdk tracerSdk = new TracerSdk();
     tracerSdk.addSpanProcessor(spanProcessor);
 ```
 
-##### Gradle
+### Gradle
 `build.gradle:`
+
+```
+repositories {
+    maven {
+        url = "https://oss.sonatype.org/content/repositories/snapshots"
+    }
+}
+```
 
 ```
 implementation("com.newrelic.telemetry:opentelemetry-exporters-newrelic:0.1.0-SNAPSHOT")
