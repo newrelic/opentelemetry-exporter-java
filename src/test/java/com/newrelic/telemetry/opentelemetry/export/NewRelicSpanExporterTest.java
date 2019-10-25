@@ -17,7 +17,7 @@ import com.newrelic.telemetry.exceptions.RetryWithRequestedWaitException;
 import com.newrelic.telemetry.exceptions.RetryWithSplitException;
 import com.newrelic.telemetry.spans.SpanBatch;
 import com.newrelic.telemetry.spans.SpanBatchSender;
-import io.opentelemetry.common.Timestamp;
+import io.opentelemetry.sdk.common.Timestamp;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter.ResultCode;
