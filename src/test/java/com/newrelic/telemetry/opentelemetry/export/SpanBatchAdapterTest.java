@@ -10,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.google.common.collect.ImmutableMap;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.spans.SpanBatch;
-import io.opentelemetry.sdk.common.Timestamp;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SpanData;
 import io.opentelemetry.trace.AttributeValue;
@@ -50,9 +49,9 @@ class SpanBatchAdapterTest {
         SpanData.newBuilder()
             .setTraceId(traceId)
             .setSpanId(spanId)
-            .setStartTimestamp(Timestamp.create(1000, 456_000_000))
+            .setStartEpochNanos(1_000_456_001_000L)
             .setParentSpanId(parentSpanId)
-            .setEndTimestamp(Timestamp.create(1001, 789_020_111))
+            .setEndEpochNanos(1_001_789_021_111L)
             .setName("spanName")
             .setStatus(Status.OK)
             .setResource(inputResource)
@@ -87,8 +86,8 @@ class SpanBatchAdapterTest {
         SpanData.newBuilder()
             .setTraceId(traceId)
             .setSpanId(spanId)
-            .setStartTimestamp(Timestamp.create(1000, 456_000_000))
-            .setEndTimestamp(Timestamp.create(1000, 456_000_100))
+            .setStartEpochNanos(1_000_456_001_000L)
+            .setEndEpochNanos(1_000_456_001_100L)
             .setAttributes(
                 ImmutableMap.of(
                     "myBooleanKey",
@@ -116,8 +115,8 @@ class SpanBatchAdapterTest {
         SpanData.newBuilder()
             .setTraceId(traceId)
             .setSpanId(spanId)
-            .setStartTimestamp(Timestamp.create(1000, 456_000_000))
-            .setEndTimestamp(Timestamp.create(1000, 456_000_100))
+            .setStartEpochNanos(456_001_000L)
+            .setEndEpochNanos(456_001_100L)
             .setName("spanName")
             .setKind(Kind.SERVER)
             .setStatus(Status.OK)
@@ -146,8 +145,8 @@ class SpanBatchAdapterTest {
         SpanData.newBuilder()
             .setTraceId(traceId)
             .setSpanId(spanId)
-            .setStartTimestamp(Timestamp.create(1000, 456_000_000))
-            .setEndTimestamp(Timestamp.create(1000, 456_000_100))
+            .setStartEpochNanos(1_000_456_001_000L)
+            .setEndEpochNanos(1_000_456_001_100L)
             .setStatus(Status.CANCELLED.withDescription("it's broken"))
             .setName("spanName")
             .setKind(Kind.SERVER)

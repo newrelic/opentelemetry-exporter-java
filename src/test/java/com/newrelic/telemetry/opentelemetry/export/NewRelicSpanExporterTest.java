@@ -17,7 +17,6 @@ import com.newrelic.telemetry.exceptions.RetryWithRequestedWaitException;
 import com.newrelic.telemetry.exceptions.RetryWithSplitException;
 import com.newrelic.telemetry.spans.SpanBatch;
 import com.newrelic.telemetry.spans.SpanBatchSender;
-import io.opentelemetry.sdk.common.Timestamp;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter.ResultCode;
@@ -65,8 +64,8 @@ class NewRelicSpanExporterTest {
         .setName("spanName")
         .setKind(Kind.SERVER)
         .setStatus(Status.OK)
-        .setStartTimestamp(Timestamp.create(1000, 456_000_000))
-        .setEndTimestamp(Timestamp.create(1000, 456_000_100))
+        .setStartEpochNanos(456_001_000L)
+        .setEndEpochNanos(456_001_100L)
         .build();
   }
 

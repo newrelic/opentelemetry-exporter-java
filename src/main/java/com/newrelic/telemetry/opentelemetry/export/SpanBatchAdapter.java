@@ -6,13 +6,11 @@
 package com.newrelic.telemetry.opentelemetry.export;
 
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
-import static java.util.concurrent.TimeUnit.SECONDS;
 
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.spans.Span;
 import com.newrelic.telemetry.spans.Span.SpanBuilder;
 import com.newrelic.telemetry.spans.SpanBatch;
-import io.opentelemetry.sdk.common.Timestamp;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SpanData;
 import io.opentelemetry.trace.AttributeValue;
@@ -106,20 +104,15 @@ class SpanBatchAdapter {
     return attributes;
   }
 
-  private static Double calculateDuration(SpanData span) {
-    Timestamp startTime = span.getStartTimestamp();
-    Timestamp endTime = span.getEndTimestamp();
+  private static double calculateDuration(SpanData span) {
+    long startTime = span.getStartEpochNanos();
+    long endTime = span.getEndEpochNanos();
 
-    int nanoDifference = endTime.getNanos() - startTime.getNanos();
-    long secondsDifference = endTime.getSeconds() - startTime.getSeconds();
-    double nanoPart = nanoDifference / 1_000_000d;
-    return nanoPart + SECONDS.toMillis(secondsDifference);
+    long nanoDifference = endTime - startTime;
+    return nanoDifference / 1_000_000d;
   }
 
   private static long calculateTimestampMillis(SpanData span) {
-    Timestamp spanStartTime = span.getStartTimestamp();
-    long millis = NANOSECONDS.toMillis(spanStartTime.getNanos());
-    long seconds = SECONDS.toMillis(spanStartTime.getSeconds());
-    return seconds + millis;
+    return NANOSECONDS.toMillis(span.getStartEpochNanos());
   }
 }
