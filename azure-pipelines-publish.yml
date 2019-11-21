@@ -32,7 +32,7 @@ steps:
 
 - task: Gradle@2
   inputs:
-    workingDirectory: ''
+    workingDirectory: '.'
     gradleWrapperFile: 'gradlew'
     options: "-Psigning.secretKeyRingFile=$(secring.secureFilePath)"
     javaHomeOption: 'JDKVersion'
