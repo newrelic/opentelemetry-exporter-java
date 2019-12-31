@@ -7,9 +7,7 @@ package com.newrelic.telemetry.opentelemetry.export;
 
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.SimpleSpanBatchSender;
-import com.newrelic.telemetry.exceptions.ResponseException;
-import com.newrelic.telemetry.exceptions.RetryWithBackoffException;
-import com.newrelic.telemetry.exceptions.RetryWithRequestedWaitException;
+import com.newrelic.telemetry.TelemetryClient;
 import com.newrelic.telemetry.spans.SpanBatch;
 import com.newrelic.telemetry.spans.SpanBatchSender;
 import com.newrelic.telemetry.spans.SpanBatchSenderBuilder;
@@ -26,7 +24,7 @@ import java.util.List;
 public class NewRelicSpanExporter implements SpanExporter {
 
   private final SpanBatchAdapter adapter;
-  private final SpanBatchSender spanBatchSender;
+  private final TelemetryClient telemetryClient;
 
   /**
    * Constructor for the NewRelicSpanExporter.
@@ -41,7 +39,7 @@ public class NewRelicSpanExporter implements SpanExporter {
       throw new IllegalArgumentException("You must provide a non-null SpanBatchSender");
     }
     this.adapter = adapter;
-    this.spanBatchSender = spanBatchSender;
+    this.telemetryClient = new TelemetryClient(null, spanBatchSender);
   }
 
   /**
@@ -52,19 +50,15 @@ public class NewRelicSpanExporter implements SpanExporter {
    */
   @Override
   public ResultCode export(List<SpanData> openTelemetrySpans) {
-    try {
-      SpanBatch spanBatch = adapter.adaptToSpanBatch(openTelemetrySpans);
-      spanBatchSender.sendBatch(spanBatch);
-      return ResultCode.SUCCESS;
-    } catch (RetryWithRequestedWaitException | RetryWithBackoffException e) {
-      return ResultCode.FAILED_RETRYABLE;
-    } catch (ResponseException e) {
-      return ResultCode.FAILED_NOT_RETRYABLE;
-    }
+    SpanBatch spanBatch = adapter.adaptToSpanBatch(openTelemetrySpans);
+    telemetryClient.sendBatch(spanBatch);
+    return ResultCode.SUCCESS;
   }
 
   @Override
-  public void shutdown() {}
+  public void shutdown() {
+    telemetryClient.shutdown();
+  }
 
   /**
    * Creates a new builder instance.
