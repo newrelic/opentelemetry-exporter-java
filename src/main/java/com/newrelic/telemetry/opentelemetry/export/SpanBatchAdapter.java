@@ -27,7 +27,11 @@ class SpanBatchAdapter {
   private final Attributes commonAttributes;
 
   SpanBatchAdapter(Attributes commonAttributes) {
-    this.commonAttributes = commonAttributes;
+    this.commonAttributes =
+        commonAttributes
+            .copy()
+            .put("instrumentation.provider", "opentelemetry-java")
+            .put("collector.name", "newrelic-opentelemetry-exporter");
   }
 
   SpanBatch adaptToSpanBatch(List<SpanData> openTracingSpans) {
@@ -60,7 +64,8 @@ class SpanBatchAdapter {
   }
 
   private static Attributes generateSpanAttributes(SpanData span) {
-    Attributes attributes = createIntrinsicAttributes(span);
+    Attributes attributes = new Attributes();
+    attributes = createIntrinsicAttributes(span, attributes);
     attributes = addPossibleErrorAttribute(span, attributes);
     attributes = addPossibleInstrumentationAttributes(span, attributes);
     return addResourceAttributes(span, attributes);
@@ -82,8 +87,7 @@ class SpanBatchAdapter {
     return attributes;
   }
 
-  private static Attributes createIntrinsicAttributes(SpanData span) {
-    Attributes attributes = new Attributes();
+  private static Attributes createIntrinsicAttributes(SpanData span, Attributes attributes) {
     Map<String, AttributeValue> originalAttributes = span.getAttributes();
     originalAttributes.forEach(
         (key, value) -> {
