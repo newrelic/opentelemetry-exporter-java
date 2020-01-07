@@ -1,10 +1,14 @@
 # New Relic OpenTelemetry Span Exporter
-An [OpenTelemetry](https://github.com/open-telemetry/opentelemetry-java) reporter for sending spans to New Relic using the New Relic Java Telemetry SDK.
-For the juicy details on how OpenTelemetry spans are mapped to New Relic spans...[coming soon - the exporter specs documentation repo!]()
+An [OpenTelemetry](https://github.com/open-telemetry/opentelemetry-java) reporter for sending spans to New Relic using the
+New Relic Java Telemetry SDK.
+For the juicy details on how OpenTelemetry spans are mapped to New Relic spans, see documentation in
+[Our Exporter Specifications Documentation](https://github.com/newrelic/newrelic-exporter-specs)
 
 ### How To Use
 
-In order to send spans to New Relic, you will need an Insights Insert API Key. Please see [New Relic Api Keys](https://docs.newrelic.com/docs/insights/insights-data-sources/custom-data/introduction-event-api#) for more information.
+In order to send spans to New Relic, you will need an Insights Insert API Key.
+Please see [New Relic Api Keys](https://docs.newrelic.com/docs/insights/insights-data-sources/custom-data/introduction-event-api#)
+for more information.
 
 1. Create a `NewRelicSpanExporter`
 ```
@@ -25,7 +29,7 @@ TracerSdk tracerSdk = new TracerSdk();
 ```
 
 ### Gradle
-`build.gradle:`
+`build.gradle`:
 
 ```
 repositories {
@@ -37,7 +41,7 @@ repositories {
 
 ```
 implementation("com.newrelic.telemetry:opentelemetry-exporters-newrelic:0.2.0-SNAPSHOT")
-implementation("io.opentelemetry:opentelemetry-sdk:0.2.0-SNAPSHOT")
+implementation("io.opentelemetry:opentelemetry-sdk:0.2.0")
 implementation("com.newrelic.telemetry:telemetry-core:0.3.2")
 implementation("com.newrelic.telemetry:telemetry-http-okhttp:0.3.2")
 ```
