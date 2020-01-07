@@ -43,7 +43,8 @@ implementation("com.newrelic.telemetry:telemetry-http-okhttp:0.3.2")
 ```
 
 ### Building
-CI builds are run on Azure Pipelines: [![Build Status](https://dev.azure.com/NRAzurePipelines/Java%20CI/_apis/build/status/PR%20Build%20for%20OpenTelemetry%20Exporters?branchName=master)](https://dev.azure.com/NRAzurePipelines/Java%20CI/_build/latest?definitionId=11&branchName=master)
+CI builds are run on Azure Pipelines:
+[![Build Status](https://dev.azure.com/NRAzurePipelines/Java%20CI/_apis/build/status/PR%20Build%20for%20OpenTelemetry%20Exporters?branchName=master)](https://dev.azure.com/NRAzurePipelines/Java%20CI/_build/latest?definitionId=11&branchName=master)
 
 The project uses gradle 5 for building, and the gradle wrapper is provided.
 
