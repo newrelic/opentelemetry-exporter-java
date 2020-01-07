@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.google.common.collect.ImmutableMap;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.spans.SpanBatch;
+import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SpanData;
 import io.opentelemetry.trace.AttributeValue;
@@ -31,6 +32,15 @@ class SpanBatchAdapterTest {
 
   @Test
   void testSendBatchWithSingleSpan() {
+    InstrumentationLibraryInfo instrumentationLibraryInfo =
+        InstrumentationLibraryInfo.create("jetty-server", "3.14.159");
+
+    Attributes expectedAttributes =
+        new Attributes()
+            .put("host", "bar")
+            .put("datacenter", "boo")
+            .put("instrumentation.name", "jetty-server")
+            .put("instrumentation.version", "3.14.159");
     com.newrelic.telemetry.spans.Span span1 =
         com.newrelic.telemetry.spans.Span.builder(hexSpanId)
             .traceId(hexTraceId)
@@ -38,7 +48,7 @@ class SpanBatchAdapterTest {
             .name("spanName")
             .parentId(hexParentSpanId)
             .durationMs(1333.020111d)
-            .attributes(new Attributes().put("host", "bar").put("datacenter", "boo"))
+            .attributes(expectedAttributes)
             .build();
     SpanBatch expected = new SpanBatch(Collections.singleton(span1), new Attributes());
 
@@ -55,6 +65,7 @@ class SpanBatchAdapterTest {
             .setName("spanName")
             .setStatus(Status.OK)
             .setResource(inputResource)
+            .setInstrumentationLibraryInfo(instrumentationLibraryInfo)
             .setKind(Kind.SERVER)
             .build();
 

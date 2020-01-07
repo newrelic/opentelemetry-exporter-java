@@ -11,6 +11,7 @@ import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.spans.Span;
 import com.newrelic.telemetry.spans.Span.SpanBuilder;
 import com.newrelic.telemetry.spans.SpanBatch;
+import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SpanData;
 import io.opentelemetry.trace.AttributeValue;
@@ -61,7 +62,24 @@ class SpanBatchAdapter {
   private static Attributes generateSpanAttributes(SpanData span) {
     Attributes attributes = createIntrinsicAttributes(span);
     attributes = addPossibleErrorAttribute(span, attributes);
+    attributes = addPossibleInstrumentationAttributes(span, attributes);
     return addResourceAttributes(span, attributes);
+  }
+
+  private static Attributes addPossibleInstrumentationAttributes(
+      SpanData span, Attributes attributes) {
+    InstrumentationLibraryInfo instrumentationLibraryInfo = span.getInstrumentationLibraryInfo();
+    if (instrumentationLibraryInfo != null) {
+      if (instrumentationLibraryInfo.name() != null
+          && !instrumentationLibraryInfo.name().isEmpty()) {
+        attributes.put("instrumentation.name", instrumentationLibraryInfo.name());
+      }
+      if (instrumentationLibraryInfo.version() != null
+          && !instrumentationLibraryInfo.version().isEmpty()) {
+        attributes.put("instrumentation.version", instrumentationLibraryInfo.version());
+      }
+    }
+    return attributes;
   }
 
   private static Attributes createIntrinsicAttributes(SpanData span) {
