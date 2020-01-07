@@ -6,12 +6,14 @@
 package com.newrelic.telemetry.opentelemetry.export;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableMap;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.spans.SpanBatch;
-import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
 import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.sdk.trace.InstrumentationLibraryInfo;
 import io.opentelemetry.sdk.trace.SpanData;
 import io.opentelemetry.trace.AttributeValue;
 import io.opentelemetry.trace.Span.Kind;
@@ -32,8 +34,9 @@ class SpanBatchAdapterTest {
 
   @Test
   void testSendBatchWithSingleSpan() {
-    InstrumentationLibraryInfo instrumentationLibraryInfo =
-        InstrumentationLibraryInfo.create("jetty-server", "3.14.159");
+    InstrumentationLibraryInfo instrumentationLibraryInfo = mock(InstrumentationLibraryInfo.class);
+    when(instrumentationLibraryInfo.name()).thenReturn("jetty-server");
+    when(instrumentationLibraryInfo.version()).thenReturn("3.14.159");
 
     Attributes expectedAttributes =
         new Attributes()
