@@ -4,6 +4,8 @@ New Relic Java Telemetry SDK.
 For the juicy details on how OpenTelemetry spans are mapped to New Relic spans, see documentation in
 [Our Exporter Specifications Documentation](https://github.com/newrelic/newrelic-exporter-specs)
 
+### Testing slackbot notification
+
 ### How To Use
 
 In order to send spans to New Relic, you will need an Insights Insert API Key.
