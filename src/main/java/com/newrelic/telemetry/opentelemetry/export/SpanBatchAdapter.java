@@ -12,6 +12,7 @@ import com.newrelic.telemetry.spans.Span;
 import com.newrelic.telemetry.spans.Span.SpanBuilder;
 import com.newrelic.telemetry.spans.SpanBatch;
 import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.sdk.trace.InstrumentationLibraryInfo;
 import io.opentelemetry.sdk.trace.SpanData;
 import io.opentelemetry.trace.AttributeValue;
 import io.opentelemetry.trace.SpanId;
@@ -26,7 +27,11 @@ class SpanBatchAdapter {
   private final Attributes commonAttributes;
 
   SpanBatchAdapter(Attributes commonAttributes) {
-    this.commonAttributes = commonAttributes;
+    this.commonAttributes =
+        commonAttributes
+            .copy()
+            .put("instrumentation.provider", "opentelemetry-java")
+            .put("collector.name", "newrelic-opentelemetry-exporter");
   }
 
   SpanBatch adaptToSpanBatch(List<SpanData> openTracingSpans) {
@@ -59,13 +64,30 @@ class SpanBatchAdapter {
   }
 
   private static Attributes generateSpanAttributes(SpanData span) {
-    Attributes attributes = createIntrinsicAttributes(span);
+    Attributes attributes = new Attributes();
+    attributes = createIntrinsicAttributes(span, attributes);
     attributes = addPossibleErrorAttribute(span, attributes);
+    attributes = addPossibleInstrumentationAttributes(span, attributes);
     return addResourceAttributes(span, attributes);
   }
 
-  private static Attributes createIntrinsicAttributes(SpanData span) {
-    Attributes attributes = new Attributes();
+  private static Attributes addPossibleInstrumentationAttributes(
+      SpanData span, Attributes attributes) {
+    InstrumentationLibraryInfo instrumentationLibraryInfo = span.getInstrumentationLibraryInfo();
+    if (instrumentationLibraryInfo != null) {
+      if (instrumentationLibraryInfo.name() != null
+          && !instrumentationLibraryInfo.name().isEmpty()) {
+        attributes.put("instrumentation.name", instrumentationLibraryInfo.name());
+      }
+      if (instrumentationLibraryInfo.version() != null
+          && !instrumentationLibraryInfo.version().isEmpty()) {
+        attributes.put("instrumentation.version", instrumentationLibraryInfo.version());
+      }
+    }
+    return attributes;
+  }
+
+  private static Attributes createIntrinsicAttributes(SpanData span, Attributes attributes) {
     Map<String, AttributeValue> originalAttributes = span.getAttributes();
     originalAttributes.forEach(
         (key, value) -> {
