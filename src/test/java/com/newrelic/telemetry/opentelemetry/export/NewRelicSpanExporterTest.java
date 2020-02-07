@@ -6,15 +6,9 @@
 package com.newrelic.telemetry.opentelemetry.export;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
 
 import com.newrelic.telemetry.Attributes;
-import com.newrelic.telemetry.exceptions.DiscardBatchException;
-import com.newrelic.telemetry.exceptions.ResponseException;
-import com.newrelic.telemetry.exceptions.RetryWithBackoffException;
-import com.newrelic.telemetry.exceptions.RetryWithRequestedWaitException;
-import com.newrelic.telemetry.exceptions.RetryWithSplitException;
 import com.newrelic.telemetry.spans.SpanBatch;
 import com.newrelic.telemetry.spans.SpanBatchSender;
 import io.opentelemetry.sdk.resources.Resource;
@@ -28,7 +22,6 @@ import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -67,45 +60,5 @@ class NewRelicSpanExporterTest {
         .setStartEpochNanos(456_001_000L)
         .setEndEpochNanos(456_001_100L)
         .build();
-  }
-
-  @Test
-  void testDiscardBatchException() throws Exception {
-    checkResponseCodeProducesException(
-        ResultCode.FAILED_NOT_RETRYABLE, DiscardBatchException.class);
-  }
-
-  @Test
-  void testRetryWithSplitException() throws Exception {
-    checkResponseCodeProducesException(
-        ResultCode.FAILED_NOT_RETRYABLE, RetryWithSplitException.class);
-  }
-
-  @Test
-  void testRetryWithBackOffException() throws Exception {
-    checkResponseCodeProducesException(
-        ResultCode.FAILED_RETRYABLE, RetryWithBackoffException.class);
-  }
-
-  @Test
-  void testRetryWithRequestedWaitException() throws Exception {
-    checkResponseCodeProducesException(
-        ResultCode.FAILED_RETRYABLE, RetryWithRequestedWaitException.class);
-  }
-
-  private void checkResponseCodeProducesException(
-      ResultCode resultCode, Class<? extends ResponseException> exceptionClass)
-      throws ResponseException {
-    com.newrelic.telemetry.spans.Span span =
-        com.newrelic.telemetry.spans.Span.builder("000000000012d685").build();
-    SpanBatch spanBatch = new SpanBatch(Collections.singleton(span), new Attributes());
-
-    NewRelicSpanExporter testClass = new NewRelicSpanExporter(adapter, sender);
-
-    when(adapter.adaptToSpanBatch(ArgumentMatchers.anyList())).thenReturn(spanBatch);
-    when(sender.sendBatch(isA(SpanBatch.class))).thenThrow(exceptionClass);
-
-    ResultCode result = testClass.export(Collections.singletonList(createMinimalSpanData()));
-    assertEquals(resultCode, result);
   }
 }
