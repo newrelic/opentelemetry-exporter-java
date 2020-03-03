@@ -98,8 +98,8 @@ public class NewRelicMetricExporter implements MetricExporter {
             point.getSum(),
             min,
             max,
-            point.getStartEpochNanos() * 1_000_000,
-            point.getEpochNanos() * 1_000_000,
+            point.getStartEpochNanos() / 1_000_000,
+            point.getEpochNanos() / 1_000_000,
             attributes));
   }
 
