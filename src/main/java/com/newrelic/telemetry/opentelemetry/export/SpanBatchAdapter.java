@@ -85,32 +85,13 @@ class SpanBatchAdapter {
       }
     }
     return attributes;
+    attributes = CommonUtils.populateLibraryInfo(attributes, span.getInstrumentationLibraryInfo());
+    return CommonUtils.addResourceAttributes(attributes, span.getResource());
   }
 
   private static Attributes createIntrinsicAttributes(SpanData span, Attributes attributes) {
     Map<String, AttributeValue> originalAttributes = span.getAttributes();
-    return addAttributes(attributes, originalAttributes);
-  }
-
-  private static Attributes addAttributes(
-      Attributes attributes, Map<String, AttributeValue> originalAttributes) {
-    originalAttributes.forEach(
-        (key, value) -> {
-          switch (value.getType()) {
-            case STRING:
-              attributes.put(key, value.getStringValue());
-              break;
-            case LONG:
-              attributes.put(key, value.getLongValue());
-              break;
-            case BOOLEAN:
-              attributes.put(key, value.getBooleanValue());
-              break;
-            case DOUBLE:
-              attributes.put(key, value.getDoubleValue());
-              break;
-          }
-        });
+    CommonUtils.putInAttributes(attributes, originalAttributes);
     return attributes;
   }
 
@@ -126,7 +107,7 @@ class SpanBatchAdapter {
     Resource resource = span.getResource();
     if (resource != null) {
       Map<String, AttributeValue> labelsMap = resource.getAttributes();
-      addAttributes(attributes, labelsMap);
+      CommonUtils.putInAttributes(attributes, labelsMap);
     }
     return attributes;
   }
