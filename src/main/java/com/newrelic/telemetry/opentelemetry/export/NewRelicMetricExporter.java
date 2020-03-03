@@ -52,9 +52,7 @@ public class NewRelicMetricExporter implements MetricExporter {
       for (Point point : points) {
         Collection<Metric> metricsFromPoint =
             buildMetricsFromPoint(descriptor, type, attributes, point);
-        for (Metric metric2 : metricsFromPoint) {
-          buffer.addMetric(metric2);
-        }
+        metricsFromPoint.forEach(buffer::addMetric);
       }
     }
     telemetryClient.sendBatch(buffer.createBatch());
