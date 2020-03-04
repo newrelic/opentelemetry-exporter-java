@@ -68,13 +68,13 @@ public class NewRelicMetricExporter implements MetricExporter {
       return buildDoublePointMetrics(descriptor, type, attributes, (DoublePoint) point);
     }
     if (point instanceof SummaryPoint) {
-      return buildSummaryPointMetrics(descriptor, type, attributes, (SummaryPoint) point);
+      return buildSummaryPointMetrics(descriptor, attributes, (SummaryPoint) point);
     }
     return emptyList();
   }
 
   private Collection<Metric> buildSummaryPointMetrics(
-      Descriptor descriptor, Type type, Attributes attributes, SummaryPoint point) {
+      Descriptor descriptor, Attributes attributes, SummaryPoint point) {
     List<ValueAtPercentile> percentileValues = point.getPercentileValues();
 
     double min = Double.NaN;
