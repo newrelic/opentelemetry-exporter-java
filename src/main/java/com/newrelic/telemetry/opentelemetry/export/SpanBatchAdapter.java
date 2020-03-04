@@ -117,6 +117,7 @@ class SpanBatchAdapter {
     long endTime = span.getEndEpochNanos();
 
     long nanoDifference = endTime - startTime;
+    // note: we don't use NANOSECONDS.toMillis here, because we want to see  sub-ms resolution.
     return nanoDifference / 1_000_000d;
   }
 

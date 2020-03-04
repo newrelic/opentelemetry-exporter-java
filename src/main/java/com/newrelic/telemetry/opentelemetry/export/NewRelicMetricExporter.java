@@ -2,6 +2,7 @@ package com.newrelic.telemetry.opentelemetry.export;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.TelemetryClient;
@@ -96,8 +97,8 @@ public class NewRelicMetricExporter implements MetricExporter {
             point.getSum(),
             min,
             max,
-            point.getStartEpochNanos() / 1_000_000,
-            point.getEpochNanos() / 1_000_000,
+            NANOSECONDS.toMillis(point.getStartEpochNanos()),
+            NANOSECONDS.toMillis(point.getEpochNanos()),
             attributes));
   }
 
@@ -126,7 +127,7 @@ public class NewRelicMetricExporter implements MetricExporter {
       case NON_MONOTONIC_LONG:
       case NON_MONOTONIC_DOUBLE:
         return singleton(
-            new Gauge(descriptor.getName(), value, epochNanos / 1_000_000, attributes));
+            new Gauge(descriptor.getName(), value, NANOSECONDS.toMillis(epochNanos), attributes));
 
       case MONOTONIC_LONG:
       case MONOTONIC_DOUBLE:
@@ -136,8 +137,8 @@ public class NewRelicMetricExporter implements MetricExporter {
             new Count(
                 descriptor.getName(),
                 value,
-                startEpochNanos / 1_000_000,
-                epochNanos / 1_000_000,
+                NANOSECONDS.toMillis(startEpochNanos),
+                NANOSECONDS.toMillis(epochNanos),
                 attributes));
 
       default:
