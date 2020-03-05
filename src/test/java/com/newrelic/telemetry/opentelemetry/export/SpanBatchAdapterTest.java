@@ -57,7 +57,7 @@ class SpanBatchAdapterTest {
         new SpanBatch(
             Collections.singleton(span1),
             new Attributes()
-                .put("instrumentation.provider", "opentelemetry-java")
+                .put("instrumentation.provider", "opentelemetry")
                 .put("collector.name", "newrelic-opentelemetry-exporter"));
 
     SpanBatchAdapter testClass = new SpanBatchAdapter(new Attributes());
@@ -101,7 +101,7 @@ class SpanBatchAdapterTest {
         new SpanBatch(
             Collections.singleton(resultSpan),
             new Attributes()
-                .put("instrumentation.provider", "opentelemetry-java")
+                .put("instrumentation.provider", "opentelemetry")
                 .put("collector.name", "newrelic-opentelemetry-exporter"));
 
     SpanBatchAdapter testClass = new SpanBatchAdapter(new Attributes());
@@ -165,7 +165,7 @@ class SpanBatchAdapterTest {
             Collections.singleton(resultSpan),
             new Attributes()
                 .put("host", "localhost")
-                .put("instrumentation.provider", "opentelemetry-java")
+                .put("instrumentation.provider", "opentelemetry")
                 .put("collector.name", "newrelic-opentelemetry-exporter"));
 
     SpanBatchAdapter testClass = new SpanBatchAdapter(new Attributes().put("host", "localhost"));
