@@ -10,22 +10,31 @@ In order to send spans to New Relic, you will need an Insights Insert API Key.
 Please see [New Relic Api Keys](https://docs.newrelic.com/docs/insights/insights-data-sources/custom-data/introduction-event-api#)
 for more information.
 
+Note: There is an example [BasicExample.java](src/test/java/com/newrelic/telemetry/opentelemetry/examples/BasicExample.java)  
+in the test source code hierarchy that matches this example code. It should be considered
+as the canonical code for this example, since OpenTelemetry internal SDK APIs are still a work in progress.
+
 1. Create a `NewRelicSpanExporter`
 ```
-NewRelicSpanExporter.newBuilder()
+    NewRelicSpanExporter exporter = NewRelicSpanExporter.newBuilder()
         .apiKey(System.getenv("INSIGHTS_INSERT_KEY"))
         .commonAttributes(new Attributes().put("service.name", "best service ever")).build();
 ```
 
 2. Build the OpenTelemetry `BatchSpansProcessor` with the `NewRelicSpanExporter` 
 ```
-BatchSpansProcessor.newBuilder(exporter).build();
+    BatchSpansProcessor spansProcessor = BatchSpansProcessor.newBuilder(exporter).build();
 ```
 
-3. Create the OpenTelemetry `TracerSdk` and add the `BatchSpanProcessor` to the tracerSdk.  
+3. Add the span processor to a TracerSdkFactory
 ```
-TracerSdk tracerSdk = new TracerSdk();
-    tracerSdk.addSpanProcessor(spanProcessor);
+    TracerSdkFactory tracerSdkFactory = TracerSdkFactory.create();
+    tracerSdkFactory.addSpanProcessor(spansProcessor);
+```
+
+4. Create the OpenTelemetry `Tracer` and use it for recording spans.
+```
+    Tracer tracer = tracerSdkFactory.get("sample-app", "1.0");
 ```
 
 ### Gradle
@@ -40,7 +49,7 @@ repositories {
 ```
 
 ```
-implementation("com.newrelic.telemetry:opentelemetry-exporters-newrelic:0.2.0-SNAPSHOT")
+implementation("com.newrelic.telemetry:opentelemetry-exporters-newrelic:0.3.0-SNAPSHOT")
 implementation("io.opentelemetry:opentelemetry-sdk:0.2.0")
 implementation("com.newrelic.telemetry:telemetry-core:0.3.2")
 implementation("com.newrelic.telemetry:telemetry-http-okhttp:0.3.2")
