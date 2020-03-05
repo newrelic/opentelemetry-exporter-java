@@ -59,7 +59,7 @@ repositories {
 ```
 
 ```
-implementation("com.newrelic.telemetry:opentelemetry-exporters-newrelic:0.3.0-SNAPSHOT")
+implementation("com.newrelic.telemetry:opentelemetry-exporters-newrelic:0.2.0-SNAPSHOT")
 implementation("io.opentelemetry:opentelemetry-sdk:0.2.0")
 implementation("com.newrelic.telemetry:telemetry-core:0.3.2")
 implementation("com.newrelic.telemetry:telemetry-http-okhttp:0.3.2")
