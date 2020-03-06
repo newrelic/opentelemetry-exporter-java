@@ -13,6 +13,8 @@ import com.newrelic.telemetry.spans.SpanBatchSender;
 import com.newrelic.telemetry.spans.SpanBatchSenderBuilder;
 import io.opentelemetry.sdk.trace.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.util.List;
 
 /**
@@ -81,6 +83,7 @@ public class NewRelicSpanExporter implements SpanExporter {
     private SpanBatchSender spanBatchSender;
     private String apiKey;
     private boolean enableAuditLogging = false;
+    private URI uriOverride;
 
     /**
      * A SpanBatchSender from the New Relic Telemetry SDK. This allows you to provide your own
@@ -131,6 +134,18 @@ public class NewRelicSpanExporter implements SpanExporter {
     }
 
     /**
+     * Set a URI to override the default ingest endpoint.
+     *
+     * @param uriOverride The scheme, host, and port that should be used for the Spans API endpoint.
+     *     The path component of this parameter is unused.
+     * @return the Builder
+     */
+    public Builder uriOverride(URI uriOverride) {
+      this.uriOverride = uriOverride;
+      return this;
+    }
+
+    /**
      * Constructs a new instance of the exporter based on the builder's values.
      *
      * @return a new NewRelicSpanExporter instance
@@ -140,6 +155,13 @@ public class NewRelicSpanExporter implements SpanExporter {
         SpanBatchSenderBuilder builder = SimpleSpanBatchSender.builder(apiKey);
         if (enableAuditLogging) {
           builder.enableAuditLogging();
+        }
+        if (uriOverride != null) {
+          try {
+            builder.uriOverride(uriOverride);
+          } catch (MalformedURLException e) {
+            throw new IllegalArgumentException("URI Override valuue must be a valid URI.", e);
+          }
         }
         spanBatchSender = builder.build();
       }
