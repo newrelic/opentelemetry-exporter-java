@@ -160,7 +160,7 @@ public class NewRelicSpanExporter implements SpanExporter {
           try {
             builder.uriOverride(uriOverride);
           } catch (MalformedURLException e) {
-            throw new IllegalArgumentException("URI Override valuue must be a valid URI.", e);
+            throw new IllegalArgumentException("URI Override value must be a valid URI.", e);
           }
         }
         spanBatchSender = builder.build();
