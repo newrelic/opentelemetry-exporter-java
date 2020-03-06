@@ -23,19 +23,29 @@ as the canonical code for this example, since OpenTelemetry internal SDK APIs ar
 
 2. Build the OpenTelemetry `BatchSpansProcessor` with the `NewRelicSpanExporter` 
 ```
-    BatchSpansProcessor spansProcessor = BatchSpansProcessor.newBuilder(exporter).build();
+    BatchSpansProcessor spanProcessor = BatchSpansProcessor.newBuilder(exporter).build();
 ```
 
-3. Add the span processor to a TracerSdkFactory
+3. Add the span processor to the default TracerSdkFactory
 ```
-    TracerSdkFactory tracerSdkFactory = TracerSdkFactory.create();
-    tracerSdkFactory.addSpanProcessor(spansProcessor);
+    TracerSdkFactory tracerSdkFactory = (TracerSdkFactory) OpenTelemetry.getTracerFactory();
+    tracerSdkFactory.addSpanProcessor(spanProcessor);
 ```
 
 4. Create the OpenTelemetry `Tracer` and use it for recording spans.
 ```
-    Tracer tracer = tracerSdkFactory.get("sample-app", "1.0");
+    Tracer tracer = OpenTelemetry.getTracerFactory().get("sample-app", "1.0");
+    
+    Span span = tracer.spanBuilder("testSpan").setSpanKind(Kind.INTERNAL).startSpan();
+    try (Scope scope = tracer.withSpan(span)) {
+      //do some work
+      Thread.sleep(1000);
+      span.end();
+    }
 ```
+
+5. Find your spans in New Relic One Distributed Tracing UI. https://one.newrelic.com/
+
 
 ### Gradle
 `build.gradle`:

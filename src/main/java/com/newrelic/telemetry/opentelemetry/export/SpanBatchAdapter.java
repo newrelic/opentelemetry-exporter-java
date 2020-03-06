@@ -30,7 +30,7 @@ class SpanBatchAdapter {
     this.commonAttributes =
         commonAttributes
             .copy()
-            .put("instrumentation.provider", "opentelemetry-java")
+            .put("instrumentation.provider", "opentelemetry")
             .put("collector.name", "newrelic-opentelemetry-exporter");
   }
 
