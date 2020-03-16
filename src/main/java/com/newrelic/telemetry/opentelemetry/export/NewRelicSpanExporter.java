@@ -9,7 +9,6 @@ import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.SimpleSpanBatchSender;
 import com.newrelic.telemetry.TelemetryClient;
 import com.newrelic.telemetry.spans.SpanBatch;
-import com.newrelic.telemetry.spans.SpanBatchSender;
 import com.newrelic.telemetry.spans.SpanBatchSenderBuilder;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
@@ -36,12 +35,12 @@ public class NewRelicSpanExporter implements SpanExporter {
    * @param spanBatchSender An instance that sends a SpanBatch to the New Relic trace ingest API
    * @since 0.1.0
    */
-  NewRelicSpanExporter(SpanBatchAdapter adapter, SpanBatchSender spanBatchSender) {
-    if (spanBatchSender == null) {
-      throw new IllegalArgumentException("You must provide a non-null SpanBatchSender");
+  NewRelicSpanExporter(SpanBatchAdapter adapter, TelemetryClient telemetryClient) {
+    if (telemetryClient == null) {
+      throw new IllegalArgumentException("You must provide a non-null telemetryClient");
     }
     this.adapter = adapter;
-    this.telemetryClient = new TelemetryClient(null, spanBatchSender);
+    this.telemetryClient = telemetryClient;
   }
 
   /**
@@ -80,7 +79,7 @@ public class NewRelicSpanExporter implements SpanExporter {
   public static class Builder {
 
     private Attributes commonAttributes = new Attributes();
-    private SpanBatchSender spanBatchSender;
+    private TelemetryClient telemetryClient;
     private String apiKey;
     private boolean enableAuditLogging = false;
     private URI uriOverride;
@@ -89,11 +88,11 @@ public class NewRelicSpanExporter implements SpanExporter {
      * A SpanBatchSender from the New Relic Telemetry SDK. This allows you to provide your own
      * custom-built SpanBatchSender (for instance, if you need to enable proxies, etc).
      *
-     * @param spanBatchSender the sender to use.
+     * @param telemetryClient the sender to use.
      * @return this builder's instance
      */
-    public Builder spanBatchSender(SpanBatchSender spanBatchSender) {
-      this.spanBatchSender = spanBatchSender;
+    public Builder telemetryClient(TelemetryClient telemetryClient) {
+      this.telemetryClient = telemetryClient;
       return this;
     }
 
@@ -151,21 +150,22 @@ public class NewRelicSpanExporter implements SpanExporter {
      * @return a new NewRelicSpanExporter instance
      */
     public NewRelicSpanExporter build() {
-      if (spanBatchSender == null) {
-        SpanBatchSenderBuilder builder = SimpleSpanBatchSender.builder(apiKey);
-        if (enableAuditLogging) {
-          builder.enableAuditLogging();
-        }
-        if (uriOverride != null) {
-          try {
-            builder.uriOverride(uriOverride);
-          } catch (MalformedURLException e) {
-            throw new IllegalArgumentException("URI Override value must be a valid URI.", e);
-          }
-        }
-        spanBatchSender = builder.build();
+      if (telemetryClient != null) {
+        return new NewRelicSpanExporter(new SpanBatchAdapter(commonAttributes), telemetryClient);
       }
-      return new NewRelicSpanExporter(new SpanBatchAdapter(commonAttributes), spanBatchSender);
+      SpanBatchSenderBuilder builder = SimpleSpanBatchSender.builder(apiKey);
+      if (enableAuditLogging) {
+        builder.enableAuditLogging();
+      }
+      if (uriOverride != null) {
+        try {
+          builder.uriOverride(uriOverride);
+        } catch (MalformedURLException e) {
+          throw new IllegalArgumentException("URI Override value must be a valid URI.", e);
+        }
+      }
+      telemetryClient = new TelemetryClient(null, builder.build());
+      return new NewRelicSpanExporter(new SpanBatchAdapter(commonAttributes), telemetryClient);
     }
   }
 }

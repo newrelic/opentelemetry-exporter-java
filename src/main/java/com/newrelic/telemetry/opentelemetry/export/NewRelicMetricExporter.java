@@ -11,6 +11,7 @@ import com.newrelic.telemetry.metrics.Gauge;
 import com.newrelic.telemetry.metrics.Metric;
 import com.newrelic.telemetry.metrics.MetricBuffer;
 import com.newrelic.telemetry.metrics.Summary;
+import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.data.MetricData.Descriptor;
 import io.opentelemetry.sdk.metrics.data.MetricData.Descriptor.Type;
@@ -21,22 +22,34 @@ import io.opentelemetry.sdk.metrics.data.MetricData.SummaryPoint;
 import io.opentelemetry.sdk.metrics.data.MetricData.ValueAtPercentile;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class NewRelicMetricExporter implements MetricExporter {
 
   private static final Attributes commonAttributes =
       new Attributes()
-          .put("instrumentation.provider", "opentelemetry-java")
+          .put("instrumentation.provider", "opentelemetry")
           .put("collector.name", "newrelic-opentelemetry-exporter");
   private final TelemetryClient telemetryClient;
 
-  public NewRelicMetricExporter(TelemetryClient telemetryClient) {
+  // note: the key here needs to include the type and the attributes. TODO
+  // also: ideally, we would not have to do this work, and the OTel SDK would be configurable to
+  // make deltas for us automatically.
+  private final Map<Descriptor, DeltaLongCounter> deltaLongCountersByDescriptor = new HashMap<>();
+  private final Map<Descriptor, DeltaDoubleCounter> deltaDoubleCountersByDescriptor =
+      new HashMap<>();
+  private final TimeTracker timeTracker;
+
+  public NewRelicMetricExporter(TelemetryClient telemetryClient, Clock clock) {
     this.telemetryClient = telemetryClient;
+    this.timeTracker = new TimeTracker(clock);
   }
 
   @Override
   public ResultCode export(Collection<MetricData> metrics) {
+    timeTracker.tick();
     MetricBuffer buffer = MetricBuffer.builder().attributes(commonAttributes).build();
     for (MetricData metric : metrics) {
       Descriptor descriptor = metric.getDescriptor();
@@ -104,16 +117,20 @@ public class NewRelicMetricExporter implements MetricExporter {
 
   private Collection<Metric> buildLongPointMetrics(
       Descriptor descriptor, Type type, Attributes attributes, LongPoint point) {
-    long value = point.getValue();
+    DeltaLongCounter deltaLongCounter =
+        deltaLongCountersByDescriptor.computeIfAbsent(descriptor, d -> new DeltaLongCounter());
+    long value = deltaLongCounter.delta(point);
     return buildMetricsFromSimpleType(
-        descriptor, type, attributes, value, point.getEpochNanos(), point.getStartEpochNanos());
+        descriptor, type, attributes, value, point.getEpochNanos(), timeTracker.getPreviousTime());
   }
 
   private Collection<Metric> buildDoublePointMetrics(
       Descriptor descriptor, Type type, Attributes attributes, DoublePoint point) {
-    double value = point.getValue();
+    DeltaDoubleCounter deltaDoubleCounter =
+        deltaDoubleCountersByDescriptor.computeIfAbsent(descriptor, d -> new DeltaDoubleCounter());
+    double value = deltaDoubleCounter.delta(point);
     return buildMetricsFromSimpleType(
-        descriptor, type, attributes, value, point.getEpochNanos(), point.getStartEpochNanos());
+        descriptor, type, attributes, value, point.getEpochNanos(), timeTracker.getPreviousTime());
   }
 
   private Collection<Metric> buildMetricsFromSimpleType(
