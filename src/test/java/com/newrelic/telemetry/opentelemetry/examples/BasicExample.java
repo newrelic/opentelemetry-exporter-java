@@ -22,6 +22,7 @@ public class BasicExample {
         NewRelicSpanExporter.newBuilder()
             .apiKey(System.getenv("INSIGHTS_INSERT_KEY"))
             .commonAttributes(new Attributes().put("service.name", "best service ever"))
+            .enableAuditLogging()
             .build();
 
     // 2. Build the OpenTelemetry `BatchSpansProcessor` with the `NewRelicSpanExporter`
@@ -43,8 +44,6 @@ public class BasicExample {
     // clean up so the JVM can exit. Note: the spanProcessor will flush any spans to the exporter
     // before it exits.
     spanProcessor.shutdown();
-    // note: it shouldn't be necessary to explicitly shut down the exporter.
-    // See https://github.com/open-telemetry/opentelemetry-java/issues/965
-    exporter.shutdown();
+    Thread.sleep(10000);
   }
 }

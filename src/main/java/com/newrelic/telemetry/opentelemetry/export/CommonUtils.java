@@ -1,9 +1,9 @@
 package com.newrelic.telemetry.opentelemetry.export;
 
 import com.newrelic.telemetry.Attributes;
+import io.opentelemetry.common.AttributeValue;
 import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
 import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.trace.AttributeValue;
 import java.util.Map;
 
 // todo: this is a terrible name.
@@ -26,7 +26,7 @@ public class CommonUtils {
 
   static Attributes addResourceAttributes(Attributes attributes, Resource resource) {
     if (resource != null) {
-      Map<String, AttributeValue> labelsMap = resource.getLabels();
+      Map<String, AttributeValue> labelsMap = resource.getAttributes();
       putInAttributes(attributes, labelsMap);
     }
     return attributes;
