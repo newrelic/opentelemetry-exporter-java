@@ -11,10 +11,10 @@ import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.spans.Span;
 import com.newrelic.telemetry.spans.Span.SpanBuilder;
 import com.newrelic.telemetry.spans.SpanBatch;
+import io.opentelemetry.common.AttributeValue;
+import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
 import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.sdk.trace.InstrumentationLibraryInfo;
-import io.opentelemetry.sdk.trace.SpanData;
-import io.opentelemetry.trace.AttributeValue;
+import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.trace.SpanId;
 import io.opentelemetry.trace.Status;
 import java.util.Collection;
@@ -75,13 +75,13 @@ class SpanBatchAdapter {
       SpanData span, Attributes attributes) {
     InstrumentationLibraryInfo instrumentationLibraryInfo = span.getInstrumentationLibraryInfo();
     if (instrumentationLibraryInfo != null) {
-      if (instrumentationLibraryInfo.name() != null
-          && !instrumentationLibraryInfo.name().isEmpty()) {
-        attributes.put("instrumentation.name", instrumentationLibraryInfo.name());
+      if (instrumentationLibraryInfo.getName() != null
+          && !instrumentationLibraryInfo.getName().isEmpty()) {
+        attributes.put("instrumentation.name", instrumentationLibraryInfo.getName());
       }
-      if (instrumentationLibraryInfo.version() != null
-          && !instrumentationLibraryInfo.version().isEmpty()) {
-        attributes.put("instrumentation.version", instrumentationLibraryInfo.version());
+      if (instrumentationLibraryInfo.getVersion() != null
+          && !instrumentationLibraryInfo.getVersion().isEmpty()) {
+        attributes.put("instrumentation.version", instrumentationLibraryInfo.getVersion());
       }
     }
     return attributes;
@@ -89,6 +89,11 @@ class SpanBatchAdapter {
 
   private static Attributes createIntrinsicAttributes(SpanData span, Attributes attributes) {
     Map<String, AttributeValue> originalAttributes = span.getAttributes();
+    return addAttributes(attributes, originalAttributes);
+  }
+
+  private static Attributes addAttributes(
+      Attributes attributes, Map<String, AttributeValue> originalAttributes) {
     originalAttributes.forEach(
         (key, value) -> {
           switch (value.getType()) {
@@ -120,8 +125,8 @@ class SpanBatchAdapter {
   private static Attributes addResourceAttributes(SpanData span, Attributes attributes) {
     Resource resource = span.getResource();
     if (resource != null) {
-      Map<String, String> labelsMap = resource.getLabels();
-      labelsMap.forEach(attributes::put);
+      Map<String, AttributeValue> labelsMap = resource.getAttributes();
+      addAttributes(attributes, labelsMap);
     }
     return attributes;
   }
