@@ -28,23 +28,27 @@ import java.util.Map;
 
 public class NewRelicMetricExporter implements MetricExporter {
 
-  private static final Attributes commonAttributes =
-      new Attributes()
-          .put("instrumentation.provider", "opentelemetry")
-          .put("collector.name", "newrelic-opentelemetry-exporter");
+  private final Attributes commonAttributes;
   private final TelemetryClient telemetryClient;
 
   // note: the key here needs to include the type and the attributes. TODO
   // also: ideally, we would not have to do this work, and the OTel SDK would be configurable to
   // make deltas for us automatically.
-  private final Map<Descriptor, DeltaLongCounter> deltaLongCountersByDescriptor = new HashMap<>();
-  private final Map<Descriptor, DeltaDoubleCounter> deltaDoubleCountersByDescriptor =
-      new HashMap<>();
+  private final Map<Key, DeltaLongCounter> deltaLongCountersByDescriptor = new HashMap<>();
+  private final Map<Key, DeltaDoubleCounter> deltaDoubleCountersByDescriptor = new HashMap<>();
   private final TimeTracker timeTracker;
 
-  public NewRelicMetricExporter(TelemetryClient telemetryClient, Clock clock) {
+  public NewRelicMetricExporter(
+      TelemetryClient telemetryClient, Clock clock, Attributes serviceAttributes) {
     this.telemetryClient = telemetryClient;
     this.timeTracker = new TimeTracker(clock);
+    // todo: these two attributes are the same as the ones in the SpanBatchAdapter. Move to
+    // somewhere common.
+    this.commonAttributes =
+        serviceAttributes
+            .copy()
+            .put("instrumentation.provider", "opentelemetry")
+            .put("collector.name", "newrelic-opentelemetry-exporter");
   }
 
   @Override
@@ -110,7 +114,7 @@ public class NewRelicMetricExporter implements MetricExporter {
             point.getSum(),
             min,
             max,
-            NANOSECONDS.toMillis(point.getStartEpochNanos()),
+            NANOSECONDS.toMillis(timeTracker.getPreviousTime()),
             NANOSECONDS.toMillis(point.getEpochNanos()),
             attributes));
   }
@@ -118,7 +122,8 @@ public class NewRelicMetricExporter implements MetricExporter {
   private Collection<Metric> buildLongPointMetrics(
       Descriptor descriptor, Type type, Attributes attributes, LongPoint point) {
     DeltaLongCounter deltaLongCounter =
-        deltaLongCountersByDescriptor.computeIfAbsent(descriptor, d -> new DeltaLongCounter());
+        deltaLongCountersByDescriptor.computeIfAbsent(
+            new Key(descriptor, type), d -> new DeltaLongCounter());
     long value = deltaLongCounter.delta(point);
     return buildMetricsFromSimpleType(
         descriptor, type, attributes, value, point.getEpochNanos(), timeTracker.getPreviousTime());
@@ -127,7 +132,8 @@ public class NewRelicMetricExporter implements MetricExporter {
   private Collection<Metric> buildDoublePointMetrics(
       Descriptor descriptor, Type type, Attributes attributes, DoublePoint point) {
     DeltaDoubleCounter deltaDoubleCounter =
-        deltaDoubleCountersByDescriptor.computeIfAbsent(descriptor, d -> new DeltaDoubleCounter());
+        deltaDoubleCountersByDescriptor.computeIfAbsent(
+            new Key(descriptor, type), d -> new DeltaDoubleCounter());
     double value = deltaDoubleCounter.delta(point);
     return buildMetricsFromSimpleType(
         descriptor, type, attributes, value, point.getEpochNanos(), timeTracker.getPreviousTime());
@@ -163,5 +169,39 @@ public class NewRelicMetricExporter implements MetricExporter {
         break;
     }
     return emptyList();
+  }
+
+  public static class Key {
+    private final Descriptor descriptor;
+    private final Type type;
+
+    public Key(Descriptor descriptor, Type type) {
+      this.descriptor = descriptor;
+      this.type = type;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (!(o instanceof Key)) {
+        return false;
+      }
+
+      Key key = (Key) o;
+
+      if (descriptor != null ? !descriptor.equals(key.descriptor) : key.descriptor != null) {
+        return false;
+      }
+      return type == key.type;
+    }
+
+    @Override
+    public int hashCode() {
+      int result = descriptor != null ? descriptor.hashCode() : 0;
+      result = 31 * result + (type != null ? type.hashCode() : 0);
+      return result;
+    }
   }
 }

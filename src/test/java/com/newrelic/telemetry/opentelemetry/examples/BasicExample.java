@@ -12,6 +12,8 @@ import com.newrelic.telemetry.spans.SpanBatchSender;
 import io.opentelemetry.OpenTelemetry;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.metrics.LongCounter;
+import io.opentelemetry.metrics.LongMeasure;
+import io.opentelemetry.metrics.LongMeasure.BoundLongMeasure;
 import io.opentelemetry.metrics.Meter;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.internal.MillisClock;
@@ -23,6 +25,7 @@ import io.opentelemetry.trace.Span.Kind;
 import io.opentelemetry.trace.Tracer;
 import java.time.Duration;
 import java.util.Collections;
+import java.util.Random;
 
 public class BasicExample {
 
@@ -39,15 +42,16 @@ public class BasicExample {
     SpanBatchSender spanBatchSender =
         SimpleSpanBatchSender.builder(apiKey).httpPoster(httpPoster).enableAuditLogging().build();
     TelemetryClient telemetryClient = new TelemetryClient(metricBatchSender, spanBatchSender);
+    Attributes serviceAttributes = new Attributes().put("service.name", "best service ever");
 
     MetricExporter metricExporter =
-        new NewRelicMetricExporter(telemetryClient, MillisClock.getInstance());
+        new NewRelicMetricExporter(telemetryClient, MillisClock.getInstance(), serviceAttributes);
 
     // 1. Create a `NewRelicSpanExporter`
     NewRelicSpanExporter exporter =
         NewRelicSpanExporter.newBuilder()
             .telemetryClient(telemetryClient)
-            .commonAttributes(new Attributes().put("service.name", "best service ever"))
+            .commonAttributes(serviceAttributes)
             .build();
 
     // 2. Build the OpenTelemetry `BatchSpansProcessor` with the `NewRelicSpanExporter`
@@ -75,13 +79,25 @@ public class BasicExample {
             .setMonotonic(true)
             .build();
 
-    for (int i = 0; i < 100; i++) {
+    LongMeasure spanTimer =
+        meter
+            .longMeasureBuilder("spanTimer")
+            .setUnit("ms")
+            .setDescription("How long the spans take")
+            .setAbsolute(true)
+            .build();
+    BoundLongMeasure boundTimer = spanTimer.bind("spanName", "testSpan");
+
+    Random random = new Random();
+    for (int i = 0; i < 1000; i++) {
+      long startTime = System.currentTimeMillis();
       Span span = tracer.spanBuilder("testSpan").setSpanKind(Kind.INTERNAL).startSpan();
       try (Scope scope = tracer.withSpan(span)) {
         spanCounter.add(1, "spanName", "testSpan");
         // do some work
-        Thread.sleep(500);
+        Thread.sleep(500 + random.nextInt(100));
         span.end();
+        boundTimer.record(System.currentTimeMillis() - startTime);
       }
     }
 
