@@ -5,13 +5,16 @@ import static java.util.Collections.singleton;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
 import com.newrelic.telemetry.Attributes;
+import com.newrelic.telemetry.SimpleMetricBatchSender;
 import com.newrelic.telemetry.TelemetryClient;
 import com.newrelic.telemetry.metrics.Count;
 import com.newrelic.telemetry.metrics.Gauge;
 import com.newrelic.telemetry.metrics.Metric;
+import com.newrelic.telemetry.metrics.MetricBatchSenderBuilder;
 import com.newrelic.telemetry.metrics.MetricBuffer;
 import com.newrelic.telemetry.metrics.Summary;
 import io.opentelemetry.sdk.common.Clock;
+import io.opentelemetry.sdk.internal.MillisClock;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.data.MetricData.Descriptor;
 import io.opentelemetry.sdk.metrics.data.MetricData.Descriptor.Type;
@@ -21,6 +24,8 @@ import io.opentelemetry.sdk.metrics.data.MetricData.Point;
 import io.opentelemetry.sdk.metrics.data.MetricData.SummaryPoint;
 import io.opentelemetry.sdk.metrics.data.MetricData.ValueAtPercentile;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -31,8 +36,7 @@ public class NewRelicMetricExporter implements MetricExporter {
   private final Attributes commonAttributes;
   private final TelemetryClient telemetryClient;
 
-  // note: the key here needs to include the type and the attributes. TODO
-  // also: ideally, we would not have to do this work, and the OTel SDK would be configurable to
+  // Ideally, we would not have to do this work, and the OTel SDK would be configurable to
   // make deltas for us automatically.
   private final Map<Key, DeltaLongCounter> deltaLongCountersByDescriptor = new HashMap<>();
   private final Map<Key, DeltaDoubleCounter> deltaDoubleCountersByDescriptor = new HashMap<>();
@@ -49,6 +53,10 @@ public class NewRelicMetricExporter implements MetricExporter {
             .copy()
             .put("instrumentation.provider", "opentelemetry")
             .put("collector.name", "newrelic-opentelemetry-exporter");
+  }
+
+  public static Builder newBuilder() {
+    return new Builder();
   }
 
   @Override
@@ -121,22 +129,33 @@ public class NewRelicMetricExporter implements MetricExporter {
 
   private Collection<Metric> buildLongPointMetrics(
       Descriptor descriptor, Type type, Attributes attributes, LongPoint point) {
-    DeltaLongCounter deltaLongCounter =
-        deltaLongCountersByDescriptor.computeIfAbsent(
-            new Key(descriptor, type), d -> new DeltaLongCounter());
-    long value = deltaLongCounter.delta(point);
+    long value = point.getValue();
+    if (isNonMonotonic(type)) {
+      DeltaLongCounter deltaLongCounter =
+          deltaLongCountersByDescriptor.computeIfAbsent(
+              new Key(descriptor, type), d -> new DeltaLongCounter());
+      value = deltaLongCounter.delta(point);
+    }
     return buildMetricsFromSimpleType(
         descriptor, type, attributes, value, point.getEpochNanos(), timeTracker.getPreviousTime());
   }
 
   private Collection<Metric> buildDoublePointMetrics(
       Descriptor descriptor, Type type, Attributes attributes, DoublePoint point) {
-    DeltaDoubleCounter deltaDoubleCounter =
-        deltaDoubleCountersByDescriptor.computeIfAbsent(
-            new Key(descriptor, type), d -> new DeltaDoubleCounter());
-    double value = deltaDoubleCounter.delta(point);
+
+    double value = point.getValue();
+    if (isNonMonotonic(type)) {
+      DeltaDoubleCounter deltaDoubleCounter =
+          deltaDoubleCountersByDescriptor.computeIfAbsent(
+              new Key(descriptor, type), d -> new DeltaDoubleCounter());
+      value = deltaDoubleCounter.delta(point);
+    }
     return buildMetricsFromSimpleType(
         descriptor, type, attributes, value, point.getEpochNanos(), timeTracker.getPreviousTime());
+  }
+
+  private boolean isNonMonotonic(Type type) {
+    return type != Type.NON_MONOTONIC_DOUBLE && type != Type.NON_MONOTONIC_LONG;
   }
 
   private Collection<Metric> buildMetricsFromSimpleType(
@@ -154,8 +173,6 @@ public class NewRelicMetricExporter implements MetricExporter {
 
       case MONOTONIC_LONG:
       case MONOTONIC_DOUBLE:
-        // todo: I'm not sure if this is a count metric, and I'm not sure if we need to track deltas
-        // or not.
         return singleton(
             new Count(
                 descriptor.getName(),
@@ -172,6 +189,7 @@ public class NewRelicMetricExporter implements MetricExporter {
   }
 
   public static class Key {
+
     private final Descriptor descriptor;
     private final Type type;
 
@@ -202,6 +220,107 @@ public class NewRelicMetricExporter implements MetricExporter {
       int result = descriptor != null ? descriptor.hashCode() : 0;
       result = 31 * result + (type != null ? type.hashCode() : 0);
       return result;
+    }
+  }
+
+  /**
+   * Builder utility for this exporter. At the very minimum, you need to provide your New Relic
+   * Insert API Key for this to work.
+   *
+   * @since 0.1.0
+   */
+  public static class Builder {
+
+    private Attributes commonAttributes = new Attributes();
+    private TelemetryClient telemetryClient;
+    private String apiKey;
+    private boolean enableAuditLogging = false;
+    private URI uriOverride;
+
+    /**
+     * A TelemetryClient from the New Relic Telemetry SDK. This allows you to provide your own
+     * custom-built MetricBatchSender (for instance, if you need to enable proxies, etc).
+     *
+     * @param telemetryClient the sender to use.
+     * @return this builder's instance
+     */
+    public NewRelicMetricExporter.Builder telemetryClient(TelemetryClient telemetryClient) {
+      this.telemetryClient = telemetryClient;
+      return this;
+    }
+
+    /**
+     * Set your New Relic Insert Key.
+     *
+     * @param apiKey your New Relic Insert Key.
+     * @return this builder's instance
+     */
+    public NewRelicMetricExporter.Builder apiKey(String apiKey) {
+      this.apiKey = apiKey;
+      return this;
+    }
+
+    /**
+     * Turn on Audit Logging for the New Relic Telemetry SDK. This will provide additional logging
+     * of the data being sent to the New Relic Trace API at DEBUG logging level.
+     *
+     * <p>WARNING: If there is sensitive data in your Traces, this will cause that data to be
+     * exposed to wherever your logs are being sent.
+     *
+     * @return this builder's instance
+     */
+    public NewRelicMetricExporter.Builder enableAuditLogging() {
+      enableAuditLogging = true;
+      return this;
+    }
+
+    /**
+     * A set of attributes that should be attached to all Spans that are sent to New Relic.
+     *
+     * @param commonAttributes the attributes to attach
+     * @return this builder's instance
+     */
+    public NewRelicMetricExporter.Builder commonAttributes(Attributes commonAttributes) {
+      this.commonAttributes = commonAttributes;
+      return this;
+    }
+
+    /**
+     * Set a URI to override the default ingest endpoint.
+     *
+     * @param uriOverride The scheme, host, and port that should be used for the Spans API endpoint.
+     *     The path component of this parameter is unused.
+     * @return the Builder
+     */
+    public NewRelicMetricExporter.Builder uriOverride(URI uriOverride) {
+      this.uriOverride = uriOverride;
+      return this;
+    }
+
+    /**
+     * Constructs a new instance of the exporter based on the builder's values.
+     *
+     * @return a new NewRelicSpanExporter instance
+     */
+    public NewRelicMetricExporter build() {
+      if (telemetryClient != null) {
+        return new NewRelicMetricExporter(
+            telemetryClient, MillisClock.getInstance(), commonAttributes);
+      }
+      MetricBatchSenderBuilder builder = SimpleMetricBatchSender.builder(apiKey);
+      if (enableAuditLogging) {
+        builder.enableAuditLogging();
+      }
+      if (uriOverride != null) {
+        try {
+          builder.uriOverride(uriOverride);
+        } catch (MalformedURLException e) {
+          throw new IllegalArgumentException("URI Override value must be a valid URI.", e);
+        }
+      }
+      telemetryClient = new TelemetryClient(builder.build(), null);
+      return new NewRelicMetricExporter(
+          telemetryClient, MillisClock.getInstance(), commonAttributes);
     }
   }
 }

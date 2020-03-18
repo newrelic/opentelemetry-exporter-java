@@ -85,7 +85,7 @@ public class NewRelicSpanExporter implements SpanExporter {
     private URI uriOverride;
 
     /**
-     * A SpanBatchSender from the New Relic Telemetry SDK. This allows you to provide your own
+     * A TelemetryClient from the New Relic Telemetry SDK. This allows you to provide your own
      * custom-built SpanBatchSender (for instance, if you need to enable proxies, etc).
      *
      * @param telemetryClient the sender to use.
