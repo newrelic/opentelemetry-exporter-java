@@ -89,7 +89,7 @@ public class BasicExample {
     BoundLongMeasure boundTimer = spanTimer.bind("spanName", "testSpan");
 
     Random random = new Random();
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < 10; i++) {
       long startTime = System.currentTimeMillis();
       Span span = tracer.spanBuilder("testSpan").setSpanKind(Kind.INTERNAL).startSpan();
       try (Scope scope = tracer.withSpan(span)) {
