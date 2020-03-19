@@ -43,7 +43,7 @@ in the test source code hierarchy that matches this example code. It should be c
 
 5. Find your spans in New Relic One: go to https://one.newrelic.com/ and select **Distributed Tracing**.
 
-## Find and use your data
+### Find and use your data
 
 For tips on how to find and query your data in New Relic, see [Find trace/span data](https://docs.newrelic.com/docs/understand-dependencies/distributed-tracing/trace-api/introduction-trace-api#view-data). 
 
