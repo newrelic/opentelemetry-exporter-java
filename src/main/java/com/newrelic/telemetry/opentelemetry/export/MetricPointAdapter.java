@@ -35,6 +35,7 @@ public class MetricPointAdapter {
 
   Collection<Metric> buildMetricsFromPoint(
       Descriptor descriptor, Type type, Attributes attributes, Point point) {
+    point.getLabels().forEach(attributes::put);
     if (point instanceof LongPoint) {
       return buildLongPointMetrics(descriptor, type, attributes, (LongPoint) point);
     }
@@ -71,13 +72,13 @@ public class MetricPointAdapter {
                 attributes));
 
       default:
-        // log something about unhandled types
+        // maybe log something about unhandled types?
         break;
     }
     return emptyList();
   }
 
-  boolean isNonMonotonic(Type type) {
+  private boolean isNonMonotonic(Type type) {
     return type != Type.NON_MONOTONIC_DOUBLE && type != Type.NON_MONOTONIC_LONG;
   }
 
