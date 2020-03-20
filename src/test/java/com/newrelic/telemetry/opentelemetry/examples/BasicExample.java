@@ -21,6 +21,7 @@ import io.opentelemetry.sdk.trace.export.BatchSpansProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import io.opentelemetry.trace.Span;
 import io.opentelemetry.trace.Span.Kind;
+import io.opentelemetry.trace.Status;
 import io.opentelemetry.trace.Tracer;
 import java.util.Collections;
 import java.util.Random;
@@ -71,6 +72,9 @@ public class BasicExample {
             .setMetricExporter(metricExporter)
             .build();
 
+    // Now, we've got the SDK fully configured. Let's write some very simple instrumentation to
+    // demonstrate how it all works.
+
     // 6. Create an OpenTelemetry `Tracer` and a `Meter` and use them for some manual
     // instrumentation.
     Tracer tracer = OpenTelemetry.getTracerProvider().get("sample-app", "1.0");
@@ -112,9 +116,14 @@ public class BasicExample {
     Random random = new Random();
     for (int i = 0; i < 1000; i++) {
       long startTime = System.currentTimeMillis();
-      Span span = tracer.spanBuilder("testSpan").setSpanKind(Kind.INTERNAL).startSpan();
+      Span span =
+          tracer.spanBuilder("testSpan").setSpanKind(Kind.INTERNAL).setNoParent().startSpan();
       try (Scope scope = tracer.withSpan(span)) {
-        spanCounter.add(1, "spanName", "testSpan");
+        boolean markAsError = random.nextBoolean();
+        if (markAsError) {
+          span.setStatus(Status.INTERNAL.withDescription("internalError"));
+        }
+        spanCounter.add(1, "spanName", "testSpan", "isItAnError", "" + markAsError);
         // do some work
         Thread.sleep(random.nextInt(1000));
         span.end();
