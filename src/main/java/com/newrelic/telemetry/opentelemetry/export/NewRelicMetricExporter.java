@@ -6,7 +6,6 @@ import com.newrelic.telemetry.TelemetryClient;
 import com.newrelic.telemetry.metrics.Metric;
 import com.newrelic.telemetry.metrics.MetricBatchSenderBuilder;
 import com.newrelic.telemetry.metrics.MetricBuffer;
-import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.internal.MillisClock;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.data.MetricData.Descriptor;
@@ -25,9 +24,12 @@ public class NewRelicMetricExporter implements MetricExporter {
   private final MetricPointAdapter metricPointAdapter;
 
   public NewRelicMetricExporter(
-      TelemetryClient telemetryClient, Clock clock, Attributes serviceAttributes) {
+      TelemetryClient telemetryClient,
+      Attributes serviceAttributes,
+      TimeTracker timeTracker,
+      MetricPointAdapter metricPointAdapter) {
     this.telemetryClient = telemetryClient;
-    this.timeTracker = new TimeTracker(clock);
+    this.timeTracker = timeTracker;
     // todo: these two attributes are the same as the ones in the SpanBatchAdapter. Move to
     // somewhere common.
     this.commonAttributes =
@@ -35,7 +37,7 @@ public class NewRelicMetricExporter implements MetricExporter {
             .copy()
             .put("instrumentation.provider", "opentelemetry")
             .put("collector.name", "newrelic-opentelemetry-exporter");
-    this.metricPointAdapter = new MetricPointAdapter(timeTracker);
+    this.metricPointAdapter = metricPointAdapter;
   }
 
   public static Builder newBuilder() {
@@ -49,23 +51,30 @@ public class NewRelicMetricExporter implements MetricExporter {
       Descriptor descriptor = metric.getDescriptor();
       Type type = descriptor.getType();
 
-      Attributes attributes = new Attributes();
-      CommonUtils.addResourceAttributes(attributes, metric.getResource());
-      CommonUtils.populateLibraryInfo(attributes, metric.getInstrumentationLibraryInfo());
-      attributes.put("description", descriptor.getDescription());
-      attributes.put("unit", descriptor.getUnit());
-      descriptor.getConstantLabels().forEach(attributes::put);
+      Attributes attributes = buildCommonAttributes(metric);
 
       Collection<Point> points = metric.getPoints();
       for (Point point : points) {
         Collection<Metric> metricsFromPoint =
-            metricPointAdapter.buildMetricsFromPoint(descriptor, type, attributes, point);
+            metricPointAdapter.buildMetricsFromPoint(descriptor, type, attributes.copy(), point);
         metricsFromPoint.forEach(buffer::addMetric);
       }
     }
     timeTracker.tick();
     telemetryClient.sendBatch(buffer.createBatch());
     return ResultCode.SUCCESS;
+  }
+
+  private Attributes buildCommonAttributes(MetricData metric) {
+    Attributes attributes = new Attributes();
+    CommonUtils.addResourceAttributes(attributes, metric.getResource());
+    CommonUtils.populateLibraryInfo(attributes, metric.getInstrumentationLibraryInfo());
+
+    Descriptor descriptor = metric.getDescriptor();
+    attributes.put("description", descriptor.getDescription());
+    attributes.put("unit", descriptor.getUnit());
+    descriptor.getConstantLabels().forEach(attributes::put);
+    return attributes;
   }
 
   /**
@@ -148,9 +157,10 @@ public class NewRelicMetricExporter implements MetricExporter {
      * @return a new NewRelicSpanExporter instance
      */
     public NewRelicMetricExporter build() {
+      TimeTracker timeTracker = new TimeTracker(MillisClock.getInstance());
       if (telemetryClient != null) {
         return new NewRelicMetricExporter(
-            telemetryClient, MillisClock.getInstance(), commonAttributes);
+            telemetryClient, commonAttributes, timeTracker, new MetricPointAdapter(timeTracker));
       }
       MetricBatchSenderBuilder builder = SimpleMetricBatchSender.builder(apiKey);
       if (enableAuditLogging) {
@@ -165,7 +175,7 @@ public class NewRelicMetricExporter implements MetricExporter {
       }
       telemetryClient = new TelemetryClient(builder.build(), null);
       return new NewRelicMetricExporter(
-          telemetryClient, MillisClock.getInstance(), commonAttributes);
+          telemetryClient, commonAttributes, timeTracker, new MetricPointAdapter(timeTracker));
     }
   }
 }
