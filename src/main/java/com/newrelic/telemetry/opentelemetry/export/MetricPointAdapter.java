@@ -88,7 +88,7 @@ public class MetricPointAdapter {
     if (isNonMonotonic(type)) {
       DeltaDoubleCounter deltaDoubleCounter =
           deltaDoubleCountersByDescriptor.computeIfAbsent(
-              new Key(descriptor, type), d -> new DeltaDoubleCounter());
+              new Key(descriptor, type, point.getLabels()), d -> new DeltaDoubleCounter());
       value = deltaDoubleCounter.delta(point);
     }
     return buildMetricsFromSimpleType(
@@ -101,7 +101,7 @@ public class MetricPointAdapter {
     if (isNonMonotonic(type)) {
       DeltaLongCounter deltaLongCounter =
           deltaLongCountersByDescriptor.computeIfAbsent(
-              new Key(descriptor, type), d -> new DeltaLongCounter());
+              new Key(descriptor, type, point.getLabels()), d -> new DeltaLongCounter());
       value = deltaLongCounter.delta(point);
     }
     return buildMetricsFromSimpleType(
@@ -137,13 +137,14 @@ public class MetricPointAdapter {
   }
 
   private static class Key {
-
     private final Descriptor descriptor;
     private final Type type;
+    private final Map<String, String> labels;
 
-    public Key(Descriptor descriptor, Type type) {
+    public Key(Descriptor descriptor, Type type, Map<String, String> labels) {
       this.descriptor = descriptor;
       this.type = type;
+      this.labels = labels;
     }
 
     @Override
@@ -160,13 +161,17 @@ public class MetricPointAdapter {
       if (descriptor != null ? !descriptor.equals(key.descriptor) : key.descriptor != null) {
         return false;
       }
-      return type == key.type;
+      if (type != key.type) {
+        return false;
+      }
+      return labels != null ? labels.equals(key.labels) : key.labels == null;
     }
 
     @Override
     public int hashCode() {
       int result = descriptor != null ? descriptor.hashCode() : 0;
       result = 31 * result + (type != null ? type.hashCode() : 0);
+      result = 31 * result + (labels != null ? labels.hashCode() : 0);
       return result;
     }
   }
