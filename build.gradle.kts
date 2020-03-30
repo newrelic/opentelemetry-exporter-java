@@ -39,8 +39,8 @@ googleJavaFormat {
 }
 
 dependencies {
-    api("com.newrelic.telemetry:telemetry:0.3.1")
-    implementation("io.opentelemetry:opentelemetry-sdk:0.2.0")
+    api("com.newrelic.telemetry:telemetry:0.4.0")
+    implementation("io.opentelemetry:opentelemetry-sdk:0.2.4")
     implementation("com.newrelic.telemetry:telemetry-http-okhttp:0.3.1")
 
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.4.2")

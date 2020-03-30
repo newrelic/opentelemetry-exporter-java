@@ -12,10 +12,10 @@ import static org.mockito.Mockito.when;
 import com.google.common.collect.ImmutableMap;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.spans.SpanBatch;
+import io.opentelemetry.common.AttributeValue;
+import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
 import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.sdk.trace.InstrumentationLibraryInfo;
-import io.opentelemetry.sdk.trace.SpanData;
-import io.opentelemetry.trace.AttributeValue;
+import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.trace.Span.Kind;
 import io.opentelemetry.trace.SpanId;
 import io.opentelemetry.trace.Status;
@@ -35,8 +35,8 @@ class SpanBatchAdapterTest {
   @Test
   void testSendBatchWithSingleSpan() {
     InstrumentationLibraryInfo instrumentationLibraryInfo = mock(InstrumentationLibraryInfo.class);
-    when(instrumentationLibraryInfo.name()).thenReturn("jetty-server");
-    when(instrumentationLibraryInfo.version()).thenReturn("3.14.159");
+    when(instrumentationLibraryInfo.getName()).thenReturn("jetty-server");
+    when(instrumentationLibraryInfo.getVersion()).thenReturn("3.14.159");
 
     Attributes expectedAttributes =
         new Attributes()
@@ -62,7 +62,13 @@ class SpanBatchAdapterTest {
 
     SpanBatchAdapter testClass = new SpanBatchAdapter(new Attributes());
 
-    Resource inputResource = Resource.create(ImmutableMap.of("host", "bar", "datacenter", "boo"));
+    Resource inputResource =
+        Resource.create(
+            ImmutableMap.of(
+                "host",
+                AttributeValue.stringAttributeValue("bar"),
+                "datacenter",
+                AttributeValue.stringAttributeValue("boo")));
     SpanData inputSpan =
         SpanData.newBuilder()
             .setTraceId(traceId)
@@ -75,6 +81,7 @@ class SpanBatchAdapterTest {
             .setResource(inputResource)
             .setInstrumentationLibraryInfo(instrumentationLibraryInfo)
             .setKind(Kind.SERVER)
+            .setHasEnded(true)
             .build();
 
     SpanBatch result = testClass.adaptToSpanBatch(Collections.singletonList(inputSpan));
@@ -125,6 +132,7 @@ class SpanBatchAdapterTest {
             .setName("spanName")
             .setKind(Kind.SERVER)
             .setStatus(Status.OK)
+            .setHasEnded(true)
             .build();
 
     SpanBatch result = testClass.adaptToSpanBatch(Collections.singletonList(inputSpan));
@@ -144,6 +152,7 @@ class SpanBatchAdapterTest {
             .setName("spanName")
             .setKind(Kind.SERVER)
             .setStatus(Status.OK)
+            .setHasEnded(true)
             .build();
     SpanBatch result = testClass.adaptToSpanBatch(Collections.singletonList(inputSpan));
 
@@ -179,6 +188,7 @@ class SpanBatchAdapterTest {
             .setStatus(Status.CANCELLED.withDescription("it's broken"))
             .setName("spanName")
             .setKind(Kind.SERVER)
+            .setHasEnded(true)
             .build();
 
     SpanBatch result = testClass.adaptToSpanBatch(Collections.singletonList(inputSpan));

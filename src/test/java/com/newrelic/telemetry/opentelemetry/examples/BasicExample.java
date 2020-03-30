@@ -27,11 +27,11 @@ public class BasicExample {
     // 2. Build the OpenTelemetry `BatchSpansProcessor` with the `NewRelicSpanExporter`
     BatchSpansProcessor spanProcessor = BatchSpansProcessor.newBuilder(exporter).build();
 
-    // 3. Add the span processor to the default TracerSdkFactory
-    OpenTelemetrySdk.getTracerFactory().addSpanProcessor(spanProcessor);
+    // 3. Add the span processor to the TracerProvider from the SDK
+    OpenTelemetrySdk.getTracerProvider().addSpanProcessor(spanProcessor);
 
     // 4. Create a OpenTelemetry `Tracer` and use it for recording spans.
-    Tracer tracer = OpenTelemetry.getTracerFactory().get("sample-app", "1.0");
+    Tracer tracer = OpenTelemetry.getTracerProvider().get("sample-app", "1.0");
 
     Span span = tracer.spanBuilder("testSpan").setSpanKind(Kind.INTERNAL).startSpan();
     try (Scope scope = tracer.withSpan(span)) {

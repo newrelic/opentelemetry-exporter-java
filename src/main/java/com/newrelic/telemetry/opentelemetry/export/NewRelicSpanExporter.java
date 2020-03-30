@@ -11,7 +11,7 @@ import com.newrelic.telemetry.TelemetryClient;
 import com.newrelic.telemetry.spans.SpanBatch;
 import com.newrelic.telemetry.spans.SpanBatchSender;
 import com.newrelic.telemetry.spans.SpanBatchSenderBuilder;
-import io.opentelemetry.sdk.trace.SpanData;
+import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.net.MalformedURLException;
 import java.net.URI;

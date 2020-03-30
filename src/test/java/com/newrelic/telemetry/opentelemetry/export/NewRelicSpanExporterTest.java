@@ -12,7 +12,7 @@ import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.spans.SpanBatch;
 import com.newrelic.telemetry.spans.SpanBatchSender;
 import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.sdk.trace.SpanData;
+import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter.ResultCode;
 import io.opentelemetry.trace.Span.Kind;
 import io.opentelemetry.trace.SpanId;
@@ -59,6 +59,7 @@ class NewRelicSpanExporterTest {
         .setStatus(Status.OK)
         .setStartEpochNanos(456_001_000L)
         .setEndEpochNanos(456_001_100L)
+        .setHasEnded(true)
         .build();
   }
 }
