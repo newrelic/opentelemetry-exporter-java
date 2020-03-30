@@ -115,6 +115,8 @@ public class MetricPointAdapter {
 
     double min = Double.NaN;
     double max = Double.NaN;
+    // note: The MinMaxSumCount aggregator, which generates Summaries puts the min at %ile 0.0
+    // and the max at %ile 100.0.
     for (ValueAtPercentile percentileValue : percentileValues) {
       if (percentileValue.getPercentile() == 0.0) {
         min = percentileValue.getValue();
