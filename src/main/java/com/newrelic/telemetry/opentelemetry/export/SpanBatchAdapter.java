@@ -12,7 +12,6 @@ import com.newrelic.telemetry.spans.Span;
 import com.newrelic.telemetry.spans.Span.SpanBuilder;
 import com.newrelic.telemetry.spans.SpanBatch;
 import io.opentelemetry.common.AttributeValue;
-import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.trace.SpanId;
@@ -73,18 +72,6 @@ class SpanBatchAdapter {
 
   private static Attributes addPossibleInstrumentationAttributes(
       SpanData span, Attributes attributes) {
-    InstrumentationLibraryInfo instrumentationLibraryInfo = span.getInstrumentationLibraryInfo();
-    if (instrumentationLibraryInfo != null) {
-      if (instrumentationLibraryInfo.getName() != null
-          && !instrumentationLibraryInfo.getName().isEmpty()) {
-        attributes.put("instrumentation.name", instrumentationLibraryInfo.getName());
-      }
-      if (instrumentationLibraryInfo.getVersion() != null
-          && !instrumentationLibraryInfo.getVersion().isEmpty()) {
-        attributes.put("instrumentation.version", instrumentationLibraryInfo.getVersion());
-      }
-    }
-    return attributes;
     attributes = CommonUtils.populateLibraryInfo(attributes, span.getInstrumentationLibraryInfo());
     return CommonUtils.addResourceAttributes(attributes, span.getResource());
   }
