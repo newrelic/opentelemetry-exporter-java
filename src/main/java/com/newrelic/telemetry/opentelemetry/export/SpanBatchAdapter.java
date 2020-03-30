@@ -17,7 +17,6 @@ import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.trace.SpanId;
 import io.opentelemetry.trace.Status;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -33,7 +32,7 @@ class SpanBatchAdapter {
             .put("collector.name", "newrelic-opentelemetry-exporter");
   }
 
-  SpanBatch adaptToSpanBatch(List<SpanData> openTracingSpans) {
+  SpanBatch adaptToSpanBatch(Collection<SpanData> openTracingSpans) {
     Collection<Span> newRelicSpans =
         openTracingSpans
             .stream()

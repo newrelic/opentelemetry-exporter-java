@@ -65,6 +65,11 @@ public class NewRelicMetricExporter implements MetricExporter {
     return ResultCode.SUCCESS;
   }
 
+  @Override
+  public void shutdown() {
+    telemetryClient.shutdown();
+  }
+
   private Attributes buildCommonAttributes(MetricData metric) {
     Attributes attributes = new Attributes();
     CommonUtils.addResourceAttributes(attributes, metric.getResource());

@@ -106,8 +106,8 @@ public class BasicExample {
 
     // clean up so the JVM can exit. Note: these will flush any data to the exporter
     // before they exit.
-    intervalMetricReader.shutdown();
     spanProcessor.shutdown();
+    intervalMetricReader.shutdown();
   }
 
   private static void doSomeSimulatedWork(

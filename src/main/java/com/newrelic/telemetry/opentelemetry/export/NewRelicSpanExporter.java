@@ -14,7 +14,7 @@ import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.util.List;
+import java.util.Collection;
 
 /**
  * The NewRelicSpanExporter takes a list of Span objects, converts them into a New Relic SpanBatch
@@ -50,7 +50,7 @@ public class NewRelicSpanExporter implements SpanExporter {
    * @return A ResultCode that indicates the execution status of the export operation
    */
   @Override
-  public ResultCode export(List<SpanData> openTelemetrySpans) {
+  public ResultCode export(Collection<SpanData> openTelemetrySpans) {
     SpanBatch spanBatch = adapter.adaptToSpanBatch(openTelemetrySpans);
     telemetryClient.sendBatch(spanBatch);
     return ResultCode.SUCCESS;
