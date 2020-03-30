@@ -48,36 +48,6 @@ public class MetricPointAdapter {
     return emptyList();
   }
 
-  private Collection<Metric> buildMetricsFromSimpleType(
-      Descriptor descriptor,
-      Type type,
-      Attributes attributes,
-      double value,
-      long epochNanos,
-      long startEpochNanos) {
-    switch (type) {
-      case NON_MONOTONIC_LONG:
-      case NON_MONOTONIC_DOUBLE:
-        return singleton(
-            new Gauge(descriptor.getName(), value, NANOSECONDS.toMillis(epochNanos), attributes));
-
-      case MONOTONIC_LONG:
-      case MONOTONIC_DOUBLE:
-        return singleton(
-            new Count(
-                descriptor.getName(),
-                value,
-                NANOSECONDS.toMillis(startEpochNanos),
-                NANOSECONDS.toMillis(epochNanos),
-                attributes));
-
-      default:
-        // maybe log something about unhandled types?
-        break;
-    }
-    return emptyList();
-  }
-
   private boolean isNonMonotonic(Type type) {
     return type != Type.NON_MONOTONIC_DOUBLE && type != Type.NON_MONOTONIC_LONG;
   }
@@ -107,6 +77,36 @@ public class MetricPointAdapter {
     }
     return buildMetricsFromSimpleType(
         descriptor, type, attributes, value, point.getEpochNanos(), timeTracker.getPreviousTime());
+  }
+
+  private Collection<Metric> buildMetricsFromSimpleType(
+      Descriptor descriptor,
+      Type type,
+      Attributes attributes,
+      double value,
+      long epochNanos,
+      long startEpochNanos) {
+    switch (type) {
+      case NON_MONOTONIC_LONG:
+      case NON_MONOTONIC_DOUBLE:
+        return singleton(
+            new Gauge(descriptor.getName(), value, NANOSECONDS.toMillis(epochNanos), attributes));
+
+      case MONOTONIC_LONG:
+      case MONOTONIC_DOUBLE:
+        return singleton(
+            new Count(
+                descriptor.getName(),
+                value,
+                NANOSECONDS.toMillis(startEpochNanos),
+                NANOSECONDS.toMillis(epochNanos),
+                attributes));
+
+      default:
+        // maybe log something about unhandled types?
+        break;
+    }
+    return emptyList();
   }
 
   private Collection<Metric> buildSummaryPointMetrics(

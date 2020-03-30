@@ -72,8 +72,8 @@ public class NewRelicMetricExporter implements MetricExporter {
 
   private Attributes buildCommonAttributes(MetricData metric) {
     Attributes attributes = new Attributes();
-    CommonUtils.addResourceAttributes(attributes, metric.getResource());
-    CommonUtils.populateLibraryInfo(attributes, metric.getInstrumentationLibraryInfo());
+    AttributesSupport.addResourceAttributes(attributes, metric.getResource());
+    AttributesSupport.populateLibraryInfo(attributes, metric.getInstrumentationLibraryInfo());
 
     Descriptor descriptor = metric.getDescriptor();
     attributes.put("description", descriptor.getDescription());

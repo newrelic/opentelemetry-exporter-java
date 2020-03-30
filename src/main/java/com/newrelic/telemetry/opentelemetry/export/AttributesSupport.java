@@ -6,8 +6,7 @@ import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
 import io.opentelemetry.sdk.resources.Resource;
 import java.util.Map;
 
-// todo: this is a terrible name.
-public class CommonUtils {
+public class AttributesSupport {
 
   static Attributes populateLibraryInfo(
       Attributes attributes, InstrumentationLibraryInfo instrumentationLibraryInfo) {

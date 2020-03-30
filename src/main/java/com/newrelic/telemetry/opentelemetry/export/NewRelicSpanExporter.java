@@ -18,7 +18,7 @@ import java.util.Collection;
 
 /**
  * The NewRelicSpanExporter takes a list of Span objects, converts them into a New Relic SpanBatch
- * instance and then sends it to the New Relic trace ingest API via a SpanBatchSender.
+ * instance and then sends it to the New Relic trace ingest API via a TelemetryClient.
  *
  * @since 0.1.0
  */
@@ -32,7 +32,7 @@ public class NewRelicSpanExporter implements SpanExporter {
    *
    * @param adapter An instance of SpanBatchAdapter that can turn list of open telemetry spans into
    *     New Relic SpanBatch.
-   * @param spanBatchSender An instance that sends a SpanBatch to the New Relic trace ingest API
+   * @param telemetryClient An instance that sends a SpanBatch to the New Relic trace ingest API
    * @since 0.1.0
    */
   NewRelicSpanExporter(SpanBatchAdapter adapter, TelemetryClient telemetryClient) {
@@ -86,9 +86,9 @@ public class NewRelicSpanExporter implements SpanExporter {
 
     /**
      * A TelemetryClient from the New Relic Telemetry SDK. This allows you to provide your own
-     * custom-built SpanBatchSender (for instance, if you need to enable proxies, etc).
+     * custom-built TelemetryClient (for instance, if you need to enable proxies, etc).
      *
-     * @param telemetryClient the sender to use.
+     * @param telemetryClient the client to use.
      * @return this builder's instance
      */
     public Builder telemetryClient(TelemetryClient telemetryClient) {

@@ -71,13 +71,14 @@ class SpanBatchAdapter {
 
   private static Attributes addPossibleInstrumentationAttributes(
       SpanData span, Attributes attributes) {
-    attributes = CommonUtils.populateLibraryInfo(attributes, span.getInstrumentationLibraryInfo());
-    return CommonUtils.addResourceAttributes(attributes, span.getResource());
+    Attributes updatedAttributes =
+        AttributesSupport.populateLibraryInfo(attributes, span.getInstrumentationLibraryInfo());
+    return AttributesSupport.addResourceAttributes(updatedAttributes, span.getResource());
   }
 
   private static Attributes createIntrinsicAttributes(SpanData span, Attributes attributes) {
     Map<String, AttributeValue> originalAttributes = span.getAttributes();
-    CommonUtils.putInAttributes(attributes, originalAttributes);
+    AttributesSupport.putInAttributes(attributes, originalAttributes);
     return attributes;
   }
 
@@ -93,7 +94,7 @@ class SpanBatchAdapter {
     Resource resource = span.getResource();
     if (resource != null) {
       Map<String, AttributeValue> labelsMap = resource.getAttributes();
-      CommonUtils.putInAttributes(attributes, labelsMap);
+      AttributesSupport.putInAttributes(attributes, labelsMap);
     }
     return attributes;
   }
