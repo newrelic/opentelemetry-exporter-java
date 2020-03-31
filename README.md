@@ -23,15 +23,15 @@ in the test source code hierarchy that matches this example code. It should be c
     BatchSpansProcessor spanProcessor = BatchSpansProcessor.newBuilder(exporter).build();
 ```
 
-3. Add the span processor to the default TracerSdkFactory
+3. Add the span processor to the default TracerSdkProvider
 ```
-    TracerSdkFactory tracerSdkFactory = (TracerSdkFactory) OpenTelemetry.getTracerFactory();
-    tracerSdkFactory.addSpanProcessor(spanProcessor);
+    TracerSdkProvider tracerSdkProvider = (TracerSdkProvider) OpenTelemetry.getTracerProvider();
+    tracerSdkProvider.addSpanProcessor(spanProcessor);
 ```
 
 4. Create the OpenTelemetry `Tracer` and use it for recording spans.
 ```
-    Tracer tracer = OpenTelemetry.getTracerFactory().get("sample-app", "1.0");
+    Tracer tracer = OpenTelemetry.getTracerProvider().get("sample-app", "1.0");
     
     Span span = tracer.spanBuilder("testSpan").setSpanKind(Kind.INTERNAL).startSpan();
     try (Scope scope = tracer.withSpan(span)) {
@@ -64,10 +64,10 @@ repositories {
 ```
 
 ```
-implementation("com.newrelic.telemetry:opentelemetry-exporters-newrelic:0.2.0-SNAPSHOT")
-implementation("io.opentelemetry:opentelemetry-sdk:0.2.0")
-implementation("com.newrelic.telemetry:telemetry-core:0.3.2")
-implementation("com.newrelic.telemetry:telemetry-http-okhttp:0.3.2")
+implementation("com.newrelic.telemetry:opentelemetry-exporters-newrelic:0.3.0-SNAPSHOT")
+implementation("io.opentelemetry:opentelemetry-sdk:0.3.0")
+implementation("com.newrelic.telemetry:telemetry-core:0.4.0")
+implementation("com.newrelic.telemetry:telemetry-http-okhttp:0.4.0")
 ```
 
 ### Building
