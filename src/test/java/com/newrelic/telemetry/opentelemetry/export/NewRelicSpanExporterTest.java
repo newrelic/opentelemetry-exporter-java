@@ -9,8 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 import com.newrelic.telemetry.Attributes;
+import com.newrelic.telemetry.TelemetryClient;
 import com.newrelic.telemetry.spans.SpanBatch;
-import com.newrelic.telemetry.spans.SpanBatchSender;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter.ResultCode;
@@ -33,7 +33,7 @@ class NewRelicSpanExporterTest {
   private final String hexTraceId = "000000000063d76f0000000037fe0393";
   private final TraceId traceId = TraceId.fromLowerBase16(hexTraceId, 0);
 
-  @Mock private SpanBatchSender sender;
+  @Mock private TelemetryClient sender;
   @Mock private SpanBatchAdapter adapter;
 
   @Test
