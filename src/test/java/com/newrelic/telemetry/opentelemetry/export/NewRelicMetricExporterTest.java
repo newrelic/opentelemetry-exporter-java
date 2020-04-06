@@ -1,11 +1,14 @@
 package com.newrelic.telemetry.opentelemetry.export;
 
 import static io.opentelemetry.common.AttributeValue.stringAttributeValue;
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singleton;
+import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.newrelic.telemetry.Attributes;
@@ -68,10 +71,10 @@ class NewRelicMetricExporterTest {
     Gauge metric2 = new Gauge("gauge", 3d, 200, new Attributes());
 
     when(metricPointAdapter.buildMetricsFromPoint(
-            descriptor, Type.SUMMARY, updatedAttributes, point1))
+            "instrumentationName", descriptor, Type.SUMMARY, updatedAttributes, point1))
         .thenReturn(singleton(metric1));
     when(metricPointAdapter.buildMetricsFromPoint(
-            descriptor, Type.SUMMARY, updatedAttributes, point2))
+            "instrumentationName", descriptor, Type.SUMMARY, updatedAttributes, point2))
         .thenReturn(singleton(metric2));
     ;
     Attributes amendedGlobalAttributes =
@@ -89,13 +92,48 @@ class NewRelicMetricExporterTest {
     InOrder inOrder = inOrder(metricPointAdapter, timeTracker, telemetryClient);
     inOrder
         .verify(metricPointAdapter)
-        .buildMetricsFromPoint(descriptor, Type.SUMMARY, updatedAttributes, point1);
+        .buildMetricsFromPoint(
+            "instrumentationName", descriptor, Type.SUMMARY, updatedAttributes, point1);
     inOrder
         .verify(metricPointAdapter)
-        .buildMetricsFromPoint(descriptor, Type.SUMMARY, updatedAttributes, point2);
+        .buildMetricsFromPoint(
+            "instrumentationName", descriptor, Type.SUMMARY, updatedAttributes, point2);
     inOrder.verify(timeTracker).tick();
     inOrder
         .verify(telemetryClient)
         .sendBatch(new MetricBatch(Arrays.asList(metric1, metric2), amendedGlobalAttributes));
+  }
+
+  @Test
+  public void testMetricNamePrefix_cleanupInstrumentationLibraryName() throws Exception {
+    MetricPointAdapter metricPointAdapter = mock(MetricPointAdapter.class);
+    TelemetryClient telemetryClient = mock(TelemetryClient.class);
+    TimeTracker timeTracker = mock(TimeTracker.class);
+    NewRelicMetricExporter newRelicMetricExporter =
+        new NewRelicMetricExporter(
+            telemetryClient, new Attributes(), timeTracker, metricPointAdapter);
+
+    Descriptor descriptor =
+        Descriptor.create("metricName", "metricDescription", "units", Type.SUMMARY, emptyMap());
+    Resource resource = Resource.getEmpty();
+    InstrumentationLibraryInfo libraryInfo = InstrumentationLibraryInfo.create("jvm_memory", "1.0");
+    LongPoint point = LongPoint.create(1000, 2000, emptyMap(), 100L);
+    Collection<Point> points = singletonList(point);
+
+    Attributes updatedAttributes =
+        new Attributes()
+            .put("unit", "units")
+            .put("description", "metricDescription")
+            .put("instrumentation.version", "1.0")
+            .put("instrumentation.name", "jvm_memory");
+
+    ResultCode result =
+        newRelicMetricExporter.export(
+            singleton(MetricData.create(descriptor, resource, libraryInfo, points)));
+
+    assertEquals(ResultCode.SUCCESS, result);
+
+    verify(metricPointAdapter)
+        .buildMetricsFromPoint("jvm.memory", descriptor, Type.SUMMARY, updatedAttributes, point);
   }
 }

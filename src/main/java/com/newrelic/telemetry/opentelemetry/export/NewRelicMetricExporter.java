@@ -6,6 +6,7 @@ import com.newrelic.telemetry.TelemetryClient;
 import com.newrelic.telemetry.metrics.Metric;
 import com.newrelic.telemetry.metrics.MetricBatchSenderBuilder;
 import com.newrelic.telemetry.metrics.MetricBuffer;
+import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
 import io.opentelemetry.sdk.internal.MillisClock;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.data.MetricData.Descriptor;
@@ -52,17 +53,24 @@ public class NewRelicMetricExporter implements MetricExporter {
       Type type = descriptor.getType();
 
       Attributes attributes = buildCommonAttributes(metric);
-
+      InstrumentationLibraryInfo instrumentationLibraryInfo =
+          metric.getInstrumentationLibraryInfo();
+      String metricNamePrefix = createMetricNamePrefix(instrumentationLibraryInfo);
       Collection<Point> points = metric.getPoints();
       for (Point point : points) {
         Collection<Metric> metricsFromPoint =
-            metricPointAdapter.buildMetricsFromPoint(descriptor, type, attributes.copy(), point);
+            metricPointAdapter.buildMetricsFromPoint(
+                metricNamePrefix, descriptor, type, attributes.copy(), point);
         metricsFromPoint.forEach(buffer::addMetric);
       }
     }
     timeTracker.tick();
     telemetryClient.sendBatch(buffer.createBatch());
     return ResultCode.SUCCESS;
+  }
+
+  private String createMetricNamePrefix(InstrumentationLibraryInfo instrumentationLibraryInfo) {
+    return instrumentationLibraryInfo.getName().replaceAll("_", ".");
   }
 
   @Override

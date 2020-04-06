@@ -34,16 +34,23 @@ public class MetricPointAdapter {
   }
 
   Collection<Metric> buildMetricsFromPoint(
-      Descriptor descriptor, Type type, Attributes attributes, Point point) {
+      String metricNamePrefix,
+      Descriptor descriptor,
+      Type type,
+      Attributes attributes,
+      Point point) {
     point.getLabels().forEach(attributes::put);
     if (point instanceof LongPoint) {
-      return buildLongPointMetrics(descriptor, type, attributes, (LongPoint) point);
+      return buildLongPointMetrics(
+          metricNamePrefix, descriptor, type, attributes, (LongPoint) point);
     }
     if (point instanceof DoublePoint) {
-      return buildDoublePointMetrics(descriptor, type, attributes, (DoublePoint) point);
+      return buildDoublePointMetrics(
+          metricNamePrefix, descriptor, type, attributes, (DoublePoint) point);
     }
     if (point instanceof SummaryPoint) {
-      return buildSummaryPointMetrics(descriptor, attributes, (SummaryPoint) point);
+      return buildSummaryPointMetrics(
+          metricNamePrefix, descriptor, attributes, (SummaryPoint) point);
     }
     return emptyList();
   }
@@ -53,7 +60,11 @@ public class MetricPointAdapter {
   }
 
   private Collection<Metric> buildDoublePointMetrics(
-      Descriptor descriptor, Type type, Attributes attributes, DoublePoint point) {
+      String metricNamePrefix,
+      Descriptor descriptor,
+      Type type,
+      Attributes attributes,
+      DoublePoint point) {
 
     double value = point.getValue();
     if (isNonMonotonic(type)) {
@@ -63,11 +74,21 @@ public class MetricPointAdapter {
       value = deltaDoubleCounter.delta(point);
     }
     return buildMetricsFromSimpleType(
-        descriptor, type, attributes, value, point.getEpochNanos(), timeTracker.getPreviousTime());
+        metricNamePrefix,
+        descriptor,
+        type,
+        attributes,
+        value,
+        point.getEpochNanos(),
+        timeTracker.getPreviousTime());
   }
 
   private Collection<Metric> buildLongPointMetrics(
-      Descriptor descriptor, Type type, Attributes attributes, LongPoint point) {
+      String metricNamePrefix,
+      Descriptor descriptor,
+      Type type,
+      Attributes attributes,
+      LongPoint point) {
     long value = point.getValue();
     if (isNonMonotonic(type)) {
       DeltaLongCounter deltaLongCounter =
@@ -76,10 +97,17 @@ public class MetricPointAdapter {
       value = deltaLongCounter.delta(point);
     }
     return buildMetricsFromSimpleType(
-        descriptor, type, attributes, value, point.getEpochNanos(), timeTracker.getPreviousTime());
+        metricNamePrefix,
+        descriptor,
+        type,
+        attributes,
+        value,
+        point.getEpochNanos(),
+        timeTracker.getPreviousTime());
   }
 
   private Collection<Metric> buildMetricsFromSimpleType(
+      String metricNamePrefix,
       Descriptor descriptor,
       Type type,
       Attributes attributes,
@@ -90,13 +118,17 @@ public class MetricPointAdapter {
       case NON_MONOTONIC_LONG:
       case NON_MONOTONIC_DOUBLE:
         return singleton(
-            new Gauge(descriptor.getName(), value, NANOSECONDS.toMillis(epochNanos), attributes));
+            new Gauge(
+                metricNamePrefix + "." + descriptor.getName(),
+                value,
+                NANOSECONDS.toMillis(epochNanos),
+                attributes));
 
       case MONOTONIC_LONG:
       case MONOTONIC_DOUBLE:
         return singleton(
             new Count(
-                descriptor.getName(),
+                metricNamePrefix + "." + descriptor.getName(),
                 value,
                 NANOSECONDS.toMillis(startEpochNanos),
                 NANOSECONDS.toMillis(epochNanos),
@@ -110,7 +142,7 @@ public class MetricPointAdapter {
   }
 
   private Collection<Metric> buildSummaryPointMetrics(
-      Descriptor descriptor, Attributes attributes, SummaryPoint point) {
+      String metricNamePrefix, Descriptor descriptor, Attributes attributes, SummaryPoint point) {
     List<ValueAtPercentile> percentileValues = point.getPercentileValues();
 
     double min = Double.NaN;
@@ -129,7 +161,7 @@ public class MetricPointAdapter {
 
     return singleton(
         new Summary(
-            descriptor.getName(),
+            metricNamePrefix + "." + descriptor.getName(),
             (int) point.getCount(),
             point.getSum(),
             min,

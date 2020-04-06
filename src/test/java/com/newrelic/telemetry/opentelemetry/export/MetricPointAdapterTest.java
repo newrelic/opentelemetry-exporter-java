@@ -48,11 +48,12 @@ class MetricPointAdapterTest {
 
     Attributes expectedAttributes =
         new Attributes().put("service.name", "fooService").put("specificKey", "specificValue");
-    Count expectedMetric = new Count("metricName", 123L, 9_000L, 10_000L, expectedAttributes);
+    Count expectedMetric =
+        new Count("metricNamePrefix.metricName", 123L, 9_000L, 10_000L, expectedAttributes);
 
     Collection<Metric> result =
         metricPointAdapter.buildMetricsFromPoint(
-            metricDescriptor, Type.MONOTONIC_LONG, commonAttributes, longPoint);
+            "metricNamePrefix", metricDescriptor, Type.MONOTONIC_LONG, commonAttributes, longPoint);
 
     assertEquals(singleton(expectedMetric), result);
   }
@@ -80,11 +81,16 @@ class MetricPointAdapterTest {
 
     Attributes expectedAttributes =
         new Attributes().put("service.name", "fooService").put("specificKey", "specificValue");
-    Gauge expectedMetric = new Gauge("metricName", 123L, 10_000L, expectedAttributes);
+    Gauge expectedMetric =
+        new Gauge("metricNamePrefix.metricName", 123L, 10_000L, expectedAttributes);
 
     Collection<Metric> result =
         metricPointAdapter.buildMetricsFromPoint(
-            metricDescriptor, Type.NON_MONOTONIC_LONG, commonAttributes, longPoint);
+            "metricNamePrefix",
+            metricDescriptor,
+            Type.NON_MONOTONIC_LONG,
+            commonAttributes,
+            longPoint);
 
     assertEquals(singleton(expectedMetric), result);
   }
@@ -112,11 +118,16 @@ class MetricPointAdapterTest {
 
     Attributes expectedAttributes =
         new Attributes().put("service.name", "fooService").put("specificKey", "specificValue");
-    Count expectedMetric = new Count("metricName", 123.55d, 9_000L, 10_000L, expectedAttributes);
+    Count expectedMetric =
+        new Count("metricNamePrefix.metricName", 123.55d, 9_000L, 10_000L, expectedAttributes);
 
     Collection<Metric> result =
         metricPointAdapter.buildMetricsFromPoint(
-            metricDescriptor, Type.MONOTONIC_DOUBLE, commonAttributes, doublePoint);
+            "metricNamePrefix",
+            metricDescriptor,
+            Type.MONOTONIC_DOUBLE,
+            commonAttributes,
+            doublePoint);
 
     assertEquals(singleton(expectedMetric), result);
   }
@@ -143,11 +154,16 @@ class MetricPointAdapterTest {
 
     Attributes expectedAttributes =
         new Attributes().put("service.name", "fooService").put("specificKey", "specificValue");
-    Gauge expectedMetric = new Gauge("metricName", 123.55d, 10_000L, expectedAttributes);
+    Gauge expectedMetric =
+        new Gauge("metricNamePrefix.metricName", 123.55d, 10_000L, expectedAttributes);
 
     Collection<Metric> result =
         metricPointAdapter.buildMetricsFromPoint(
-            metricDescriptor, Type.NON_MONOTONIC_DOUBLE, commonAttributes, doublePoint);
+            "metricNamePrefix",
+            metricDescriptor,
+            Type.NON_MONOTONIC_DOUBLE,
+            commonAttributes,
+            doublePoint);
 
     assertEquals(singleton(expectedMetric), result);
   }
@@ -181,11 +197,19 @@ class MetricPointAdapterTest {
     Attributes expectedAttributes =
         new Attributes().put("service.name", "fooService").put("specificKey", "specificValue");
     Summary expectedMetric =
-        new Summary("metricName", 200, 123.55d, 5.5d, 100.01d, 9000L, 10000L, expectedAttributes);
+        new Summary(
+            "metricNamePrefix.metricName",
+            200,
+            123.55d,
+            5.5d,
+            100.01d,
+            9000L,
+            10000L,
+            expectedAttributes);
 
     Collection<Metric> result =
         metricPointAdapter.buildMetricsFromPoint(
-            metricDescriptor, Type.SUMMARY, commonAttributes, summary);
+            "metricNamePrefix", metricDescriptor, Type.SUMMARY, commonAttributes, summary);
 
     assertEquals(singleton(expectedMetric), result);
   }
