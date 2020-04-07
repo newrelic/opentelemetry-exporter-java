@@ -107,7 +107,7 @@ in the test source code hierarchy that matches this example code. It should be c
    spanTimer.record(1000, "spanName", "testSpan")
 ```
 
-7. Find your spans in New Relic One: go to https://one.newrelic.com/ and locate your service
+7. Find your metrics in New Relic One: go to https://one.newrelic.com/ and locate your service
 in the **Entity explorer** (based on the `"service.name"` attributes you've used).
 
 ### Find and use your data
