@@ -110,6 +110,8 @@ in the test source code hierarchy that matches this example code. It should be c
 7. Find your metrics in New Relic One: go to https://one.newrelic.com/ and locate your service
 in the **Entity explorer** (based on the `"service.name"` attributes you've used).
 
+### [![Javadocs][javadoc-image]][javadoc-url]
+
 ### Find and use your data
 
 For tips on how to find and query your data in New Relic, see [Find trace/span data](https://docs.newrelic.com/docs/understand-dependencies/distributed-tracing/trace-api/introduction-trace-api#view-data). 
@@ -149,3 +151,6 @@ To compile, run the tests and build the jar:
 
 ### Contributing
 Full details are available in our [CONTRIBUTING.md file](CONTRIBUTING.md). We'd love to get your contributions to improve the New Relic OpenTelemetry exporter! Keep in mind when you submit your pull request, you'll need to sign the CLA via the click-through using CLA-Assistant. You only have to sign the CLA one time per project. To execute our corporate CLA, which is required if your contribution is on behalf of a company, or if you have any questions, please drop us an email at open-source@newrelic.com.
+
+[javadoc-image]: https://www.javadoc.io/badge/com.newrelic.telemetry/opentelemetry-exporters-newrelic.svg
+[javadoc-url]: https://www.javadoc.io/doc/com.newrelic.telemetry/opentelemetry-exporters-newrelic
