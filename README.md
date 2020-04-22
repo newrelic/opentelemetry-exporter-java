@@ -110,7 +110,7 @@ in the test source code hierarchy that matches this example code. It should be c
 7. Find your metrics in New Relic One: go to https://one.newrelic.com/ and locate your service
 in the **Entity explorer** (based on the `"service.name"` attributes you've used).
 
-### [![Javadocs][javadoc-image]][javadoc-url]
+### Javadoc for this project can be found here: [![Javadocs][javadoc-image]][javadoc-url]
 
 ### Find and use your data
 
