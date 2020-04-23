@@ -15,7 +15,6 @@ import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.Collection;
-import java.util.Optional;
 
 /**
  * The NewRelicMetricExporter takes a collection of MetricData objects, converts them into a New
@@ -33,13 +32,6 @@ public class NewRelicMetricExporter implements MetricExporter {
   private final TelemetryClient telemetryClient;
   private final TimeTracker timeTracker;
   private final MetricPointAdapter metricPointAdapter;
-  private static final String implementationVersion;
-
-  static {
-    Package thisPackage = NewRelicMetricExporter.class.getPackage();
-    implementationVersion =
-        Optional.ofNullable(thisPackage.getImplementationVersion()).orElse("UnknownVersion");
-  }
 
   /**
    * Create a metric exporter with the given components.
@@ -202,7 +194,7 @@ public class NewRelicMetricExporter implements MetricExporter {
             telemetryClient, commonAttributes, timeTracker, new MetricPointAdapter(timeTracker));
       }
       MetricBatchSenderBuilder builder = SimpleMetricBatchSender.builder(apiKey);
-      builder.secondaryUserAgent("NewRelic-OpenTelemetry-Exporter", implementationVersion);
+      builder.secondaryUserAgent("NewRelic-OpenTelemetry-Exporter", null);
       if (enableAuditLogging) {
         builder.enableAuditLogging();
       }
