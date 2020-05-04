@@ -110,6 +110,19 @@ in the test source code hierarchy that matches this example code. It should be c
 7. Find your metrics in New Relic One: go to https://one.newrelic.com/ and locate your service
 in the **Entity explorer** (based on the `"service.name"` attributes you've used).
 
+### Auto-Instrumentation
+
+To instrument trace using [opentelemetry-auto-instr-java](https://github.com/open-telemetry/opentelemetry-auto-instr-java),
+`opentelemetry-exporter-newrelic-auto` can be used as opentelemetry exporter 
+with environment variable `INSIGHTS_INSERT_KEY` exposed. Here is an example.
+
+```bash
+java -javaagent:path/to/opentelemetry-auto-<version>.jar \
+     -Dota.exporter.jar=path/to/opentelemetry-exporter-newrelic-auto-<version>.jar \
+     -Dota.exporter.newrelic.service.name=best-service-ever \
+     -jar myapp.jar
+```
+
 ### Javadoc for this project can be found here: [![Javadocs][javadoc-image]][javadoc-url]
 
 ### Find and use your data
