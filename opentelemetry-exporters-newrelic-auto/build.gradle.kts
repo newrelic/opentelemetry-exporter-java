@@ -25,13 +25,13 @@ tasks {
     assemble {
         dependsOn(shadowJar)
     }
-    build {
-        dependsOn(shadowJar)
-    }
     jar {
         enabled = false
     }
-    publish {
+    publishMavenJavaPublicationToMavenLocal {
+        dependsOn(shadowJar)
+    }
+    publishMavenJavaPublicationToMavenRepository {
         dependsOn(shadowJar)
     }
 }
