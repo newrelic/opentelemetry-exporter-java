@@ -9,7 +9,6 @@ apply(plugin = "com.github.johnrengelman.shadow")
 dependencies {
     api(project(":opentelemetry-exporters-newrelic"))
     implementation("io.opentelemetry:opentelemetry-sdk-contrib-auto-config:0.3.0")
-    implementation("com.google.guava:guava:20.0")
 
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.4.2")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.4.2")

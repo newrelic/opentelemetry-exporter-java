@@ -8,25 +8,25 @@ import io.opentelemetry.sdk.trace.export.SpanExporter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class NewRelicSpanExporterFactoryTest {
 
   @Mock private Config config;
-  @Spy private NewRelicSpanExporterFactory newRelicSpanExporterFactory;
 
   @Test
   void testFromConfig_HappyPath() {
-    String serviceNameKey = "newrelic.service.name";
-    String serviceName = "best service ever";
+    String apiKeyKey = "newrelic.api.key";
+    String apiKeyValue = "test-key";
     String defaultServiceName = "(unknown service)";
-    String newRelicInsightsInsertKeyValue = "test-key";
+    String serviceNameKey = "newrelic.service.name";
+    String serviceNameValue = "best service ever";
 
-    when(newRelicSpanExporterFactory.getApiKey()).thenReturn(newRelicInsightsInsertKeyValue);
-    when(config.getString(serviceNameKey, defaultServiceName)).thenReturn(serviceName);
+    when(config.getString(apiKeyKey, "")).thenReturn(apiKeyValue);
+    when(config.getString(serviceNameKey, defaultServiceName)).thenReturn(serviceNameValue);
 
+    NewRelicSpanExporterFactory newRelicSpanExporterFactory = new NewRelicSpanExporterFactory();
     SpanExporter spanExporter = newRelicSpanExporterFactory.fromConfig(config);
 
     assertNotNull(spanExporter);

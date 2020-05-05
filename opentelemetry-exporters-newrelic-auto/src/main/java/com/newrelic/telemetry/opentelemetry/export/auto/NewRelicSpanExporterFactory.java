@@ -1,6 +1,5 @@
 package com.newrelic.telemetry.opentelemetry.export.auto;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.opentelemetry.export.NewRelicSpanExporter;
 import io.opentelemetry.sdk.contrib.auto.config.Config;
@@ -9,7 +8,7 @@ import io.opentelemetry.sdk.trace.export.SpanExporter;
 
 public class NewRelicSpanExporterFactory implements SpanExporterFactory {
 
-  private static final String INSIGHTS_INSERT_KEY = "INSIGHTS_INSERT_KEY";
+  private static final String NEWRELIC_API_KEY = "newrelic.api.key";
   private static final String NEWRELIC_SERVICE_NAME = "newrelic.service.name";
   private static final String DEFAULT_NEWRELIC_SERVICE_NAME = "(unknown service)";
 
@@ -21,7 +20,7 @@ public class NewRelicSpanExporterFactory implements SpanExporterFactory {
    */
   @Override
   public SpanExporter fromConfig(Config config) {
-    final String apiKey = getApiKey();
+    final String apiKey = config.getString(NEWRELIC_API_KEY, "");
     final String serviceName =
         config.getString(NEWRELIC_SERVICE_NAME, DEFAULT_NEWRELIC_SERVICE_NAME);
 
@@ -29,10 +28,5 @@ public class NewRelicSpanExporterFactory implements SpanExporterFactory {
         .commonAttributes(new Attributes().put("service.name", serviceName))
         .apiKey(apiKey)
         .build();
-  }
-
-  @VisibleForTesting
-  String getApiKey() {
-    return System.getenv(INSIGHTS_INSERT_KEY);
   }
 }
