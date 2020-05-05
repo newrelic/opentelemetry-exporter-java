@@ -21,6 +21,7 @@ public class NewRelicSpanExporterFactory implements SpanExporterFactory {
   @Override
   public SpanExporter fromConfig(Config config) {
     final String apiKey = config.getString(NEWRELIC_API_KEY, "");
+    // todo: update key to service.name once it is standardized
     final String serviceName =
         config.getString(NEWRELIC_SERVICE_NAME, DEFAULT_NEWRELIC_SERVICE_NAME);
 
