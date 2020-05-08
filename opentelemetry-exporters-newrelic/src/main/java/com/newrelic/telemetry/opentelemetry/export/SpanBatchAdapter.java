@@ -79,6 +79,7 @@ class SpanBatchAdapter {
   private static Attributes createIntrinsicAttributes(SpanData span, Attributes attributes) {
     Map<String, AttributeValue> originalAttributes = span.getAttributes();
     AttributesSupport.putInAttributes(attributes, originalAttributes);
+    attributes.put("span.kind", span.getKind().name());
     return attributes;
   }
 
