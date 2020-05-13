@@ -43,7 +43,8 @@ class SpanBatchAdapterTest {
             .put("host", "bar")
             .put("datacenter", "boo")
             .put("instrumentation.name", "jetty-server")
-            .put("instrumentation.version", "3.14.159");
+            .put("instrumentation.version", "3.14.159")
+            .put("span.kind", "SERVER");
     com.newrelic.telemetry.spans.Span span1 =
         com.newrelic.telemetry.spans.Span.builder(hexSpanId)
             .traceId(hexTraceId)
@@ -101,7 +102,8 @@ class SpanBatchAdapterTest {
                     .put("myBooleanKey", true)
                     .put("myIntKey", 123L)
                     .put("myStringKey", "attrValue")
-                    .put("myDoubleKey", 123.45d))
+                    .put("myDoubleKey", 123.45d)
+                    .put("span.kind", "INTERNAL"))
             .build();
 
     SpanBatch expected =
@@ -130,7 +132,7 @@ class SpanBatchAdapterTest {
                     "myDoubleKey",
                     AttributeValue.doubleAttributeValue(123.45)))
             .setName("spanName")
-            .setKind(Kind.SERVER)
+            .setKind(Kind.INTERNAL)
             .setStatus(Status.OK)
             .setHasEnded(true)
             .build();
@@ -167,7 +169,8 @@ class SpanBatchAdapterTest {
             .timestamp(1000456)
             .name("spanName")
             .durationMs(0.0001)
-            .attributes(new Attributes().put("error.message", "it's broken"))
+            .attributes(
+                new Attributes().put("error.message", "it's broken").put("span.kind", "PRODUCER"))
             .build();
     SpanBatch expected =
         new SpanBatch(
@@ -187,7 +190,7 @@ class SpanBatchAdapterTest {
             .setEndEpochNanos(1_000_456_001_100L)
             .setStatus(Status.CANCELLED.withDescription("it's broken"))
             .setName("spanName")
-            .setKind(Kind.SERVER)
+            .setKind(Kind.PRODUCER)
             .setHasEnded(true)
             .build();
 

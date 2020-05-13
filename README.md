@@ -9,7 +9,7 @@ For the details on how OpenTelemetry data is mapped to New Relic data, see docum
 
 To send spans or metrics to New Relic, you will need an [Insights Insert API Key](https://docs.newrelic.com/docs/insights/insights-data-sources/custom-data/introduction-event-api#).
 
-Note: There is an example [BasicExample.java](src/test/java/com/newrelic/telemetry/opentelemetry/examples/BasicExample.java)  
+Note: There is an example [BasicExample.java](opentelemetry-exporters-newrelic/src/test/java/com/newrelic/telemetry/opentelemetry/examples/BasicExample.java)  
 in the test source code hierarchy that matches this example code. It should be considered as the canonical code for this example, since OpenTelemetry internal SDK APIs are still a work in progress.
 
 #### For spans:
