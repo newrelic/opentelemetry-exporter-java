@@ -194,6 +194,7 @@ public class NewRelicMetricExporter implements MetricExporter {
             telemetryClient, commonAttributes, timeTracker, new MetricPointAdapter(timeTracker));
       }
       MetricBatchSenderBuilder builder = SimpleMetricBatchSender.builder(apiKey);
+      builder.secondaryUserAgent("NewRelic-OpenTelemetry-Exporter", null);
       if (enableAuditLogging) {
         builder.enableAuditLogging();
       }

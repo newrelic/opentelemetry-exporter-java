@@ -154,6 +154,7 @@ public class NewRelicSpanExporter implements SpanExporter {
         return new NewRelicSpanExporter(new SpanBatchAdapter(commonAttributes), telemetryClient);
       }
       SpanBatchSenderBuilder builder = SimpleSpanBatchSender.builder(apiKey);
+      builder.secondaryUserAgent("NewRelic-OpenTelemetry-Exporter", null);
       if (enableAuditLogging) {
         builder.enableAuditLogging();
       }
