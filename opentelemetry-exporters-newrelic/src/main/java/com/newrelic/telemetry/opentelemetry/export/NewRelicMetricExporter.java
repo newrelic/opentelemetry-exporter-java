@@ -92,6 +92,12 @@ public class NewRelicMetricExporter implements MetricExporter {
   }
 
   @Override
+  public ResultCode flush() {
+    // no-op for this exporter
+    return ResultCode.SUCCESS;
+  }
+
+  @Override
   public void shutdown() {
     telemetryClient.shutdown();
   }

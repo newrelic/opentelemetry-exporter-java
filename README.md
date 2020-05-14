@@ -23,7 +23,7 @@ in the test source code hierarchy that matches this example code. It should be c
 
 2. Build the OpenTelemetry `BatchSpansProcessor` with the `NewRelicSpanExporter` 
 ```java
-    BatchSpansProcessor spanProcessor = BatchSpansProcessor.newBuilder(exporter).build();
+    BatchSpansProcessor spanProcessor = BatchSpansProcessor.create(exporter);
 ```
 
 3. Add the span processor to the default TracerSdkProvider
@@ -146,8 +146,8 @@ repositories {
 ```
 
 ```
-implementation("com.newrelic.telemetry:opentelemetry-exporters-newrelic:0.3.0")
-implementation("io.opentelemetry:opentelemetry-sdk:0.3.0")
+implementation("com.newrelic.telemetry:opentelemetry-exporters-newrelic:0.4.0")
+implementation("io.opentelemetry:opentelemetry-sdk:0.4.0")
 implementation("com.newrelic.telemetry:telemetry-core:0.4.0")
 implementation("com.newrelic.telemetry:telemetry-http-okhttp:0.4.0")
 ```
