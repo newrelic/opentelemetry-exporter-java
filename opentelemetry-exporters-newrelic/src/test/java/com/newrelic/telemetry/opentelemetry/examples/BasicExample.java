@@ -58,7 +58,7 @@ public class BasicExample {
             .build();
 
     // 3. Build the OpenTelemetry `BatchSpansProcessor` with the `NewRelicSpanExporter`
-    BatchSpansProcessor spanProcessor = BatchSpansProcessor.newBuilder(exporter).build();
+    BatchSpansProcessor spanProcessor = BatchSpansProcessor.create(exporter);
 
     // 4. Add the span processor to the TracerProvider from the SDK
     OpenTelemetrySdk.getTracerProvider().addSpanProcessor(spanProcessor);
@@ -118,7 +118,7 @@ public class BasicExample {
       long startTime = System.currentTimeMillis();
       Span span =
           tracer.spanBuilder("testSpan").setSpanKind(Kind.INTERNAL).setNoParent().startSpan();
-      try (Scope scope = tracer.withSpan(span)) {
+      try (Scope ignored = tracer.withSpan(span)) {
         boolean markAsError = random.nextBoolean();
         if (markAsError) {
           span.setStatus(Status.INTERNAL.withDescription("internalError"));

@@ -1,6 +1,6 @@
 dependencies {
     api("com.newrelic.telemetry:telemetry:0.4.0")
-    implementation("io.opentelemetry:opentelemetry-sdk:0.3.0")
+    implementation("io.opentelemetry:opentelemetry-sdk:0.4.1")
     implementation("com.newrelic.telemetry:telemetry-http-okhttp:0.3.1")
 
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.4.2")

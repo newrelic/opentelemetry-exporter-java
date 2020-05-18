@@ -57,6 +57,12 @@ public class NewRelicSpanExporter implements SpanExporter {
   }
 
   @Override
+  public ResultCode flush() {
+    // no-op for this exporter
+    return ResultCode.SUCCESS;
+  }
+
+  @Override
   public void shutdown() {
     telemetryClient.shutdown();
   }
