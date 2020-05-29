@@ -6,10 +6,13 @@
 package com.newrelic.telemetry.opentelemetry.export;
 
 import com.newrelic.telemetry.Attributes;
-import com.newrelic.telemetry.SimpleSpanBatchSender;
+import com.newrelic.telemetry.OkHttpPoster;
+import com.newrelic.telemetry.SenderConfiguration;
+import com.newrelic.telemetry.SenderConfiguration.SenderConfigurationBuilder;
+import com.newrelic.telemetry.SpanBatchSenderFactory;
 import com.newrelic.telemetry.TelemetryClient;
 import com.newrelic.telemetry.spans.SpanBatch;
-import com.newrelic.telemetry.spans.SpanBatchSenderBuilder;
+import com.newrelic.telemetry.spans.SpanBatchSender;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.net.MalformedURLException;
@@ -94,7 +97,8 @@ public class NewRelicSpanExporter implements SpanExporter {
      * A TelemetryClient from the New Relic Telemetry SDK. This allows you to provide your own
      * custom-built TelemetryClient (for instance, if you need to enable proxies, etc).
      *
-     * @param telemetryClient the client to use.
+     * @param telemetryClient the client to use. This MUST include at least a {@link
+     *     SpanBatchSender} implementation in order to be functional for exporting Spans.
      * @return this builder's instance
      */
     public Builder telemetryClient(TelemetryClient telemetryClient) {
@@ -156,23 +160,28 @@ public class NewRelicSpanExporter implements SpanExporter {
      * @return a new NewRelicSpanExporter instance
      */
     public NewRelicSpanExporter build() {
+      SpanBatchAdapter spanBatchAdapter = new SpanBatchAdapter(commonAttributes);
       if (telemetryClient != null) {
-        return new NewRelicSpanExporter(new SpanBatchAdapter(commonAttributes), telemetryClient);
+        return new NewRelicSpanExporter(spanBatchAdapter, telemetryClient);
       }
-      SpanBatchSenderBuilder builder = SimpleSpanBatchSender.builder(apiKey);
-      builder.secondaryUserAgent("NewRelic-OpenTelemetry-Exporter", null);
+      SenderConfigurationBuilder builder =
+          SpanBatchSenderFactory.fromHttpImplementation(OkHttpPoster::new)
+              .configureWith(apiKey)
+              .secondaryUserAgent("NewRelic-OpenTelemetry-Exporter");
       if (enableAuditLogging) {
-        builder.enableAuditLogging();
+        builder.auditLoggingEnabled(true);
       }
       if (uriOverride != null) {
         try {
-          builder.uriOverride(uriOverride);
+          builder.endpoint(uriOverride.getScheme(), uriOverride.getHost(), uriOverride.getPort());
         } catch (MalformedURLException e) {
           throw new IllegalArgumentException("URI Override value must be a valid URI.", e);
         }
       }
-      telemetryClient = new TelemetryClient(null, builder.build());
-      return new NewRelicSpanExporter(new SpanBatchAdapter(commonAttributes), telemetryClient);
+      SenderConfiguration configuration = builder.build();
+      telemetryClient =
+          new TelemetryClient(null, SpanBatchSender.create(configuration), null, null);
+      return new NewRelicSpanExporter(spanBatchAdapter, telemetryClient);
     }
   }
 }
