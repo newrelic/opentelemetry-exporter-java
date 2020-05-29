@@ -34,6 +34,12 @@ public class AttributesSupport {
     return attributes;
   }
 
+  static Attributes makeAttributes(Map<String, AttributeValue> originalAttributes) {
+    Attributes result = new Attributes();
+    putInAttributes(result, originalAttributes);
+    return result;
+  }
+
   static void putInAttributes(
       Attributes attributes, Map<String, AttributeValue> originalAttributes) {
     originalAttributes.forEach(

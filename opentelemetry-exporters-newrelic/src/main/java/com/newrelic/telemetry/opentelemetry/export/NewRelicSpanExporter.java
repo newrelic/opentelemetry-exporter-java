@@ -6,11 +6,13 @@
 package com.newrelic.telemetry.opentelemetry.export;
 
 import com.newrelic.telemetry.Attributes;
+import com.newrelic.telemetry.LogBatchSenderFactory;
 import com.newrelic.telemetry.OkHttpPoster;
-import com.newrelic.telemetry.SenderConfiguration;
 import com.newrelic.telemetry.SenderConfiguration.SenderConfigurationBuilder;
 import com.newrelic.telemetry.SpanBatchSenderFactory;
 import com.newrelic.telemetry.TelemetryClient;
+import com.newrelic.telemetry.logs.LogBatch;
+import com.newrelic.telemetry.logs.LogBatchSender;
 import com.newrelic.telemetry.spans.SpanBatch;
 import com.newrelic.telemetry.spans.SpanBatchSender;
 import io.opentelemetry.sdk.trace.data.SpanData;
@@ -22,6 +24,9 @@ import java.util.Collection;
 /**
  * The NewRelicSpanExporter takes a list of Span objects, converts them into a New Relic SpanBatch
  * instance and then sends it to the New Relic trace ingest API via a TelemetryClient.
+ *
+ * <p>Events attached to OpenTelemetry Spans will be sent to the New Relic Log API, with appropriate
+ * span and trace linkages to the owning Spans.
  *
  * @since 0.1.0
  */
@@ -55,7 +60,9 @@ public class NewRelicSpanExporter implements SpanExporter {
   @Override
   public ResultCode export(Collection<SpanData> openTelemetrySpans) {
     SpanBatch spanBatch = adapter.adaptToSpanBatch(openTelemetrySpans);
+    LogBatch logBatch = adapter.adaptEventsAsLogs(openTelemetrySpans);
     telemetryClient.sendBatch(spanBatch);
+    telemetryClient.sendBatch(logBatch);
     return ResultCode.SUCCESS;
   }
 
@@ -91,7 +98,8 @@ public class NewRelicSpanExporter implements SpanExporter {
     private TelemetryClient telemetryClient;
     private String apiKey;
     private boolean enableAuditLogging = false;
-    private URI uriOverride;
+    private URI spanApiUriOverride;
+    private URI logApiUriOverride;
 
     /**
      * A TelemetryClient from the New Relic Telemetry SDK. This allows you to provide your own
@@ -143,14 +151,39 @@ public class NewRelicSpanExporter implements SpanExporter {
     }
 
     /**
-     * Set a URI to override the default ingest endpoint.
+     * Set a URI to override the default ingest endpoint for Spans.
+     *
+     * @param uriOverride The scheme, host, and port that should be used for the Spans API endpoint.
+     *     The path component of this parameter is unused.
+     * @return the Builder
+     * @deprecated Please use the {@link #spanApiUriOverride(URI)} method instead.
+     */
+    public Builder uriOverride(URI uriOverride) {
+      this.spanApiUriOverride = uriOverride;
+      return this;
+    }
+
+    /**
+     * Set a URI to override the default ingest endpoint for Spans.
      *
      * @param uriOverride The scheme, host, and port that should be used for the Spans API endpoint.
      *     The path component of this parameter is unused.
      * @return the Builder
      */
-    public Builder uriOverride(URI uriOverride) {
-      this.uriOverride = uriOverride;
+    public Builder spanApiUriOverride(URI uriOverride) {
+      this.spanApiUriOverride = uriOverride;
+      return this;
+    }
+
+    /**
+     * Set a URI to override the default ingest endpoint for Logs.
+     *
+     * @param logApiUriOverride The scheme, host, and port that should be used for the Log API
+     *     endpoint. The path component of this parameter is unused.
+     * @return the Builder
+     */
+    public Builder logUriOverride(URI logApiUriOverride) {
+      this.logApiUriOverride = logApiUriOverride;
       return this;
     }
 
@@ -161,9 +194,14 @@ public class NewRelicSpanExporter implements SpanExporter {
      */
     public NewRelicSpanExporter build() {
       SpanBatchAdapter spanBatchAdapter = new SpanBatchAdapter(commonAttributes);
-      if (telemetryClient != null) {
-        return new NewRelicSpanExporter(spanBatchAdapter, telemetryClient);
+      if (telemetryClient == null) {
+        telemetryClient =
+            new TelemetryClient(null, makeSpanBatchSender(), null, makeLogBatchSender());
       }
+      return new NewRelicSpanExporter(spanBatchAdapter, telemetryClient);
+    }
+
+    private SpanBatchSender makeSpanBatchSender() {
       SenderConfigurationBuilder builder =
           SpanBatchSenderFactory.fromHttpImplementation(OkHttpPoster::new)
               .configureWith(apiKey)
@@ -171,17 +209,40 @@ public class NewRelicSpanExporter implements SpanExporter {
       if (enableAuditLogging) {
         builder.auditLoggingEnabled(true);
       }
-      if (uriOverride != null) {
+      if (spanApiUriOverride != null) {
         try {
-          builder.endpoint(uriOverride.getScheme(), uriOverride.getHost(), uriOverride.getPort());
+          builder.endpoint(
+              spanApiUriOverride.getScheme(),
+              spanApiUriOverride.getHost(),
+              spanApiUriOverride.getPort());
         } catch (MalformedURLException e) {
           throw new IllegalArgumentException("URI Override value must be a valid URI.", e);
         }
       }
-      SenderConfiguration configuration = builder.build();
-      telemetryClient =
-          new TelemetryClient(null, SpanBatchSender.create(configuration), null, null);
-      return new NewRelicSpanExporter(spanBatchAdapter, telemetryClient);
+
+      return SpanBatchSender.create(builder.build());
+    }
+
+    private LogBatchSender makeLogBatchSender() {
+      SenderConfigurationBuilder builder =
+          LogBatchSenderFactory.fromHttpImplementation(OkHttpPoster::new)
+              .configureWith(apiKey)
+              .secondaryUserAgent("NewRelic-OpenTelemetry-Exporter");
+      if (enableAuditLogging) {
+        builder.auditLoggingEnabled(true);
+      }
+      if (logApiUriOverride != null) {
+        try {
+          builder.endpoint(
+              logApiUriOverride.getScheme(),
+              logApiUriOverride.getHost(),
+              logApiUriOverride.getPort());
+        } catch (MalformedURLException e) {
+          throw new IllegalArgumentException("URI Override value must be a valid URI.", e);
+        }
+      }
+
+      return LogBatchSender.create(builder.build());
     }
   }
 }

@@ -9,9 +9,12 @@ import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.COLLECT
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.ERROR_MESSAGE;
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.INSTRUMENTATION_PROVIDER;
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SPAN_KIND;
+import static com.newrelic.telemetry.opentelemetry.export.AttributesSupport.makeAttributes;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
 import com.newrelic.telemetry.Attributes;
+import com.newrelic.telemetry.logs.Log;
+import com.newrelic.telemetry.logs.LogBatch;
 import com.newrelic.telemetry.spans.Span;
 import com.newrelic.telemetry.spans.Span.SpanBuilder;
 import com.newrelic.telemetry.spans.SpanBatch;
@@ -23,6 +26,7 @@ import io.opentelemetry.trace.Status;
 import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 class SpanBatchAdapter {
 
@@ -36,13 +40,35 @@ class SpanBatchAdapter {
             .put(COLLECTOR_NAME, "newrelic-opentelemetry-exporter");
   }
 
-  SpanBatch adaptToSpanBatch(Collection<SpanData> openTracingSpans) {
+  SpanBatch adaptToSpanBatch(Collection<SpanData> openTelemetrySpans) {
     Collection<Span> newRelicSpans =
-        openTracingSpans
+        openTelemetrySpans
             .stream()
             .map(SpanBatchAdapter::makeNewRelicSpan)
             .collect(Collectors.toSet());
     return new SpanBatch(newRelicSpans, commonAttributes);
+  }
+
+  // todo: this needs unit testing!
+  LogBatch adaptEventsAsLogs(Collection<SpanData> openTelemetrySpans) {
+    Collection<Log> logs =
+        openTelemetrySpans.stream().flatMap(this::extractEvents).collect(Collectors.toSet());
+    return new LogBatch(logs, commonAttributes);
+  }
+
+  private Stream<Log> extractEvents(SpanData span) {
+    return span.getTimedEvents()
+        .stream()
+        .map(
+            timedEvent ->
+                Log.builder()
+                    .message(timedEvent.getName())
+                    .timestamp(NANOSECONDS.toMillis(timedEvent.getEpochNanos()))
+                    .attributes(
+                        makeAttributes(timedEvent.getAttributes())
+                            .put("span.id", span.getSpanId().toLowerBase16())
+                            .put("trace.id", span.getTraceId().toLowerBase16()))
+                    .build());
   }
 
   private static com.newrelic.telemetry.spans.Span makeNewRelicSpan(SpanData span) {

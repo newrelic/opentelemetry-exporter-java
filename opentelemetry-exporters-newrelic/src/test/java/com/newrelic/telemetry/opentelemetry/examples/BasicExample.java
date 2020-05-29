@@ -1,12 +1,17 @@
 package com.newrelic.telemetry.opentelemetry.examples;
 
+import static io.opentelemetry.common.AttributeValue.stringAttributeValue;
+
+import com.google.common.collect.ImmutableMap;
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SERVICE_NAME;
 
 import com.newrelic.telemetry.Attributes;
+import com.newrelic.telemetry.LogBatchSenderFactory;
 import com.newrelic.telemetry.MetricBatchSenderFactory;
 import com.newrelic.telemetry.OkHttpPoster;
 import com.newrelic.telemetry.SpanBatchSenderFactory;
 import com.newrelic.telemetry.TelemetryClient;
+import com.newrelic.telemetry.logs.LogBatchSender;
 import com.newrelic.telemetry.metrics.MetricBatchSender;
 import com.newrelic.telemetry.opentelemetry.export.NewRelicMetricExporter;
 import com.newrelic.telemetry.opentelemetry.export.NewRelicSpanExporter;
@@ -26,6 +31,8 @@ import io.opentelemetry.trace.Span;
 import io.opentelemetry.trace.Span.Kind;
 import io.opentelemetry.trace.Status;
 import io.opentelemetry.trace.Tracer;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.Collections;
 import java.util.Random;
 
@@ -120,7 +127,14 @@ public class BasicExample {
                 .auditLoggingEnabled(true)
                 .build());
 
-    return new TelemetryClient(metricBatchSender, spanBatchSender, null, null);
+    LogBatchSender logBatchSender =
+        LogBatchSender.create(
+            LogBatchSenderFactory.fromHttpImplementation(OkHttpPoster::new)
+                .configureWith(apiKey)
+                .auditLoggingEnabled(true)
+                .build());
+
+    return new TelemetryClient(metricBatchSender, spanBatchSender, null, logBatchSender);
     // note: if you just want the simple defaults, you can use this method:
     // return TelemetryClient.create(OkHttpPoster::new, apiKey);
   }
@@ -134,13 +148,25 @@ public class BasicExample {
       Span span =
           tracer.spanBuilder("testSpan").setSpanKind(Kind.INTERNAL).setNoParent().startSpan();
       try (Scope ignored = tracer.withSpan(span)) {
+        span.addEvent("Starting process");
         boolean markAsError = random.nextBoolean();
-        if (markAsError) {
-          span.setStatus(Status.INTERNAL.withDescription("internalError"));
-        }
         spanCounter.add(1, "spanName", "testSpan", "isItAnError", "" + markAsError);
         // do some work
         Thread.sleep(random.nextInt(1000));
+        if (markAsError) {
+          Exception exception = new Exception("Processing failed");
+          ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+          exception.printStackTrace(new PrintStream(bytes));
+
+          span.addEvent(
+              "Failed processing",
+              ImmutableMap.of(
+                  "error.message", stringAttributeValue(exception.getMessage()),
+                  "error.stack", stringAttributeValue(bytes.toString()),
+                  "error.class", stringAttributeValue(exception.getClass().getName())));
+          span.setStatus(Status.INTERNAL.withDescription("internalError"));
+        }
+        span.addEvent("Ending process");
         span.end();
         boundTimer.record(System.currentTimeMillis() - startTime);
       }
