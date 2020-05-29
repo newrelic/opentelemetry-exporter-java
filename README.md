@@ -14,6 +14,8 @@ in the test source code hierarchy that matches this example code. It should be c
 
 #### For spans:
 
+Important: If you are using [auto-instrumentation](#auto-instrumentation), you should skip the configuration of the SDK, and go right to step 4.
+
 1. Create a `NewRelicSpanExporter`
 ```java
     NewRelicSpanExporter exporter = NewRelicSpanExporter.newBuilder()
