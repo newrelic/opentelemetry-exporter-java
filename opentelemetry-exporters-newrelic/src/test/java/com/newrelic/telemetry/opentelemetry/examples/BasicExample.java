@@ -1,8 +1,9 @@
 package com.newrelic.telemetry.opentelemetry.examples;
 
 import com.newrelic.telemetry.Attributes;
-import com.newrelic.telemetry.SimpleMetricBatchSender;
-import com.newrelic.telemetry.SimpleSpanBatchSender;
+import com.newrelic.telemetry.MetricBatchSenderFactory;
+import com.newrelic.telemetry.OkHttpPoster;
+import com.newrelic.telemetry.SpanBatchSenderFactory;
 import com.newrelic.telemetry.TelemetryClient;
 import com.newrelic.telemetry.metrics.MetricBatchSender;
 import com.newrelic.telemetry.opentelemetry.export.NewRelicMetricExporter;
@@ -35,12 +36,7 @@ public class BasicExample {
 
     String apiKey = System.getenv("INSIGHTS_INSERT_KEY");
 
-    MetricBatchSender metricBatchSender =
-        SimpleMetricBatchSender.builder(apiKey).enableAuditLogging().build();
-    SpanBatchSender spanBatchSender =
-        SimpleSpanBatchSender.builder(apiKey).enableAuditLogging().build();
-
-    TelemetryClient telemetryClient = new TelemetryClient(metricBatchSender, spanBatchSender);
+    TelemetryClient telemetryClient = createTelemetryClient(apiKey);
     Attributes serviceAttributes = new Attributes().put("service.name", "best service ever");
 
     // 1. Create a `NewRelicSpanExporter`
@@ -106,15 +102,34 @@ public class BasicExample {
 
     // clean up so the JVM can exit. Note: these will flush any data to the exporter
     // before they exit.
-    spanProcessor.shutdown();
     intervalMetricReader.shutdown();
+    spanProcessor.shutdown();
+  }
+
+  private static TelemetryClient createTelemetryClient(String apiKey) {
+    MetricBatchSender metricBatchSender =
+        MetricBatchSender.create(
+            MetricBatchSenderFactory.fromHttpImplementation(OkHttpPoster::new)
+                .configureWith(apiKey)
+                .auditLoggingEnabled(true)
+                .build());
+    SpanBatchSender spanBatchSender =
+        SpanBatchSender.create(
+            SpanBatchSenderFactory.fromHttpImplementation(OkHttpPoster::new)
+                .configureWith(apiKey)
+                .auditLoggingEnabled(true)
+                .build());
+
+    return new TelemetryClient(metricBatchSender, spanBatchSender, null, null);
+    // note: if you just want the simple defaults, you can use this method:
+    // return TelemetryClient.create(OkHttpPoster::new, apiKey);
   }
 
   private static void doSomeSimulatedWork(
       Tracer tracer, LongCounter spanCounter, BoundLongMeasure boundTimer)
       throws InterruptedException {
     Random random = new Random();
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < 100; i++) {
       long startTime = System.currentTimeMillis();
       Span span =
           tracer.spanBuilder("testSpan").setSpanKind(Kind.INTERNAL).setNoParent().startSpan();
