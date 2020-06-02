@@ -5,8 +5,6 @@
 
 package com.newrelic.telemetry.opentelemetry.export;
 
-import static java.util.concurrent.TimeUnit.NANOSECONDS;
-
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.spans.Span;
 import com.newrelic.telemetry.spans.Span.SpanBuilder;
@@ -16,9 +14,12 @@ import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.trace.SpanId;
 import io.opentelemetry.trace.Status;
+
 import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
 class SpanBatchAdapter {
 
@@ -85,10 +86,18 @@ class SpanBatchAdapter {
 
   private static Attributes addPossibleErrorAttribute(SpanData span, Attributes attributes) {
     Status status = span.getStatus();
-    if (!status.isOk() && status.getDescription() != null && !status.getDescription().isEmpty()) {
-      attributes.put("error.message", status.getDescription());
+    if (!status.isOk()) {
+      attributes.put("error.message", getErrorMessage(status));
     }
     return attributes;
+  }
+
+  private static String getErrorMessage(Status status) {
+    String description = status.getDescription();
+    if (description == null || description.isEmpty()) {
+      return status.getCanonicalCode().name();
+    }
+    return description;
   }
 
   private static Attributes addResourceAttributes(SpanData span, Attributes attributes) {
