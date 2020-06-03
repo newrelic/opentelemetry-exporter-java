@@ -1,11 +1,5 @@
 package com.newrelic.telemetry.opentelemetry.export;
 
-import static java.util.Collections.singleton;
-import static java.util.Collections.singletonMap;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.metrics.Count;
 import com.newrelic.telemetry.metrics.Gauge;
@@ -17,10 +11,18 @@ import io.opentelemetry.sdk.metrics.data.MetricData.DoublePoint;
 import io.opentelemetry.sdk.metrics.data.MetricData.LongPoint;
 import io.opentelemetry.sdk.metrics.data.MetricData.SummaryPoint;
 import io.opentelemetry.sdk.metrics.data.MetricData.ValueAtPercentile;
+import org.junit.jupiter.api.Test;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
-import org.junit.jupiter.api.Test;
+
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SERVICE_NAME;
+import static java.util.Collections.singleton;
+import static java.util.Collections.singletonMap;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class MetricPointAdapterTest {
 
@@ -30,7 +32,7 @@ class MetricPointAdapterTest {
     when(timeTracker.getPreviousTime()).thenReturn(TimeUnit.MILLISECONDS.toNanos(9_000L));
     MetricPointAdapter metricPointAdapter = new MetricPointAdapter(timeTracker);
 
-    Attributes commonAttributes = new Attributes().put("service.name", "fooService");
+    Attributes commonAttributes = new Attributes().put(SERVICE_NAME, "fooService");
     Descriptor metricDescriptor =
         Descriptor.create(
             "metricName",
@@ -47,7 +49,7 @@ class MetricPointAdapterTest {
             123L);
 
     Attributes expectedAttributes =
-        new Attributes().put("service.name", "fooService").put("specificKey", "specificValue");
+        new Attributes().put(SERVICE_NAME, "fooService").put("specificKey", "specificValue");
     Count expectedMetric = new Count("metricName", 123L, 9_000L, 10_000L, expectedAttributes);
 
     Collection<Metric> result =
@@ -62,7 +64,7 @@ class MetricPointAdapterTest {
     TimeTracker timeTracker = mock(TimeTracker.class);
     MetricPointAdapter metricPointAdapter = new MetricPointAdapter(timeTracker);
 
-    Attributes commonAttributes = new Attributes().put("service.name", "fooService");
+    Attributes commonAttributes = new Attributes().put(SERVICE_NAME, "fooService");
     Descriptor metricDescriptor =
         Descriptor.create(
             "metricName",
@@ -79,7 +81,7 @@ class MetricPointAdapterTest {
             123L);
 
     Attributes expectedAttributes =
-        new Attributes().put("service.name", "fooService").put("specificKey", "specificValue");
+        new Attributes().put(SERVICE_NAME, "fooService").put("specificKey", "specificValue");
     Gauge expectedMetric = new Gauge("metricName", 123L, 10_000L, expectedAttributes);
 
     Collection<Metric> result =
@@ -95,7 +97,7 @@ class MetricPointAdapterTest {
     when(timeTracker.getPreviousTime()).thenReturn(TimeUnit.MILLISECONDS.toNanos(9_000L));
     MetricPointAdapter metricPointAdapter = new MetricPointAdapter(timeTracker);
 
-    Attributes commonAttributes = new Attributes().put("service.name", "fooService");
+    Attributes commonAttributes = new Attributes().put(SERVICE_NAME, "fooService");
     DoublePoint doublePoint =
         DoublePoint.create(
             100,
@@ -111,7 +113,7 @@ class MetricPointAdapterTest {
             singletonMap("commonKey", "commonValue"));
 
     Attributes expectedAttributes =
-        new Attributes().put("service.name", "fooService").put("specificKey", "specificValue");
+        new Attributes().put(SERVICE_NAME, "fooService").put("specificKey", "specificValue");
     Count expectedMetric = new Count("metricName", 123.55d, 9_000L, 10_000L, expectedAttributes);
 
     Collection<Metric> result =
@@ -126,7 +128,7 @@ class MetricPointAdapterTest {
     TimeTracker timeTracker = mock(TimeTracker.class);
     MetricPointAdapter metricPointAdapter = new MetricPointAdapter(timeTracker);
 
-    Attributes commonAttributes = new Attributes().put("service.name", "fooService");
+    Attributes commonAttributes = new Attributes().put(SERVICE_NAME, "fooService");
     Descriptor metricDescriptor =
         Descriptor.create(
             "metricName",
@@ -142,7 +144,7 @@ class MetricPointAdapterTest {
             123.55d);
 
     Attributes expectedAttributes =
-        new Attributes().put("service.name", "fooService").put("specificKey", "specificValue");
+        new Attributes().put(SERVICE_NAME, "fooService").put("specificKey", "specificValue");
     Gauge expectedMetric = new Gauge("metricName", 123.55d, 10_000L, expectedAttributes);
 
     Collection<Metric> result =
@@ -158,7 +160,7 @@ class MetricPointAdapterTest {
     when(timeTracker.getPreviousTime()).thenReturn(TimeUnit.MILLISECONDS.toNanos(9_000L));
     MetricPointAdapter metricPointAdapter = new MetricPointAdapter(timeTracker);
 
-    Attributes commonAttributes = new Attributes().put("service.name", "fooService");
+    Attributes commonAttributes = new Attributes().put(SERVICE_NAME, "fooService");
     ValueAtPercentile min = ValueAtPercentile.create(0.0, 5.5d);
     ValueAtPercentile max = ValueAtPercentile.create(100.0, 100.01d);
     Descriptor metricDescriptor =
@@ -179,7 +181,7 @@ class MetricPointAdapterTest {
             Arrays.asList(min, max));
 
     Attributes expectedAttributes =
-        new Attributes().put("service.name", "fooService").put("specificKey", "specificValue");
+        new Attributes().put(SERVICE_NAME, "fooService").put("specificKey", "specificValue");
     Summary expectedMetric =
         new Summary("metricName", 200, 123.55d, 5.5d, 100.01d, 9000L, 10000L, expectedAttributes);
 

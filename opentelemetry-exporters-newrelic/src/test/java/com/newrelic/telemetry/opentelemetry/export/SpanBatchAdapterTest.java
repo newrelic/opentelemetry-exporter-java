@@ -5,10 +5,6 @@
 
 package com.newrelic.telemetry.opentelemetry.export;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import com.google.common.collect.ImmutableMap;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.spans.SpanBatch;
@@ -20,8 +16,19 @@ import io.opentelemetry.trace.Span.Kind;
 import io.opentelemetry.trace.SpanId;
 import io.opentelemetry.trace.Status;
 import io.opentelemetry.trace.TraceId;
-import java.util.Collections;
 import org.junit.jupiter.api.Test;
+
+import java.util.Collections;
+
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.COLLECTOR_NAME;
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.ERROR_MESSAGE;
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.INSTRUMENTATION_NAME;
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.INSTRUMENTATION_PROVIDER;
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.INSTRUMENTATION_VERSION;
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SPAN_KIND;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class SpanBatchAdapterTest {
 
@@ -42,9 +49,9 @@ class SpanBatchAdapterTest {
         new Attributes()
             .put("host", "bar")
             .put("datacenter", "boo")
-            .put("instrumentation.name", "jetty-server")
-            .put("instrumentation.version", "3.14.159")
-            .put("span.kind", "SERVER");
+            .put(INSTRUMENTATION_NAME, "jetty-server")
+            .put(INSTRUMENTATION_VERSION, "3.14.159")
+            .put(SPAN_KIND, "SERVER");
     com.newrelic.telemetry.spans.Span span1 =
         com.newrelic.telemetry.spans.Span.builder(hexSpanId)
             .traceId(hexTraceId)
@@ -58,8 +65,8 @@ class SpanBatchAdapterTest {
         new SpanBatch(
             Collections.singleton(span1),
             new Attributes()
-                .put("instrumentation.provider", "opentelemetry")
-                .put("collector.name", "newrelic-opentelemetry-exporter"));
+                .put(INSTRUMENTATION_PROVIDER, "opentelemetry")
+                .put(COLLECTOR_NAME, "newrelic-opentelemetry-exporter"));
 
     SpanBatchAdapter testClass = new SpanBatchAdapter(new Attributes());
 
@@ -103,15 +110,15 @@ class SpanBatchAdapterTest {
                     .put("myIntKey", 123L)
                     .put("myStringKey", "attrValue")
                     .put("myDoubleKey", 123.45d)
-                    .put("span.kind", "INTERNAL"))
+                    .put(SPAN_KIND, "INTERNAL"))
             .build();
 
     SpanBatch expected =
         new SpanBatch(
             Collections.singleton(resultSpan),
             new Attributes()
-                .put("instrumentation.provider", "opentelemetry")
-                .put("collector.name", "newrelic-opentelemetry-exporter"));
+                .put(INSTRUMENTATION_PROVIDER, "opentelemetry")
+                .put(COLLECTOR_NAME, "newrelic-opentelemetry-exporter"));
 
     SpanBatchAdapter testClass = new SpanBatchAdapter(new Attributes());
 
@@ -169,8 +176,8 @@ class SpanBatchAdapterTest {
             Collections.singleton(resultSpan),
             new Attributes()
                 .put("host", "localhost")
-                .put("instrumentation.provider", "opentelemetry")
-                .put("collector.name", "newrelic-opentelemetry-exporter"));
+                    .put(INSTRUMENTATION_PROVIDER, "opentelemetry")
+                    .put(COLLECTOR_NAME, "newrelic-opentelemetry-exporter"));
 
     SpanBatchAdapter testClass = new SpanBatchAdapter(new Attributes().put("host", "localhost"));
 
@@ -190,8 +197,8 @@ class SpanBatchAdapterTest {
             Collections.singleton(resultSpan),
             new Attributes()
                 .put("host", "localhost")
-                .put("instrumentation.provider", "opentelemetry")
-                .put("collector.name", "newrelic-opentelemetry-exporter"));
+                .put(INSTRUMENTATION_PROVIDER, "opentelemetry")
+                .put(COLLECTOR_NAME, "newrelic-opentelemetry-exporter"));
 
     SpanBatchAdapter testClass = new SpanBatchAdapter(new Attributes().put("host", "localhost"));
 

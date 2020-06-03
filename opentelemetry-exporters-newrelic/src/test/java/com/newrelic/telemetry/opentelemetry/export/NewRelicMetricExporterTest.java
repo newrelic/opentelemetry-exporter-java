@@ -1,13 +1,5 @@
 package com.newrelic.telemetry.opentelemetry.export;
 
-import static io.opentelemetry.common.AttributeValue.stringAttributeValue;
-import static java.util.Collections.singleton;
-import static java.util.Collections.singletonMap;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.TelemetryClient;
 import com.newrelic.telemetry.metrics.Count;
@@ -22,10 +14,24 @@ import io.opentelemetry.sdk.metrics.data.MetricData.LongPoint;
 import io.opentelemetry.sdk.metrics.data.MetricData.Point;
 import io.opentelemetry.sdk.metrics.export.MetricExporter.ResultCode;
 import io.opentelemetry.sdk.resources.Resource;
-import java.util.Arrays;
-import java.util.Collection;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
+
+import java.util.Arrays;
+import java.util.Collection;
+
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.COLLECTOR_NAME;
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.INSTRUMENTATION_NAME;
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.INSTRUMENTATION_PROVIDER;
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.INSTRUMENTATION_VERSION;
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SERVICE_NAME;
+import static io.opentelemetry.common.AttributeValue.stringAttributeValue;
+import static java.util.Collections.singleton;
+import static java.util.Collections.singletonMap;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class NewRelicMetricExporterTest {
 
@@ -47,7 +53,7 @@ class NewRelicMetricExporterTest {
             Type.SUMMARY,
             singletonMap("constantKey", "constantValue"));
     Resource resource =
-        Resource.create(singletonMap("service.name", stringAttributeValue("myService")));
+        Resource.create(singletonMap(SERVICE_NAME, stringAttributeValue("myService")));
     InstrumentationLibraryInfo libraryInfo =
         InstrumentationLibraryInfo.create("instrumentationName", "1.0");
     LongPoint point1 = LongPoint.create(1000, 2000, singletonMap("longLabel", "longValue"), 100L);
@@ -57,11 +63,11 @@ class NewRelicMetricExporterTest {
 
     Attributes updatedAttributes =
         new Attributes()
-            .put("service.name", "myService")
+            .put(SERVICE_NAME, "myService")
             .put("unit", "units")
             .put("description", "metricDescription")
-            .put("instrumentation.version", "1.0")
-            .put("instrumentation.name", "instrumentationName")
+            .put(INSTRUMENTATION_VERSION, "1.0")
+            .put(INSTRUMENTATION_NAME, "instrumentationName")
             .put("constantKey", "constantValue");
 
     Count metric1 = new Count("count", 3d, 100, 200, new Attributes());
@@ -77,8 +83,8 @@ class NewRelicMetricExporterTest {
     Attributes amendedGlobalAttributes =
         globalAttributes
             .copy()
-            .put("instrumentation.provider", "opentelemetry")
-            .put("collector.name", "newrelic-opentelemetry-exporter");
+            .put(INSTRUMENTATION_PROVIDER, "opentelemetry")
+            .put(COLLECTOR_NAME, "newrelic-opentelemetry-exporter");
 
     ResultCode result =
         newRelicMetricExporter.export(
