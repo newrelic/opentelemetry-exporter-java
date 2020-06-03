@@ -163,15 +163,7 @@ class SpanBatchAdapterTest {
 
   @Test
   void testErrors() {
-    com.newrelic.telemetry.spans.Span resultSpan =
-        com.newrelic.telemetry.spans.Span.builder("000000000012d685")
-            .traceId(hexTraceId)
-            .timestamp(1000456)
-            .name("spanName")
-            .durationMs(0.0001)
-            .attributes(
-                new Attributes().put("error.message", "it's broken").put("span.kind", "PRODUCER"))
-            .build();
+    com.newrelic.telemetry.spans.Span resultSpan = buildResultSpan("it's broken");
     SpanBatch expected =
         new SpanBatch(
             Collections.singleton(resultSpan),
@@ -182,20 +174,58 @@ class SpanBatchAdapterTest {
 
     SpanBatchAdapter testClass = new SpanBatchAdapter(new Attributes().put("host", "localhost"));
 
-    SpanData inputSpan =
+    Status status = Status.CANCELLED.withDescription("it's broken");
+    SpanData inputSpan = buildSpan(status);
+
+    SpanBatch result = testClass.adaptToSpanBatch(Collections.singletonList(inputSpan));
+
+    assertEquals(expected, result);
+  }
+
+  @Test
+  void testErrorWithNoMessage() {
+    com.newrelic.telemetry.spans.Span resultSpan = buildResultSpan("ABORTED");
+    SpanBatch expected =
+        new SpanBatch(
+            Collections.singleton(resultSpan),
+            new Attributes()
+                .put("host", "localhost")
+                .put("instrumentation.provider", "opentelemetry")
+                .put("collector.name", "newrelic-opentelemetry-exporter"));
+
+    SpanBatchAdapter testClass = new SpanBatchAdapter(new Attributes().put("host", "localhost"));
+
+    SpanData inputSpan = buildSpan(Status.ABORTED);
+
+    SpanBatch result = testClass.adaptToSpanBatch(Collections.singletonList(inputSpan));
+
+    assertEquals(expected, result);
+  }
+
+  private com.newrelic.telemetry.spans.Span buildResultSpan(String expectedMessage) {
+    return com.newrelic.telemetry.spans.Span.builder("000000000012d685")
+        .traceId(hexTraceId)
+        .timestamp(1000456)
+        .name("spanName")
+        .durationMs(0.0001)
+        .attributes(
+            new Attributes().put("error.message", expectedMessage).put("span.kind", "PRODUCER"))
+        .build();
+  }
+
+  private SpanData buildSpan(Status status) {
+    SpanData.Builder builder =
         SpanData.newBuilder()
             .setTraceId(traceId)
             .setSpanId(spanId)
             .setStartEpochNanos(1_000_456_001_000L)
             .setEndEpochNanos(1_000_456_001_100L)
-            .setStatus(Status.CANCELLED.withDescription("it's broken"))
             .setName("spanName")
             .setKind(Kind.PRODUCER)
-            .setHasEnded(true)
-            .build();
-
-    SpanBatch result = testClass.adaptToSpanBatch(Collections.singletonList(inputSpan));
-
-    assertEquals(expected, result);
+            .setHasEnded(true);
+    if (status != null) {
+      builder = builder.setStatus(status);
+    }
+    return builder.build();
   }
 }

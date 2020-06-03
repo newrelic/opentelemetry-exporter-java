@@ -85,10 +85,19 @@ class SpanBatchAdapter {
 
   private static Attributes addPossibleErrorAttribute(SpanData span, Attributes attributes) {
     Status status = span.getStatus();
-    if (!status.isOk() && status.getDescription() != null && !status.getDescription().isEmpty()) {
-      attributes.put("error.message", status.getDescription());
+    if (!status.isOk()) {
+      attributes.put("error.message", getErrorMessage(status));
     }
     return attributes;
+  }
+
+  private static String getErrorMessage(Status status) {
+    String description = status.getDescription();
+    return isNullOrEmpty(description) ? status.getCanonicalCode().name() : description;
+  }
+
+  private static boolean isNullOrEmpty(String string) {
+    return string == null || string.isEmpty();
   }
 
   private static Attributes addResourceAttributes(SpanData span, Attributes attributes) {
