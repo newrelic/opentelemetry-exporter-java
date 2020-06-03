@@ -93,10 +93,11 @@ class SpanBatchAdapter {
 
   private static String getErrorMessage(Status status) {
     String description = status.getDescription();
-    if (description == null || description.isEmpty()) {
-      return status.getCanonicalCode().name();
-    }
-    return description;
+    return isNullOrEmpty(description) ? status.getCanonicalCode().name() : description;
+  }
+
+  private static boolean isNullOrEmpty(String string) {
+    return string == null || string.isEmpty();
   }
 
   private static Attributes addResourceAttributes(SpanData span, Attributes attributes) {
