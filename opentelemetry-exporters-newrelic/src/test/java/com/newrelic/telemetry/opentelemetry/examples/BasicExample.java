@@ -1,5 +1,7 @@
 package com.newrelic.telemetry.opentelemetry.examples;
 
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SERVICE_NAME;
+
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.MetricBatchSenderFactory;
 import com.newrelic.telemetry.OkHttpPoster;
@@ -37,7 +39,7 @@ public class BasicExample {
     String apiKey = System.getenv("INSIGHTS_INSERT_KEY");
 
     TelemetryClient telemetryClient = createTelemetryClient(apiKey);
-    Attributes serviceAttributes = new Attributes().put("service.name", "best service ever");
+    Attributes serviceAttributes = new Attributes().put(SERVICE_NAME, "best service ever");
 
     // 1. Create a `NewRelicSpanExporter`
     SpanExporter exporter =

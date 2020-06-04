@@ -1,5 +1,8 @@
 package com.newrelic.telemetry.opentelemetry.export;
 
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.INSTRUMENTATION_NAME;
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.INSTRUMENTATION_VERSION;
+
 import com.newrelic.telemetry.Attributes;
 import io.opentelemetry.common.AttributeValue;
 import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
@@ -13,11 +16,11 @@ public class AttributesSupport {
     if (instrumentationLibraryInfo != null) {
       if (instrumentationLibraryInfo.getName() != null
           && !instrumentationLibraryInfo.getName().isEmpty()) {
-        attributes.put("instrumentation.name", instrumentationLibraryInfo.getName());
+        attributes.put(INSTRUMENTATION_NAME, instrumentationLibraryInfo.getName());
       }
       if (instrumentationLibraryInfo.getVersion() != null
           && !instrumentationLibraryInfo.getVersion().isEmpty()) {
-        attributes.put("instrumentation.version", instrumentationLibraryInfo.getVersion());
+        attributes.put(INSTRUMENTATION_VERSION, instrumentationLibraryInfo.getVersion());
       }
     }
     return attributes;

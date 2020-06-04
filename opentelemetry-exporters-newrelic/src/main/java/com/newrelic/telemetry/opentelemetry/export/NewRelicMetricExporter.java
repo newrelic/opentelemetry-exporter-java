@@ -1,5 +1,10 @@
 package com.newrelic.telemetry.opentelemetry.export;
 
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.COLLECTOR_NAME;
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.DESCRIPTOR_DESCRIPTION;
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.DESCRIPTOR_UNIT;
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.INSTRUMENTATION_PROVIDER;
+
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.SimpleMetricBatchSender;
 import com.newrelic.telemetry.TelemetryClient;
@@ -56,8 +61,8 @@ public class NewRelicMetricExporter implements MetricExporter {
     this.commonAttributes =
         serviceAttributes
             .copy()
-            .put("instrumentation.provider", "opentelemetry")
-            .put("collector.name", "newrelic-opentelemetry-exporter");
+            .put(INSTRUMENTATION_PROVIDER, "opentelemetry")
+            .put(COLLECTOR_NAME, "newrelic-opentelemetry-exporter");
     this.metricPointAdapter = metricPointAdapter;
   }
 
@@ -108,8 +113,8 @@ public class NewRelicMetricExporter implements MetricExporter {
     AttributesSupport.populateLibraryInfo(attributes, metric.getInstrumentationLibraryInfo());
 
     Descriptor descriptor = metric.getDescriptor();
-    attributes.put("description", descriptor.getDescription());
-    attributes.put("unit", descriptor.getUnit());
+    attributes.put(DESCRIPTOR_DESCRIPTION, descriptor.getDescription());
+    attributes.put(DESCRIPTOR_UNIT, descriptor.getUnit());
     descriptor.getConstantLabels().forEach(attributes::put);
     return attributes;
   }

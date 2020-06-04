@@ -1,5 +1,7 @@
 package com.newrelic.telemetry.opentelemetry.export.auto;
 
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SERVICE_NAME;
+
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.opentelemetry.export.NewRelicSpanExporter;
 import io.opentelemetry.internal.StringUtils;
@@ -34,7 +36,7 @@ public class NewRelicSpanExporterFactory implements SpanExporterFactory {
 
     NewRelicSpanExporter.Builder newRelicSpanExporterBuilder =
         NewRelicSpanExporter.newBuilder()
-            .commonAttributes(new Attributes().put("service.name", serviceName))
+            .commonAttributes(new Attributes().put(SERVICE_NAME, serviceName))
             .apiKey(apiKey);
 
     if (enableAuditLogging) {

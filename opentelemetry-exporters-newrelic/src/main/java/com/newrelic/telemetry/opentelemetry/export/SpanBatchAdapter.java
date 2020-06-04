@@ -5,6 +5,10 @@
 
 package com.newrelic.telemetry.opentelemetry.export;
 
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.COLLECTOR_NAME;
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.ERROR_MESSAGE;
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.INSTRUMENTATION_PROVIDER;
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SPAN_KIND;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
 import com.newrelic.telemetry.Attributes;
@@ -28,8 +32,8 @@ class SpanBatchAdapter {
     this.commonAttributes =
         commonAttributes
             .copy()
-            .put("instrumentation.provider", "opentelemetry")
-            .put("collector.name", "newrelic-opentelemetry-exporter");
+            .put(INSTRUMENTATION_PROVIDER, "opentelemetry")
+            .put(COLLECTOR_NAME, "newrelic-opentelemetry-exporter");
   }
 
   SpanBatch adaptToSpanBatch(Collection<SpanData> openTracingSpans) {
@@ -79,14 +83,14 @@ class SpanBatchAdapter {
   private static Attributes createIntrinsicAttributes(SpanData span, Attributes attributes) {
     Map<String, AttributeValue> originalAttributes = span.getAttributes();
     AttributesSupport.putInAttributes(attributes, originalAttributes);
-    attributes.put("span.kind", span.getKind().name());
+    attributes.put(SPAN_KIND, span.getKind().name());
     return attributes;
   }
 
   private static Attributes addPossibleErrorAttribute(SpanData span, Attributes attributes) {
     Status status = span.getStatus();
     if (!status.isOk()) {
-      attributes.put("error.message", getErrorMessage(status));
+      attributes.put(ERROR_MESSAGE, getErrorMessage(status));
     }
     return attributes;
   }

@@ -20,7 +20,7 @@ Important: If you are using [auto-instrumentation](#auto-instrumentation), you s
 ```java
     NewRelicSpanExporter exporter = NewRelicSpanExporter.newBuilder()
         .apiKey(System.getenv("INSIGHTS_INSERT_KEY"))
-        .commonAttributes(new Attributes().put("service.name", "best service ever")).build();
+        .commonAttributes(new Attributes().put(SERVICE_NAME, "best service ever")).build();
 ```
 
 2. Build the OpenTelemetry `BatchSpansProcessor` with the `NewRelicSpanExporter` 
@@ -56,7 +56,7 @@ Important: If you are using [auto-instrumentation](#auto-instrumentation), you s
     MetricExporter metricExporter =
         NewRelicMetricExporter.newBuilder()
           .apiKey(System.getenv("INSIGHTS_INSERT_KEY"))
-          .commonAttributes(new Attributes().put("service.name", "best service ever"))
+          .commonAttributes(new Attributes().put(SERVICE_NAME, "best service ever"))
           .build();
 ```
 
