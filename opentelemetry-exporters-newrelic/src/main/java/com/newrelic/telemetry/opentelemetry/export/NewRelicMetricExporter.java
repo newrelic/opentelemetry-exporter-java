@@ -1,5 +1,10 @@
 package com.newrelic.telemetry.opentelemetry.export;
 
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.COLLECTOR_NAME;
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.DESCRIPTOR_DESCRIPTION;
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.DESCRIPTOR_UNIT;
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.INSTRUMENTATION_PROVIDER;
+
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.SimpleMetricBatchSender;
 import com.newrelic.telemetry.TelemetryClient;
@@ -12,15 +17,9 @@ import io.opentelemetry.sdk.metrics.data.MetricData.Descriptor;
 import io.opentelemetry.sdk.metrics.data.MetricData.Descriptor.Type;
 import io.opentelemetry.sdk.metrics.data.MetricData.Point;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
-
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.Collection;
-
-import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.COLLECTOR_NAME;
-import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.DESCRIPTOR_DESCRIPTION;
-import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.DESCRIPTOR_UNIT;
-import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.INSTRUMENTATION_PROVIDER;
 
 /**
  * The NewRelicMetricExporter takes a collection of MetricData objects, converts them into a New

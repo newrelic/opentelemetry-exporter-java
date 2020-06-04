@@ -5,6 +5,12 @@
 
 package com.newrelic.telemetry.opentelemetry.export;
 
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.COLLECTOR_NAME;
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.ERROR_MESSAGE;
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.INSTRUMENTATION_PROVIDER;
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SPAN_KIND;
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
+
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.spans.Span;
 import com.newrelic.telemetry.spans.Span.SpanBuilder;
@@ -14,16 +20,9 @@ import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.trace.SpanId;
 import io.opentelemetry.trace.Status;
-
 import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.COLLECTOR_NAME;
-import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.ERROR_MESSAGE;
-import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.INSTRUMENTATION_PROVIDER;
-import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SPAN_KIND;
-import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
 class SpanBatchAdapter {
 

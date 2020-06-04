@@ -1,15 +1,14 @@
 package com.newrelic.telemetry.opentelemetry.export.auto;
 
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SERVICE_NAME;
+
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.opentelemetry.export.NewRelicSpanExporter;
 import io.opentelemetry.internal.StringUtils;
 import io.opentelemetry.sdk.contrib.auto.config.Config;
 import io.opentelemetry.sdk.contrib.auto.config.SpanExporterFactory;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
-
 import java.net.URI;
-
-import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SERVICE_NAME;
 
 public class NewRelicSpanExporterFactory implements SpanExporterFactory {
 

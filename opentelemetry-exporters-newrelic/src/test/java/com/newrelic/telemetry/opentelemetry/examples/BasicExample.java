@@ -1,5 +1,7 @@
 package com.newrelic.telemetry.opentelemetry.examples;
 
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SERVICE_NAME;
+
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.MetricBatchSenderFactory;
 import com.newrelic.telemetry.OkHttpPoster;
@@ -24,11 +26,8 @@ import io.opentelemetry.trace.Span;
 import io.opentelemetry.trace.Span.Kind;
 import io.opentelemetry.trace.Status;
 import io.opentelemetry.trace.Tracer;
-
 import java.util.Collections;
 import java.util.Random;
-
-import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SERVICE_NAME;
 
 public class BasicExample {
 
