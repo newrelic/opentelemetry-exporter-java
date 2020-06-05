@@ -55,7 +55,7 @@ public class BasicExample {
             .commonAttributes(serviceAttributes)
             .build();
 
-    // 3. Build the OpenTelemetry `BatchSpansProcessor` with the `NewRelicSpanExporter`
+    // 3. Build the OpenTelemetry `BatchSpanProcessor` with the `NewRelicSpanExporter`
     BatchSpanProcessor spanProcessor = BatchSpanProcessor.newBuilder(exporter).build();
 
     // 4. Add the span processor to the TracerProvider from the SDK

@@ -25,7 +25,7 @@ Important: If you are using [auto-instrumentation](#auto-instrumentation), you s
 
 2. Build the OpenTelemetry `BatchSpansProcessor` with the `NewRelicSpanExporter` 
 ```java
-    BatchSpansProcessor spanProcessor = BatchSpansProcessor.create(exporter);
+    BatchSpanProcessor spanProcessor = BatchSpanProcessor.newBuilder(exporter).build();
 ```
 
 3. Add the span processor to the default TracerSdkProvider
