@@ -13,6 +13,7 @@ import com.newrelic.telemetry.TelemetryClient;
 import com.newrelic.telemetry.spans.SpanBatch;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.data.SpanData;
+import io.opentelemetry.sdk.trace.data.test.TestSpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter.ResultCode;
 import io.opentelemetry.trace.Span.Kind;
 import io.opentelemetry.trace.SpanId;
@@ -50,7 +51,7 @@ class NewRelicSpanExporterTest {
   }
 
   private SpanData createMinimalSpanData() {
-    return SpanData.newBuilder()
+    return TestSpanData.newBuilder()
         .setTraceId(traceId)
         .setSpanId(spanId)
         .setResource(Resource.create(Collections.emptyMap()))

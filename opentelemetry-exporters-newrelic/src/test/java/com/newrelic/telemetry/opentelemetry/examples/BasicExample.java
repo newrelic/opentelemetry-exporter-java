@@ -14,13 +14,13 @@ import com.newrelic.telemetry.spans.SpanBatchSender;
 import io.opentelemetry.OpenTelemetry;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.metrics.LongCounter;
-import io.opentelemetry.metrics.LongMeasure;
-import io.opentelemetry.metrics.LongMeasure.BoundLongMeasure;
+import io.opentelemetry.metrics.LongValueRecorder;
+import io.opentelemetry.metrics.LongValueRecorder.BoundLongValueRecorder;
 import io.opentelemetry.metrics.Meter;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.metrics.export.IntervalMetricReader;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
-import io.opentelemetry.sdk.trace.export.BatchSpansProcessor;
+import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import io.opentelemetry.trace.Span;
 import io.opentelemetry.trace.Span.Kind;
@@ -55,8 +55,8 @@ public class BasicExample {
             .commonAttributes(serviceAttributes)
             .build();
 
-    // 3. Build the OpenTelemetry `BatchSpansProcessor` with the `NewRelicSpanExporter`
-    BatchSpansProcessor spanProcessor = BatchSpansProcessor.create(exporter);
+    // 3. Build the OpenTelemetry `BatchSpanProcessor` with the `NewRelicSpanExporter`
+    BatchSpanProcessor spanProcessor = BatchSpanProcessor.newBuilder(exporter).build();
 
     // 4. Add the span processor to the TracerProvider from the SDK
     OpenTelemetrySdk.getTracerProvider().addSpanProcessor(spanProcessor);
@@ -84,20 +84,18 @@ public class BasicExample {
             .longCounterBuilder("spanCounter")
             .setUnit("one")
             .setDescription("Counting all the spans")
-            .setMonotonic(true)
             .build();
 
     // 8. Here's an example of a measure.
-    LongMeasure spanTimer =
+    LongValueRecorder spanTimer =
         meter
-            .longMeasureBuilder("spanTimer")
+            .longValueRecorderBuilder("spanTimer")
             .setUnit("ms")
             .setDescription("How long the spans take")
-            .setAbsolute(true)
             .build();
 
     // 9. Optionally, you can pre-bind a set of labels, rather than passing them in every time.
-    BoundLongMeasure boundTimer = spanTimer.bind("spanName", "testSpan");
+    BoundLongValueRecorder boundTimer = spanTimer.bind("spanName", "testSpan");
 
     // 10. use these to instrument some work
     doSomeSimulatedWork(tracer, spanCounter, boundTimer);
@@ -128,7 +126,7 @@ public class BasicExample {
   }
 
   private static void doSomeSimulatedWork(
-      Tracer tracer, LongCounter spanCounter, BoundLongMeasure boundTimer)
+      Tracer tracer, LongCounter spanCounter, BoundLongValueRecorder boundTimer)
       throws InterruptedException {
     Random random = new Random();
     for (int i = 0; i < 100; i++) {

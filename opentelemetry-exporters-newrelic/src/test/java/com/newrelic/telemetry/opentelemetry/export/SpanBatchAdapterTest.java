@@ -21,6 +21,7 @@ import io.opentelemetry.common.AttributeValue;
 import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.data.SpanData;
+import io.opentelemetry.sdk.trace.data.test.TestSpanData;
 import io.opentelemetry.trace.Span.Kind;
 import io.opentelemetry.trace.SpanId;
 import io.opentelemetry.trace.Status;
@@ -76,7 +77,7 @@ class SpanBatchAdapterTest {
                 "datacenter",
                 AttributeValue.stringAttributeValue("boo")));
     SpanData inputSpan =
-        SpanData.newBuilder()
+        TestSpanData.newBuilder()
             .setTraceId(traceId)
             .setSpanId(spanId)
             .setStartEpochNanos(1_000_456_001_000L)
@@ -121,7 +122,7 @@ class SpanBatchAdapterTest {
     SpanBatchAdapter testClass = new SpanBatchAdapter(new Attributes());
 
     SpanData inputSpan =
-        SpanData.newBuilder()
+        TestSpanData.newBuilder()
             .setTraceId(traceId)
             .setSpanId(spanId)
             .setStartEpochNanos(1_000_456_001_000L)
@@ -151,7 +152,7 @@ class SpanBatchAdapterTest {
     SpanBatchAdapter testClass = new SpanBatchAdapter(new Attributes());
 
     SpanData inputSpan =
-        SpanData.newBuilder()
+        TestSpanData.newBuilder()
             .setTraceId(traceId)
             .setSpanId(spanId)
             .setStartEpochNanos(456_001_000L)
@@ -219,8 +220,8 @@ class SpanBatchAdapterTest {
   }
 
   private SpanData buildSpan(Status status) {
-    SpanData.Builder builder =
-        SpanData.newBuilder()
+    TestSpanData.Builder builder =
+        TestSpanData.newBuilder()
             .setTraceId(traceId)
             .setSpanId(spanId)
             .setStartEpochNanos(1_000_456_001_000L)
