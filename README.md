@@ -125,6 +125,16 @@ java -javaagent:path/to/opentelemetry-auto-<version>.jar \
      -jar myapp.jar
 ```
 
+If you wish to turn on debug logging for the exporter running in the auto-instrumentation agent, use the following system property:
+```
+-Dio.opentelemetry.auto.slf4j.simpleLogger.log.com.newrelic.telemetry=debug
+```
+
+And, if you wish to enable audit logging for the exporter running in the auto-instrumentaiotn agent, use this system property:
+```
+-Dota.exporter.newrelic.enable.audit.logging=true
+```
+
 ### Javadoc for this project can be found here: [![Javadocs][javadoc-image]][javadoc-url]
 
 ### Find and use your data
@@ -148,10 +158,10 @@ repositories {
 ```
 
 ```
-implementation("com.newrelic.telemetry:opentelemetry-exporters-newrelic:0.4.0")
-implementation("io.opentelemetry:opentelemetry-sdk:0.4.1")
-implementation("com.newrelic.telemetry:telemetry-core:0.4.0")
-implementation("com.newrelic.telemetry:telemetry-http-okhttp:0.4.0")
+implementation("com.newrelic.telemetry:opentelemetry-exporters-newrelic:0.5.0")
+implementation("io.opentelemetry:opentelemetry-sdk:0.5.0")
+implementation("com.newrelic.telemetry:telemetry-core:0.6.0")
+implementation("com.newrelic.telemetry:telemetry-http-okhttp:0.6.0")
 ```
 
 ### Building

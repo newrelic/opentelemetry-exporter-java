@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Coming soon:
 - Support for auto-instrumentation configuration for the MetricsExporter.
 
+## [0.5.0] - 2020-06-08
+- Support for OpenTelemetry-Java version 0.5.0
+- Update to using the New Relic Telemetry SDK version 0.6.0
+- Fixed a bug where span statuses without descriptions were being ignored.
+
 ## [0.4.0] - 2020-05-18
 - Support for OpenTelemetry-Java version 0.4.0
 - Support for Auto-Instrumentation configuration for the SpanExporter (thanks, @cmouli84!)
