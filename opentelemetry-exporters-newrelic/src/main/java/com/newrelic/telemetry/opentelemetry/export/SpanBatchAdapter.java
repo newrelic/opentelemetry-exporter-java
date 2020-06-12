@@ -57,7 +57,7 @@ class SpanBatchAdapter {
   }
 
   private Stream<Log> extractEvents(SpanData span) {
-    return span.getTimedEvents()
+    return span.getEvents()
         .stream()
         .map(
             timedEvent ->
