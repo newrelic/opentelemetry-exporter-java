@@ -17,18 +17,43 @@ class NewRelicSpanExporterFactoryTest {
 
   @Test
   void testFromConfig_HappyPath() {
-    String apiKeyKey = "newrelic.api.key";
+    String apiKeyKey = NewRelicConfiguration.NEW_RELIC_API_KEY;
     String apiKeyValue = "test-key";
-    String enableAuditLoggingKey = "newrelic.enable.audit.logging";
+    String enableAuditLoggingKey = NewRelicConfiguration.NEW_RELIC_ENABLE_AUDIT_LOGGING;
     String defaultServiceName = "(unknown service)";
-    String serviceNameKey = "newrelic.service.name";
+    String serviceNameKey = NewRelicConfiguration.NEW_RELIC_SERVICE_NAME;
     String serviceNameValue = "best service ever";
-    String uriOverrideKey = "newrelic.uri.override";
+    String uriOverrideKey = NewRelicConfiguration.NEW_RELIC_SPAN_URI_OVERRIDE;
     String uriOverrideValue = "http://test.domain.com";
 
     when(config.getString(apiKeyKey, "")).thenReturn(apiKeyValue);
     when(config.getBoolean(enableAuditLoggingKey, false)).thenReturn(true);
     when(config.getString(serviceNameKey, defaultServiceName)).thenReturn(serviceNameValue);
+    when(config.getString(uriOverrideKey, "")).thenReturn(uriOverrideValue);
+    when(config.getString(NewRelicSpanExporterFactory.NEW_RELIC_URI_OVERRIDE, "")).thenReturn("");
+
+    NewRelicSpanExporterFactory newRelicSpanExporterFactory = new NewRelicSpanExporterFactory();
+    SpanExporter spanExporter = newRelicSpanExporterFactory.fromConfig(config);
+
+    assertNotNull(spanExporter);
+  }
+
+  @Test
+  void testFromConfig_OldUri() {
+    String apiKeyKey = NewRelicConfiguration.NEW_RELIC_API_KEY;
+    String apiKeyValue = "test-key";
+    String enableAuditLoggingKey = NewRelicConfiguration.NEW_RELIC_ENABLE_AUDIT_LOGGING;
+    String defaultServiceName = "(unknown service)";
+    String serviceNameKey = NewRelicConfiguration.NEW_RELIC_SERVICE_NAME;
+    String serviceNameValue = "best service ever";
+    String uriOverrideKey = NewRelicSpanExporterFactory.NEW_RELIC_URI_OVERRIDE;
+    String uriOverrideValue = "http://test.domain.com";
+
+    when(config.getString(apiKeyKey, "")).thenReturn(apiKeyValue);
+    when(config.getBoolean(enableAuditLoggingKey, false)).thenReturn(true);
+    when(config.getString(serviceNameKey, defaultServiceName)).thenReturn(serviceNameValue);
+    when(config.getString(NewRelicConfiguration.NEW_RELIC_SPAN_URI_OVERRIDE, uriOverrideValue))
+        .thenReturn(uriOverrideValue);
     when(config.getString(uriOverrideKey, "")).thenReturn(uriOverrideValue);
 
     NewRelicSpanExporterFactory newRelicSpanExporterFactory = new NewRelicSpanExporterFactory();
