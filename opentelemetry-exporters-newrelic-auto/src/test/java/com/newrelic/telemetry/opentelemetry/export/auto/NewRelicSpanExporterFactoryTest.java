@@ -23,7 +23,7 @@ class NewRelicSpanExporterFactoryTest {
     String defaultServiceName = "(unknown service)";
     String serviceNameKey = NewRelicConfiguration.NEW_RELIC_SERVICE_NAME;
     String serviceNameValue = "best service ever";
-    String uriOverrideKey = NewRelicConfiguration.NEW_RELIC_SPAN_URI_OVERRIDE;
+    String uriOverrideKey = NewRelicConfiguration.NEW_RELIC_TRACE_URI_OVERRIDE;
     String uriOverrideValue = "http://test.domain.com";
 
     when(config.getString(apiKeyKey, "")).thenReturn(apiKeyValue);
@@ -52,7 +52,7 @@ class NewRelicSpanExporterFactoryTest {
     when(config.getString(apiKeyKey, "")).thenReturn(apiKeyValue);
     when(config.getBoolean(enableAuditLoggingKey, false)).thenReturn(true);
     when(config.getString(serviceNameKey, defaultServiceName)).thenReturn(serviceNameValue);
-    when(config.getString(NewRelicConfiguration.NEW_RELIC_SPAN_URI_OVERRIDE, uriOverrideValue))
+    when(config.getString(NewRelicConfiguration.NEW_RELIC_TRACE_URI_OVERRIDE, uriOverrideValue))
         .thenReturn(uriOverrideValue);
     when(config.getString(uriOverrideKey, "")).thenReturn(uriOverrideValue);
 

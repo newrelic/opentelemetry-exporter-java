@@ -7,7 +7,7 @@ public class NewRelicConfiguration {
   static final String NEW_RELIC_ENABLE_AUDIT_LOGGING = "newrelic.enable.audit.logging";
   static final String NEW_RELIC_SERVICE_NAME = "newrelic.service.name";
   static final String DEFAULT_NEW_RELIC_SERVICE_NAME = "(unknown service)";
-  static final String NEW_RELIC_SPAN_URI_OVERRIDE = "newrelic.span.uri.override";
+  static final String NEW_RELIC_TRACE_URI_OVERRIDE = "newrelic.trace.uri.override";
   static final String NEW_RELIC_METRIC_URI_OVERRIDE = "newrelic.metric.uri.override";
 
   static String getApiKey(Config config) {

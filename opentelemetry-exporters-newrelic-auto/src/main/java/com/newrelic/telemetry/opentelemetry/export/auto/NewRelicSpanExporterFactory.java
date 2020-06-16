@@ -38,7 +38,7 @@ public class NewRelicSpanExporterFactory implements SpanExporterFactory {
 
     String deprecatedUriOverride = config.getString(NEW_RELIC_URI_OVERRIDE, "");
     String uriOverride =
-        config.getString(NewRelicConfiguration.NEW_RELIC_SPAN_URI_OVERRIDE, deprecatedUriOverride);
+        config.getString(NewRelicConfiguration.NEW_RELIC_TRACE_URI_OVERRIDE, deprecatedUriOverride);
     if (!StringUtils.isNullOrEmpty(uriOverride)) {
       newRelicSpanExporterBuilder.uriOverride(URI.create(uriOverride));
     }
