@@ -10,13 +10,14 @@ import io.opentelemetry.sdk.contrib.auto.config.SpanExporterFactory;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.net.URI;
 
+/**
+ * A {@link SpanExporterFactory} that creates a {@link SpanExporter} that sends spans to New Relic.
+ */
 public class NewRelicSpanExporterFactory implements SpanExporterFactory {
 
-  private static final String NEW_RELIC_API_KEY = "newrelic.api.key";
-  private static final String NEW_RELIC_ENABLE_AUDIT_LOGGING = "newrelic.enable.audit.logging";
-  private static final String NEW_RELIC_SERVICE_NAME = "newrelic.service.name";
-  private static final String NEW_RELIC_URI_OVERRIDE = "newrelic.uri.override";
-  private static final String DEFAULT_NEW_RELIC_SERVICE_NAME = "(unknown service)";
+  // this should not be used, now that we have both span and metric exporters. Support is here
+  // for any users who might still be using it.
+  static final String NEW_RELIC_URI_OVERRIDE = "newrelic.uri.override";
 
   /**
    * Creates an instance of a {@link SpanExporter} based on the provided configuration.
@@ -26,22 +27,19 @@ public class NewRelicSpanExporterFactory implements SpanExporterFactory {
    */
   @Override
   public SpanExporter fromConfig(Config config) {
-    final String apiKey = config.getString(NEW_RELIC_API_KEY, "");
-    final boolean enableAuditLogging = config.getBoolean(NEW_RELIC_ENABLE_AUDIT_LOGGING, false);
-    // todo: newrelic.service.name key will not required once service.name is provided via Resource
-    // in the SDK
-    final String serviceName =
-        config.getString(NEW_RELIC_SERVICE_NAME, DEFAULT_NEW_RELIC_SERVICE_NAME);
-    final String uriOverride = config.getString(NEW_RELIC_URI_OVERRIDE, "");
-
     NewRelicSpanExporter.Builder newRelicSpanExporterBuilder =
         NewRelicSpanExporter.newBuilder()
-            .commonAttributes(new Attributes().put(SERVICE_NAME, serviceName))
-            .apiKey(apiKey);
+            .commonAttributes(
+                new Attributes().put(SERVICE_NAME, NewRelicConfiguration.getServiceName(config)))
+            .apiKey(NewRelicConfiguration.getApiKey(config));
 
-    if (enableAuditLogging) {
+    if (NewRelicConfiguration.shouldEnableAuditLogging(config)) {
       newRelicSpanExporterBuilder.enableAuditLogging();
     }
+
+    String deprecatedUriOverride = config.getString(NEW_RELIC_URI_OVERRIDE, "");
+    String uriOverride =
+        config.getString(NewRelicConfiguration.NEW_RELIC_TRACE_URI_OVERRIDE, deprecatedUriOverride);
     if (!StringUtils.isNullOrEmpty(uriOverride)) {
       newRelicSpanExporterBuilder.uriOverride(URI.create(uriOverride));
     }
