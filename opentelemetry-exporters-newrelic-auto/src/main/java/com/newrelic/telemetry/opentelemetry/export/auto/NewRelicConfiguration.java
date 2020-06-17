@@ -18,8 +18,10 @@ public class NewRelicConfiguration {
     return config.getBoolean(NEW_RELIC_ENABLE_AUDIT_LOGGING, false);
   }
 
-  // todo: newrelic.service.name key will not required once service.name is provided via Resource
-  // in the SDK
+  // note: newrelic.service.name key will not required once service.name is guaranteed to be
+  // provided via the Resource in the SDK.  See
+  // https://github.com/newrelic/opentelemetry-exporter-java/issues/62
+  // for the tracking issue.
   static String getServiceName(Config config) {
     return config.getString(NEW_RELIC_SERVICE_NAME, DEFAULT_NEW_RELIC_SERVICE_NAME);
   }
