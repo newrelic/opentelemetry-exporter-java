@@ -15,7 +15,8 @@ import java.net.URI;
  */
 public class NewRelicSpanExporterFactory implements SpanExporterFactory {
 
-  // this should not be used, now that we have both span and metric exporters.
+  // this should not be used, now that we have both span and metric exporters. Support is here
+  // for any users who might still be using it.
   static final String NEW_RELIC_URI_OVERRIDE = "newrelic.uri.override";
 
   /**

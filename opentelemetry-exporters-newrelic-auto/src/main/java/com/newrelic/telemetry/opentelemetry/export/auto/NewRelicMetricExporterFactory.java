@@ -1,6 +1,7 @@
 package com.newrelic.telemetry.opentelemetry.export.auto;
 
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SERVICE_NAME;
+import static com.newrelic.telemetry.opentelemetry.export.auto.NewRelicConfiguration.NEW_RELIC_METRIC_URI_OVERRIDE;
 
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.opentelemetry.export.NewRelicMetricExporter;
@@ -35,7 +36,7 @@ public class NewRelicMetricExporterFactory implements MetricExporterFactory {
       builder.enableAuditLogging();
     }
 
-    String uriOverride = config.getString(NewRelicConfiguration.NEW_RELIC_METRIC_URI_OVERRIDE, "");
+    String uriOverride = config.getString(NEW_RELIC_METRIC_URI_OVERRIDE, "");
     if (!StringUtils.isNullOrEmpty(uriOverride)) {
       builder.uriOverride(URI.create(uriOverride));
     }

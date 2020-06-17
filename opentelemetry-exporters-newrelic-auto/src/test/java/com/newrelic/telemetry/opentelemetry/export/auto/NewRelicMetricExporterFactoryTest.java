@@ -1,5 +1,9 @@
 package com.newrelic.telemetry.opentelemetry.export.auto;
 
+import static com.newrelic.telemetry.opentelemetry.export.auto.NewRelicConfiguration.NEW_RELIC_API_KEY;
+import static com.newrelic.telemetry.opentelemetry.export.auto.NewRelicConfiguration.NEW_RELIC_ENABLE_AUDIT_LOGGING;
+import static com.newrelic.telemetry.opentelemetry.export.auto.NewRelicConfiguration.NEW_RELIC_METRIC_URI_OVERRIDE;
+import static com.newrelic.telemetry.opentelemetry.export.auto.NewRelicConfiguration.NEW_RELIC_SERVICE_NAME;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
@@ -17,19 +21,15 @@ class NewRelicMetricExporterFactoryTest {
 
   @Test
   void testFromConfig_HappyPath() {
-    String apiKeyKey = NewRelicConfiguration.NEW_RELIC_API_KEY;
     String apiKeyValue = "test-key";
-    String enableAuditLoggingKey = NewRelicConfiguration.NEW_RELIC_ENABLE_AUDIT_LOGGING;
     String defaultServiceName = "(unknown service)";
-    String serviceNameKey = NewRelicConfiguration.NEW_RELIC_SERVICE_NAME;
     String serviceNameValue = "best service ever";
-    String uriOverrideKey = NewRelicConfiguration.NEW_RELIC_METRIC_URI_OVERRIDE;
     String uriOverrideValue = "http://test.domain.com";
 
-    when(config.getString(apiKeyKey, "")).thenReturn(apiKeyValue);
-    when(config.getBoolean(enableAuditLoggingKey, false)).thenReturn(true);
-    when(config.getString(serviceNameKey, defaultServiceName)).thenReturn(serviceNameValue);
-    when(config.getString(uriOverrideKey, "")).thenReturn(uriOverrideValue);
+    when(config.getString(NEW_RELIC_API_KEY, "")).thenReturn(apiKeyValue);
+    when(config.getBoolean(NEW_RELIC_ENABLE_AUDIT_LOGGING, false)).thenReturn(true);
+    when(config.getString(NEW_RELIC_SERVICE_NAME, defaultServiceName)).thenReturn(serviceNameValue);
+    when(config.getString(NEW_RELIC_METRIC_URI_OVERRIDE, "")).thenReturn(uriOverrideValue);
 
     NewRelicMetricExporterFactory newRelicSpanExporterFactory = new NewRelicMetricExporterFactory();
     MetricExporter metricExporter = newRelicSpanExporterFactory.fromConfig(config);
