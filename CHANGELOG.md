@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Coming soon:
+- Support for the version 0.6.0 of OpenTelemetry Java
+
+## [0.5.1] - 2020-06-19
 - Support for auto-instrumentation configuration for the MetricsExporter.
 
 ## [0.5.0] - 2020-06-08
