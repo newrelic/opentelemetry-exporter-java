@@ -50,6 +50,8 @@ Important: If you are using [auto-instrumentation](#auto-instrumentation), you s
 
 #### For metrics:
 
+Important: If you are using [auto-instrumentation](#auto-instrumentation), you should skip the configuration of the SDK, and go right to step 3.
+
 1. Create a `NewRelicMetricExporter`
 
 ```java
@@ -114,7 +116,7 @@ in the **Entity explorer** (based on the `"service.name"` attributes you've used
 
 ### Auto-Instrumentation
 
-To instrument trace using [opentelemetry-auto-instr-java](https://github.com/open-telemetry/opentelemetry-auto-instr-java),
+To instrument tracers and meters using [opentelemetry-auto-instr-java](https://github.com/open-telemetry/opentelemetry-auto-instr-java),
 `opentelemetry-exporter-newrelic-auto-<version>.jar` can be used to provide opentelemetry exporters. Here is an example.
 
 ```bash
@@ -158,10 +160,10 @@ repositories {
 ```
 
 ```
-implementation("com.newrelic.telemetry:opentelemetry-exporters-newrelic:0.5.0")
+implementation("com.newrelic.telemetry:opentelemetry-exporters-newrelic:0.5.1")
 implementation("io.opentelemetry:opentelemetry-sdk:0.5.0")
-implementation("com.newrelic.telemetry:telemetry-core:0.6.0")
-implementation("com.newrelic.telemetry:telemetry-http-okhttp:0.6.0")
+implementation("com.newrelic.telemetry:telemetry-core:0.6.1")
+implementation("com.newrelic.telemetry:telemetry-http-okhttp:0.6.1")
 ```
 
 ### Building
