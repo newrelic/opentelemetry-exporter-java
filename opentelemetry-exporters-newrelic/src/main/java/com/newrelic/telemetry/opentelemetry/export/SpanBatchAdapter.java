@@ -9,7 +9,11 @@ import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.COLLECT
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.ERROR_MESSAGE;
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.INSTRUMENTATION_PROVIDER;
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SPAN_KIND;
+import static com.newrelic.telemetry.opentelemetry.export.AttributesSupport.addResourceAttributes;
+import static com.newrelic.telemetry.opentelemetry.export.AttributesSupport.populateLibraryInfo;
+import static com.newrelic.telemetry.opentelemetry.export.AttributesSupport.putInAttributes;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
+import static java.util.stream.Collectors.groupingBy;
 
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.spans.Span;
@@ -38,9 +42,9 @@ class SpanBatchAdapter {
   }
 
   Collection<SpanBatch> adaptToSpanBatches(Collection<SpanData> openTracingSpans) {
-    Map<Resource, List<SpanData>> newRelicSpans =
-        openTracingSpans.stream().collect(Collectors.groupingBy(SpanData::getResource));
-    return newRelicSpans
+    Map<Resource, List<SpanData>> spansGroupedByResource =
+        openTracingSpans.stream().collect(groupingBy(SpanData::getResource));
+    return spansGroupedByResource
         .entrySet()
         .stream()
         .map(
@@ -51,8 +55,7 @@ class SpanBatchAdapter {
 
   private SpanBatch makeBatch(
       Resource resource, List<SpanData> spans, Attributes commonAttributes) {
-    Attributes attributes =
-        AttributesSupport.addResourceAttributes(commonAttributes.copy(), resource);
+    Attributes attributes = addResourceAttributes(commonAttributes.copy(), resource);
     List<Span> newRelicSpans =
         spans.stream().map(SpanBatchAdapter::makeNewRelicSpan).collect(Collectors.toList());
     return new SpanBatch(newRelicSpans, attributes);
@@ -88,12 +91,12 @@ class SpanBatchAdapter {
 
   private static Attributes addPossibleInstrumentationAttributes(
       SpanData span, Attributes attributes) {
-    return AttributesSupport.populateLibraryInfo(attributes, span.getInstrumentationLibraryInfo());
+    return populateLibraryInfo(attributes, span.getInstrumentationLibraryInfo());
   }
 
   private static Attributes createIntrinsicAttributes(SpanData span, Attributes attributes) {
     Map<String, AttributeValue> originalAttributes = span.getAttributes();
-    AttributesSupport.putInAttributes(attributes, originalAttributes);
+    putInAttributes(attributes, originalAttributes);
     attributes.put(SPAN_KIND, span.getKind().name());
     return attributes;
   }
