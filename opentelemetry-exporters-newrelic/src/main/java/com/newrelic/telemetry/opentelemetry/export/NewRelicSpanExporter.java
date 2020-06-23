@@ -54,8 +54,8 @@ public class NewRelicSpanExporter implements SpanExporter {
    */
   @Override
   public ResultCode export(Collection<SpanData> openTelemetrySpans) {
-    SpanBatch spanBatch = adapter.adaptToSpanBatch(openTelemetrySpans);
-    telemetryClient.sendBatch(spanBatch);
+    Collection<SpanBatch> spanBatch = adapter.adaptToSpanBatches(openTelemetrySpans);
+    spanBatch.forEach(telemetryClient::sendBatch);
     return ResultCode.SUCCESS;
   }
 
