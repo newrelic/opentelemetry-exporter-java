@@ -9,7 +9,11 @@ import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.COLLECT
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.ERROR_MESSAGE;
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.INSTRUMENTATION_PROVIDER;
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SPAN_KIND;
+import static com.newrelic.telemetry.opentelemetry.export.AttributesSupport.addResourceAttributes;
+import static com.newrelic.telemetry.opentelemetry.export.AttributesSupport.populateLibraryInfo;
+import static com.newrelic.telemetry.opentelemetry.export.AttributesSupport.putInAttributes;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
+import static java.util.stream.Collectors.groupingBy;
 
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.spans.Span;
@@ -21,6 +25,7 @@ import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.trace.SpanId;
 import io.opentelemetry.trace.Status;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -36,13 +41,24 @@ class SpanBatchAdapter {
             .put(COLLECTOR_NAME, "newrelic-opentelemetry-exporter");
   }
 
-  SpanBatch adaptToSpanBatch(Collection<SpanData> openTracingSpans) {
-    Collection<Span> newRelicSpans =
-        openTracingSpans
-            .stream()
-            .map(SpanBatchAdapter::makeNewRelicSpan)
-            .collect(Collectors.toSet());
-    return new SpanBatch(newRelicSpans, commonAttributes);
+  Collection<SpanBatch> adaptToSpanBatches(Collection<SpanData> openTracingSpans) {
+    Map<Resource, List<SpanData>> spansGroupedByResource =
+        openTracingSpans.stream().collect(groupingBy(SpanData::getResource));
+    return spansGroupedByResource
+        .entrySet()
+        .stream()
+        .map(
+            (resourceSpans) ->
+                makeBatch(resourceSpans.getKey(), resourceSpans.getValue(), commonAttributes))
+        .collect(Collectors.toList());
+  }
+
+  private SpanBatch makeBatch(
+      Resource resource, List<SpanData> spans, Attributes commonAttributes) {
+    Attributes attributes = addResourceAttributes(commonAttributes.copy(), resource);
+    List<Span> newRelicSpans =
+        spans.stream().map(SpanBatchAdapter::makeNewRelicSpan).collect(Collectors.toList());
+    return new SpanBatch(newRelicSpans, attributes);
   }
 
   private static com.newrelic.telemetry.spans.Span makeNewRelicSpan(SpanData span) {
@@ -70,19 +86,17 @@ class SpanBatchAdapter {
     attributes = createIntrinsicAttributes(span, attributes);
     attributes = addPossibleErrorAttribute(span, attributes);
     attributes = addPossibleInstrumentationAttributes(span, attributes);
-    return addResourceAttributes(span, attributes);
+    return attributes;
   }
 
   private static Attributes addPossibleInstrumentationAttributes(
       SpanData span, Attributes attributes) {
-    Attributes updatedAttributes =
-        AttributesSupport.populateLibraryInfo(attributes, span.getInstrumentationLibraryInfo());
-    return AttributesSupport.addResourceAttributes(updatedAttributes, span.getResource());
+    return populateLibraryInfo(attributes, span.getInstrumentationLibraryInfo());
   }
 
   private static Attributes createIntrinsicAttributes(SpanData span, Attributes attributes) {
     Map<String, AttributeValue> originalAttributes = span.getAttributes();
-    AttributesSupport.putInAttributes(attributes, originalAttributes);
+    putInAttributes(attributes, originalAttributes);
     attributes.put(SPAN_KIND, span.getKind().name());
     return attributes;
   }
@@ -102,15 +116,6 @@ class SpanBatchAdapter {
 
   private static boolean isNullOrEmpty(String string) {
     return string == null || string.isEmpty();
-  }
-
-  private static Attributes addResourceAttributes(SpanData span, Attributes attributes) {
-    Resource resource = span.getResource();
-    if (resource != null) {
-      Map<String, AttributeValue> labelsMap = resource.getAttributes();
-      AttributesSupport.putInAttributes(attributes, labelsMap);
-    }
-    return attributes;
   }
 
   private static double calculateDuration(SpanData span) {

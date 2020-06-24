@@ -44,7 +44,7 @@ class NewRelicSpanExporterTest {
     SpanData inputSpan = createMinimalSpanData();
     List<SpanData> spans = Collections.singletonList(inputSpan);
     SpanBatch batch = new SpanBatch(Collections.emptyList(), new Attributes());
-    when(adapter.adaptToSpanBatch(spans)).thenReturn(batch);
+    when(adapter.adaptToSpanBatches(spans)).thenReturn(Collections.singleton(batch));
 
     ResultCode result = testClass.export(spans);
     assertEquals(ResultCode.SUCCESS, result);
