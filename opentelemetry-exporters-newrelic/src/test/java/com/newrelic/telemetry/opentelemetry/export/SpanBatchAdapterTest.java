@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.spans.SpanBatch;
 import io.opentelemetry.common.AttributeValue;
@@ -30,7 +30,8 @@ import io.opentelemetry.trace.TraceId;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 class SpanBatchAdapterTest {
@@ -75,7 +76,7 @@ class SpanBatchAdapterTest {
 
     Resource inputResource =
         Resource.create(
-            ImmutableMap.of(
+            io.opentelemetry.common.Attributes.of(
                 "host",
                 AttributeValue.stringAttributeValue("bar"),
                 "datacenter",
@@ -108,7 +109,7 @@ class SpanBatchAdapterTest {
 
     Resource resource1 =
         Resource.create(
-            ImmutableMap.of(
+            io.opentelemetry.common.Attributes.of(
                 "host",
                 AttributeValue.stringAttributeValue("abcd"),
                 "datacenter",
@@ -116,7 +117,7 @@ class SpanBatchAdapterTest {
 
     Resource resource2 =
         Resource.create(
-            ImmutableMap.of(
+            io.opentelemetry.common.Attributes.of(
                 "host",
                 AttributeValue.stringAttributeValue("efgh"),
                 "datacenter",
@@ -167,8 +168,8 @@ class SpanBatchAdapterTest {
             .durationMs(1333.020111d)
             .attributes(expectedAttributes)
             .build();
-    List<SpanBatch> expected =
-        Arrays.asList(
+    Set<SpanBatch> expected =
+        Sets.newHashSet(
             new SpanBatch(
                 singletonList(outputSpan),
                 new Attributes()
@@ -188,7 +189,8 @@ class SpanBatchAdapterTest {
 
     Collection<SpanBatch> result =
         testClass.adaptToSpanBatches(Arrays.asList(inputSpan1, inputSpan2));
-    assertEquals(expected, result);
+    // wrap in a Set to get rid of any order dependency in the test.
+    assertEquals(expected, new HashSet<>(result));
   }
 
   @Test
@@ -224,7 +226,7 @@ class SpanBatchAdapterTest {
             .setStartEpochNanos(1_000_456_001_000L)
             .setEndEpochNanos(1_000_456_001_100L)
             .setAttributes(
-                ImmutableMap.of(
+                io.opentelemetry.common.Attributes.of(
                     "myBooleanKey",
                     AttributeValue.booleanAttributeValue(true),
                     "myIntKey",

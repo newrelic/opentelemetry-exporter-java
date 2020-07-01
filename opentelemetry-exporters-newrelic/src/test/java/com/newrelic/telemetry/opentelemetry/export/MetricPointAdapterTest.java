@@ -7,7 +7,6 @@ package com.newrelic.telemetry.opentelemetry.export;
 
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SERVICE_NAME;
 import static java.util.Collections.singleton;
-import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -17,6 +16,7 @@ import com.newrelic.telemetry.metrics.Count;
 import com.newrelic.telemetry.metrics.Gauge;
 import com.newrelic.telemetry.metrics.Metric;
 import com.newrelic.telemetry.metrics.Summary;
+import io.opentelemetry.common.Labels;
 import io.opentelemetry.sdk.metrics.data.MetricData.Descriptor;
 import io.opentelemetry.sdk.metrics.data.MetricData.Descriptor.Type;
 import io.opentelemetry.sdk.metrics.data.MetricData.DoublePoint;
@@ -43,13 +43,13 @@ class MetricPointAdapterTest {
             "metricDescription",
             "units",
             Type.MONOTONIC_LONG,
-            singletonMap("commonKey", "commonValue"));
+            Labels.of("commonKey", "commonValue"));
 
     LongPoint longPoint =
         LongPoint.create(
             100,
             TimeUnit.MILLISECONDS.toNanos(10_000L),
-            singletonMap("specificKey", "specificValue"),
+            Labels.of("specificKey", "specificValue"),
             123L);
 
     Attributes expectedAttributes =
@@ -75,13 +75,13 @@ class MetricPointAdapterTest {
             "metricDescription",
             "units",
             Type.NON_MONOTONIC_LONG,
-            singletonMap("commonKey", "commonValue"));
+            Labels.of("commonKey", "commonValue"));
 
     LongPoint longPoint =
         LongPoint.create(
             100,
             TimeUnit.MILLISECONDS.toNanos(10_000L),
-            singletonMap("specificKey", "specificValue"),
+            Labels.of("specificKey", "specificValue"),
             123L);
 
     Attributes expectedAttributes =
@@ -106,7 +106,7 @@ class MetricPointAdapterTest {
         DoublePoint.create(
             100,
             TimeUnit.MILLISECONDS.toNanos(10_000L),
-            singletonMap("specificKey", "specificValue"),
+            Labels.of("specificKey", "specificValue"),
             123.55d);
     Descriptor metricDescriptor =
         Descriptor.create(
@@ -114,7 +114,7 @@ class MetricPointAdapterTest {
             "metricDescription",
             "units",
             Type.MONOTONIC_DOUBLE,
-            singletonMap("commonKey", "commonValue"));
+            Labels.of("commonKey", "commonValue"));
 
     Attributes expectedAttributes =
         new Attributes().put(SERVICE_NAME, "fooService").put("specificKey", "specificValue");
@@ -139,12 +139,12 @@ class MetricPointAdapterTest {
             "metricDescription",
             "units",
             Type.NON_MONOTONIC_DOUBLE,
-            singletonMap("commonKey", "commonValue"));
+            Labels.of("commonKey", "commonValue"));
     DoublePoint doublePoint =
         DoublePoint.create(
             100,
             TimeUnit.MILLISECONDS.toNanos(10_000L),
-            singletonMap("specificKey", "specificValue"),
+            Labels.of("specificKey", "specificValue"),
             123.55d);
 
     Attributes expectedAttributes =
@@ -173,13 +173,13 @@ class MetricPointAdapterTest {
             "metricDescription",
             "units",
             Type.SUMMARY,
-            singletonMap("commonKey", "commonValue"));
+            Labels.of("commonKey", "commonValue"));
 
     SummaryPoint summary =
         SummaryPoint.create(
             100,
             TimeUnit.MILLISECONDS.toNanos(10_000L),
-            singletonMap("specificKey", "specificValue"),
+            Labels.of("specificKey", "specificValue"),
             200,
             123.55d,
             Arrays.asList(min, max));

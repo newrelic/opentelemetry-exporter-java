@@ -19,7 +19,7 @@ import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.spans.Span;
 import com.newrelic.telemetry.spans.Span.SpanBuilder;
 import com.newrelic.telemetry.spans.SpanBatch;
-import io.opentelemetry.common.AttributeValue;
+import io.opentelemetry.common.ReadableAttributes;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.trace.SpanId;
@@ -95,7 +95,7 @@ class SpanBatchAdapter {
   }
 
   private static Attributes createIntrinsicAttributes(SpanData span, Attributes attributes) {
-    Map<String, AttributeValue> originalAttributes = span.getAttributes();
+    ReadableAttributes originalAttributes = span.getAttributes();
     putInAttributes(attributes, originalAttributes);
     attributes.put(SPAN_KIND, span.getKind().name());
     return attributes;

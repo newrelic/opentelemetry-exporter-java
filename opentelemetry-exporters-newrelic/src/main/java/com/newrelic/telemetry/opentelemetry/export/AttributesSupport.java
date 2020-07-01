@@ -9,10 +9,9 @@ import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.INSTRUM
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.INSTRUMENTATION_VERSION;
 
 import com.newrelic.telemetry.Attributes;
-import io.opentelemetry.common.AttributeValue;
+import io.opentelemetry.common.ReadableAttributes;
 import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
 import io.opentelemetry.sdk.resources.Resource;
-import java.util.Map;
 
 public class AttributesSupport {
 
@@ -33,14 +32,13 @@ public class AttributesSupport {
 
   static Attributes addResourceAttributes(Attributes attributes, Resource resource) {
     if (resource != null) {
-      Map<String, AttributeValue> labelsMap = resource.getAttributes();
+      ReadableAttributes labelsMap = resource.getAttributes();
       putInAttributes(attributes, labelsMap);
     }
     return attributes;
   }
 
-  static void putInAttributes(
-      Attributes attributes, Map<String, AttributeValue> originalAttributes) {
+  static void putInAttributes(Attributes attributes, ReadableAttributes originalAttributes) {
     originalAttributes.forEach(
         (key, value) -> {
           switch (value.getType()) {

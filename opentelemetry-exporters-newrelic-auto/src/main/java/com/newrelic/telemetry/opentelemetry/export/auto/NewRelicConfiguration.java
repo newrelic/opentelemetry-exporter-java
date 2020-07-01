@@ -30,4 +30,8 @@ public class NewRelicConfiguration {
   static String getServiceName(Config config) {
     return config.getString(NEW_RELIC_SERVICE_NAME, DEFAULT_NEW_RELIC_SERVICE_NAME);
   }
+
+  static boolean isNotBlank(String s) {
+    return s != null && !s.isEmpty();
+  }
 }

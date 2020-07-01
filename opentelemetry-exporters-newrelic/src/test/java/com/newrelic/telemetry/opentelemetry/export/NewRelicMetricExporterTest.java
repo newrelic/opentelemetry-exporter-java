@@ -12,7 +12,6 @@ import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.INSTRUM
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SERVICE_NAME;
 import static io.opentelemetry.common.AttributeValue.stringAttributeValue;
 import static java.util.Collections.singleton;
-import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -23,6 +22,7 @@ import com.newrelic.telemetry.TelemetryClient;
 import com.newrelic.telemetry.metrics.Count;
 import com.newrelic.telemetry.metrics.Gauge;
 import com.newrelic.telemetry.metrics.MetricBatch;
+import io.opentelemetry.common.Labels;
 import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.data.MetricData.Descriptor;
@@ -40,7 +40,7 @@ import org.mockito.InOrder;
 class NewRelicMetricExporterTest {
 
   @Test
-  void testExport() throws Exception {
+  void testExport() {
     MetricPointAdapter metricPointAdapter = mock(MetricPointAdapter.class);
     Attributes globalAttributes = new Attributes().put("globalKey", "globalValue");
     TelemetryClient telemetryClient = mock(TelemetryClient.class);
@@ -55,14 +55,15 @@ class NewRelicMetricExporterTest {
             "metricDescription",
             "units",
             Type.SUMMARY,
-            singletonMap("constantKey", "constantValue"));
+            Labels.of("constantKey", "constantValue"));
     Resource resource =
-        Resource.create(singletonMap(SERVICE_NAME, stringAttributeValue("myService")));
+        Resource.create(
+            io.opentelemetry.common.Attributes.of(SERVICE_NAME, stringAttributeValue("myService")));
     InstrumentationLibraryInfo libraryInfo =
         InstrumentationLibraryInfo.create("instrumentationName", "1.0");
-    LongPoint point1 = LongPoint.create(1000, 2000, singletonMap("longLabel", "longValue"), 100L);
+    LongPoint point1 = LongPoint.create(1000, 2000, Labels.of("longLabel", "longValue"), 100L);
     DoublePoint point2 =
-        DoublePoint.create(2001, 3001, singletonMap("doubleLabel", "doubleValue"), 100.33d);
+        DoublePoint.create(2001, 3001, Labels.of("doubleLabel", "doubleValue"), 100.33d);
     Collection<Point> points = Arrays.asList(point1, point2);
 
     Attributes updatedAttributes =
@@ -83,7 +84,7 @@ class NewRelicMetricExporterTest {
     when(metricPointAdapter.buildMetricsFromPoint(
             descriptor, Type.SUMMARY, updatedAttributes, point2))
         .thenReturn(singleton(metric2));
-    ;
+
     Attributes amendedGlobalAttributes =
         globalAttributes
             .copy()
