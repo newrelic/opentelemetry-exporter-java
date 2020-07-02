@@ -6,7 +6,6 @@
 package com.newrelic.telemetry.opentelemetry.export.auto;
 
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SERVICE_NAME;
-import static com.newrelic.telemetry.opentelemetry.export.auto.NewRelicConfiguration.isSpecified;
 
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.opentelemetry.export.NewRelicSpanExporter;
@@ -20,10 +19,6 @@ import java.net.URI;
  */
 public class NewRelicSpanExporterFactory implements SpanExporterFactory {
 
-  // this should not be used, now that we have both span and metric exporters. Support is here
-  // for any users who might still be using it.
-  static final String NEW_RELIC_URI_OVERRIDE = "newrelic.uri.override";
-
   /**
    * Creates an instance of a {@link SpanExporter} based on the provided configuration.
    *
@@ -32,21 +27,19 @@ public class NewRelicSpanExporterFactory implements SpanExporterFactory {
    */
   @Override
   public SpanExporter fromConfig(Config config) {
+    NewRelicConfiguration newRelicConfiguration = new NewRelicConfiguration(config);
     NewRelicSpanExporter.Builder newRelicSpanExporterBuilder =
         NewRelicSpanExporter.newBuilder()
             .commonAttributes(
-                new Attributes().put(SERVICE_NAME, NewRelicConfiguration.getServiceName(config)))
-            .apiKey(NewRelicConfiguration.getApiKey(config));
+                new Attributes().put(SERVICE_NAME, newRelicConfiguration.getServiceName()))
+            .apiKey(newRelicConfiguration.getApiKey());
 
-    if (NewRelicConfiguration.shouldEnableAuditLogging(config)) {
+    if (newRelicConfiguration.shouldEnableAuditLogging()) {
       newRelicSpanExporterBuilder.enableAuditLogging();
     }
 
-    String deprecatedUriOverride = config.getString(NEW_RELIC_URI_OVERRIDE, "");
-    String uriOverride =
-        config.getString(NewRelicConfiguration.NEW_RELIC_TRACE_URI_OVERRIDE, deprecatedUriOverride);
-    if (isSpecified(uriOverride)) {
-      newRelicSpanExporterBuilder.uriOverride(URI.create(uriOverride));
+    if (newRelicConfiguration.isTraceUriSpecified()) {
+      newRelicSpanExporterBuilder.uriOverride(URI.create(newRelicConfiguration.getTraceUri()));
     }
 
     return newRelicSpanExporterBuilder.build();

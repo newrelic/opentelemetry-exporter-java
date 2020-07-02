@@ -7,7 +7,6 @@ package com.newrelic.telemetry.opentelemetry.export.auto;
 
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SERVICE_NAME;
 import static com.newrelic.telemetry.opentelemetry.export.auto.NewRelicConfiguration.*;
-import static com.newrelic.telemetry.opentelemetry.export.auto.NewRelicConfiguration.NEW_RELIC_METRIC_URI_OVERRIDE;
 
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.opentelemetry.export.NewRelicMetricExporter;
@@ -31,18 +30,20 @@ public class NewRelicMetricExporterFactory implements MetricExporterFactory {
    */
   @Override
   public MetricExporter fromConfig(Config config) {
+    NewRelicConfiguration newRelicConfiguration = new NewRelicConfiguration(config);
+
     Builder builder =
         NewRelicMetricExporter.newBuilder()
-            .apiKey(getApiKey(config))
-            .commonAttributes(new Attributes().put(SERVICE_NAME, getServiceName(config)));
+            .apiKey(newRelicConfiguration.getApiKey())
+            .commonAttributes(
+                new Attributes().put(SERVICE_NAME, newRelicConfiguration.getServiceName()));
 
-    if (shouldEnableAuditLogging(config)) {
+    if (newRelicConfiguration.shouldEnableAuditLogging()) {
       builder.enableAuditLogging();
     }
 
-    String uriOverride = config.getString(NEW_RELIC_METRIC_URI_OVERRIDE, "");
-    if (isSpecified(uriOverride)) {
-      builder.uriOverride(URI.create(uriOverride));
+    if (newRelicConfiguration.isMetricUriSpecified()) {
+      builder.uriOverride(URI.create(newRelicConfiguration.getMetricUri()));
     }
 
     return builder.build();
