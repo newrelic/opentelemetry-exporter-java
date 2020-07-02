@@ -17,6 +17,7 @@ import com.newrelic.telemetry.opentelemetry.export.NewRelicMetricExporter;
 import com.newrelic.telemetry.opentelemetry.export.NewRelicSpanExporter;
 import com.newrelic.telemetry.spans.SpanBatchSender;
 import io.opentelemetry.OpenTelemetry;
+import io.opentelemetry.common.Labels;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.metrics.LongCounter;
 import io.opentelemetry.metrics.LongValueRecorder;
@@ -100,7 +101,7 @@ public class BasicExample {
             .build();
 
     // 9. Optionally, you can pre-bind a set of labels, rather than passing them in every time.
-    BoundLongValueRecorder boundTimer = spanTimer.bind("spanName", "testSpan");
+    BoundLongValueRecorder boundTimer = spanTimer.bind(Labels.of("spanName", "testSpan"));
 
     // 10. use these to instrument some work
     doSomeSimulatedWork(tracer, spanCounter, boundTimer);
@@ -134,7 +135,7 @@ public class BasicExample {
       Tracer tracer, LongCounter spanCounter, BoundLongValueRecorder boundTimer)
       throws InterruptedException {
     Random random = new Random();
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 10; i++) {
       long startTime = System.currentTimeMillis();
       Span span =
           tracer.spanBuilder("testSpan").setSpanKind(Kind.INTERNAL).setNoParent().startSpan();
@@ -143,7 +144,7 @@ public class BasicExample {
         if (markAsError) {
           span.setStatus(Status.INTERNAL.withDescription("internalError"));
         }
-        spanCounter.add(1, "spanName", "testSpan", "isItAnError", "" + markAsError);
+        spanCounter.add(1, Labels.of("spanName", "testSpan", "isItAnError", "" + markAsError));
         // do some work
         Thread.sleep(random.nextInt(1000));
         span.end();

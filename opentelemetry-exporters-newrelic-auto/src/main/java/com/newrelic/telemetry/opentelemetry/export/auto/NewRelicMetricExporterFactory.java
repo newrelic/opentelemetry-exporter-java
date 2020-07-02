@@ -6,14 +6,14 @@
 package com.newrelic.telemetry.opentelemetry.export.auto;
 
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SERVICE_NAME;
+import static com.newrelic.telemetry.opentelemetry.export.auto.NewRelicConfiguration.*;
 import static com.newrelic.telemetry.opentelemetry.export.auto.NewRelicConfiguration.NEW_RELIC_METRIC_URI_OVERRIDE;
 
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.opentelemetry.export.NewRelicMetricExporter;
 import com.newrelic.telemetry.opentelemetry.export.NewRelicMetricExporter.Builder;
-import io.opentelemetry.internal.StringUtils;
-import io.opentelemetry.sdk.contrib.auto.config.Config;
-import io.opentelemetry.sdk.contrib.auto.config.MetricExporterFactory;
+import io.opentelemetry.sdk.extensions.auto.config.Config;
+import io.opentelemetry.sdk.extensions.auto.config.MetricExporterFactory;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import java.net.URI;
 
@@ -33,16 +33,15 @@ public class NewRelicMetricExporterFactory implements MetricExporterFactory {
   public MetricExporter fromConfig(Config config) {
     Builder builder =
         NewRelicMetricExporter.newBuilder()
-            .apiKey(NewRelicConfiguration.getApiKey(config))
-            .commonAttributes(
-                new Attributes().put(SERVICE_NAME, NewRelicConfiguration.getServiceName(config)));
+            .apiKey(getApiKey(config))
+            .commonAttributes(new Attributes().put(SERVICE_NAME, getServiceName(config)));
 
-    if (NewRelicConfiguration.shouldEnableAuditLogging(config)) {
+    if (shouldEnableAuditLogging(config)) {
       builder.enableAuditLogging();
     }
 
     String uriOverride = config.getString(NEW_RELIC_METRIC_URI_OVERRIDE, "");
-    if (!StringUtils.isNullOrEmpty(uriOverride)) {
+    if (isSpecified(uriOverride)) {
       builder.uriOverride(URI.create(uriOverride));
     }
 

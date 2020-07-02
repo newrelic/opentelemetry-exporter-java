@@ -12,7 +12,7 @@ import static com.newrelic.telemetry.opentelemetry.export.auto.NewRelicConfigura
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
-import io.opentelemetry.sdk.contrib.auto.config.Config;
+import io.opentelemetry.sdk.extensions.auto.config.Config;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -5,7 +5,7 @@
 
 package com.newrelic.telemetry.opentelemetry.export.auto;
 
-import io.opentelemetry.sdk.contrib.auto.config.Config;
+import io.opentelemetry.sdk.extensions.auto.config.Config;
 
 public class NewRelicConfiguration {
   static final String NEW_RELIC_API_KEY = "newrelic.api.key";
@@ -29,5 +29,9 @@ public class NewRelicConfiguration {
   // for the tracking issue.
   static String getServiceName(Config config) {
     return config.getString(NEW_RELIC_SERVICE_NAME, DEFAULT_NEW_RELIC_SERVICE_NAME);
+  }
+
+  static boolean isSpecified(String s) {
+    return s != null && !s.isEmpty();
   }
 }

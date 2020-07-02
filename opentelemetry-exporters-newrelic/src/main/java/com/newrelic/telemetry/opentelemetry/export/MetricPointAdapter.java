@@ -14,6 +14,7 @@ import com.newrelic.telemetry.metrics.Count;
 import com.newrelic.telemetry.metrics.Gauge;
 import com.newrelic.telemetry.metrics.Metric;
 import com.newrelic.telemetry.metrics.Summary;
+import io.opentelemetry.common.Labels;
 import io.opentelemetry.sdk.metrics.data.MetricData.Descriptor;
 import io.opentelemetry.sdk.metrics.data.MetricData.Descriptor.Type;
 import io.opentelemetry.sdk.metrics.data.MetricData.DoublePoint;
@@ -147,9 +148,9 @@ public class MetricPointAdapter {
   private static class Key {
     private final Descriptor descriptor;
     private final Type type;
-    private final Map<String, String> labels;
+    private final Labels labels;
 
-    public Key(Descriptor descriptor, Type type, Map<String, String> labels) {
+    public Key(Descriptor descriptor, Type type, Labels labels) {
       this.descriptor = descriptor;
       this.type = type;
       this.labels = labels;

@@ -10,11 +10,9 @@ import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.DESCRIP
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.DESCRIPTOR_UNIT;
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.INSTRUMENTATION_PROVIDER;
 
-import com.newrelic.telemetry.Attributes;
-import com.newrelic.telemetry.SimpleMetricBatchSender;
-import com.newrelic.telemetry.TelemetryClient;
+import com.newrelic.telemetry.*;
 import com.newrelic.telemetry.metrics.Metric;
-import com.newrelic.telemetry.metrics.MetricBatchSenderBuilder;
+import com.newrelic.telemetry.metrics.MetricBatchSender;
 import com.newrelic.telemetry.metrics.MetricBuffer;
 import io.opentelemetry.sdk.internal.MillisClock;
 import io.opentelemetry.sdk.metrics.data.MetricData;
@@ -209,19 +207,25 @@ public class NewRelicMetricExporter implements MetricExporter {
         return new NewRelicMetricExporter(
             telemetryClient, commonAttributes, timeTracker, new MetricPointAdapter(timeTracker));
       }
-      MetricBatchSenderBuilder builder = SimpleMetricBatchSender.builder(apiKey);
-      builder.secondaryUserAgent("NewRelic-OpenTelemetry-Exporter", null);
-      if (enableAuditLogging) {
-        builder.enableAuditLogging();
-      }
+      SenderConfiguration.SenderConfigurationBuilder builder =
+          MetricBatchSenderFactory.fromHttpImplementation(OkHttpPoster::new)
+              .configureWith(apiKey)
+              .secondaryUserAgent("NewRelic-OpenTelemetry-Exporter")
+              .auditLoggingEnabled(enableAuditLogging);
+
       if (uriOverride != null) {
         try {
-          builder.uriOverride(uriOverride);
+          if (uriOverride.getPath() != null && !uriOverride.getPath().isEmpty()) {
+            builder.endpointWithPath(uriOverride.toURL());
+          } else {
+            builder.endpoint(uriOverride.getScheme(), uriOverride.getHost(), uriOverride.getPort());
+          }
         } catch (MalformedURLException e) {
-          throw new IllegalArgumentException("URI Override value must be a valid URI.", e);
+          throw new IllegalArgumentException("Invalid URI for the metric API : " + uriOverride, e);
         }
       }
-      telemetryClient = new TelemetryClient(builder.build(), null);
+      telemetryClient =
+          new TelemetryClient(MetricBatchSender.create(builder.build()), null, null, null);
       return new NewRelicMetricExporter(
           telemetryClient, commonAttributes, timeTracker, new MetricPointAdapter(timeTracker));
     }

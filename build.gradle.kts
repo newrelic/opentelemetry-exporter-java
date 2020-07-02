@@ -14,20 +14,17 @@ apply(plugin = "signing")
 
 apply(plugin = "com.github.sherter.google-java-format")
 
-repositories {
-    maven("https://oss.jfrog.org/artifactory/oss-snapshot-local") {
-        mavenContent {
-            snapshotsOnly()
-        }
-    }
-}
-
 allprojects {
     group = "com.newrelic.telemetry"
     version = project.findProperty("releaseVersion") as String
     repositories {
         mavenCentral()
         maven(url = "https://oss.sonatype.org/content/repositories/snapshots")
+        maven("https://oss.jfrog.org/artifactory/oss-snapshot-local") {
+            mavenContent {
+                snapshotsOnly()
+            }
+        }
     }
     tasks.withType<Test> {
         useJUnitPlatform()

@@ -54,7 +54,7 @@ class NewRelicSpanExporterTest {
     return TestSpanData.newBuilder()
         .setTraceId(traceId)
         .setSpanId(spanId)
-        .setResource(Resource.create(Collections.emptyMap()))
+        .setResource(Resource.create(io.opentelemetry.common.Attributes.empty()))
         .setName("spanName")
         .setKind(Kind.SERVER)
         .setStatus(Status.OK)
