@@ -7,7 +7,7 @@ package com.newrelic.telemetry.opentelemetry.export.auto;
 
 import io.opentelemetry.sdk.extensions.auto.config.Config;
 
-public class NewRelicConfiguration {
+class NewRelicConfiguration {
   static final String NEW_RELIC_API_KEY = "newrelic.api.key";
   static final String NEW_RELIC_ENABLE_AUDIT_LOGGING = "newrelic.enable.audit.logging";
   static final String NEW_RELIC_SERVICE_NAME = "newrelic.service.name";
@@ -21,7 +21,7 @@ public class NewRelicConfiguration {
 
   private final Config config;
 
-  public NewRelicConfiguration(Config config) {
+  NewRelicConfiguration(Config config) {
     this.config = config;
   }
 
@@ -41,23 +41,23 @@ public class NewRelicConfiguration {
     return config.getString(NEW_RELIC_SERVICE_NAME, DEFAULT_NEW_RELIC_SERVICE_NAME);
   }
 
-  public String getServiceName() {
+  String getServiceName() {
     return getServiceName(config);
   }
 
-  public boolean isMetricUriSpecified() {
+  boolean isMetricUriSpecified() {
     return isSpecified(getMetricUri());
   }
 
-  public String getMetricUri() {
+  String getMetricUri() {
     return config.getString(NEW_RELIC_METRIC_URI_OVERRIDE, "");
   }
 
-  public boolean isTraceUriSpecified() {
+  boolean isTraceUriSpecified() {
     return isSpecified(getTraceUri());
   }
 
-  public String getTraceUri() {
+  String getTraceUri() {
     String deprecatedUriOverride = config.getString(NEW_RELIC_URI_OVERRIDE, "");
     return config.getString(NEW_RELIC_TRACE_URI_OVERRIDE, deprecatedUriOverride);
   }
