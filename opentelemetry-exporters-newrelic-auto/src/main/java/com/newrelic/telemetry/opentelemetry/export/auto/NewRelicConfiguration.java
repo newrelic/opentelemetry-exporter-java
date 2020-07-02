@@ -31,7 +31,7 @@ public class NewRelicConfiguration {
     return config.getString(NEW_RELIC_SERVICE_NAME, DEFAULT_NEW_RELIC_SERVICE_NAME);
   }
 
-  static boolean isNotBlank(String s) {
+  static boolean isSpecified(String s) {
     return s != null && !s.isEmpty();
   }
 }

@@ -41,7 +41,7 @@ public class NewRelicMetricExporterFactory implements MetricExporterFactory {
     }
 
     String uriOverride = config.getString(NEW_RELIC_METRIC_URI_OVERRIDE, "");
-    if (isNotBlank(uriOverride)) {
+    if (isSpecified(uriOverride)) {
       builder.uriOverride(URI.create(uriOverride));
     }
 

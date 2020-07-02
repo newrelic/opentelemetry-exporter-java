@@ -6,7 +6,7 @@
 package com.newrelic.telemetry.opentelemetry.export.auto;
 
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SERVICE_NAME;
-import static com.newrelic.telemetry.opentelemetry.export.auto.NewRelicConfiguration.isNotBlank;
+import static com.newrelic.telemetry.opentelemetry.export.auto.NewRelicConfiguration.isSpecified;
 
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.opentelemetry.export.NewRelicSpanExporter;
@@ -45,7 +45,7 @@ public class NewRelicSpanExporterFactory implements SpanExporterFactory {
     String deprecatedUriOverride = config.getString(NEW_RELIC_URI_OVERRIDE, "");
     String uriOverride =
         config.getString(NewRelicConfiguration.NEW_RELIC_TRACE_URI_OVERRIDE, deprecatedUriOverride);
-    if (isNotBlank(uriOverride)) {
+    if (isSpecified(uriOverride)) {
       newRelicSpanExporterBuilder.uriOverride(URI.create(uriOverride));
     }
 
