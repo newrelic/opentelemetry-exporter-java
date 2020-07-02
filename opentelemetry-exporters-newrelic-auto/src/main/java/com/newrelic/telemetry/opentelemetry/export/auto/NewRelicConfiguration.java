@@ -5,7 +5,7 @@
 
 package com.newrelic.telemetry.opentelemetry.export.auto;
 
-import io.opentelemetry.sdk.contrib.auto.config.Config;
+import io.opentelemetry.sdk.extensions.auto.config.Config;
 
 public class NewRelicConfiguration {
   static final String NEW_RELIC_API_KEY = "newrelic.api.key";
