@@ -15,11 +15,21 @@ public class NewRelicConfiguration {
   static final String NEW_RELIC_TRACE_URI_OVERRIDE = "newrelic.trace.uri.override";
   static final String NEW_RELIC_METRIC_URI_OVERRIDE = "newrelic.metric.uri.override";
 
-  static String getApiKey(Config config) {
+  // this should not be used, now that we have both span and metric exporters. Support is here
+  // for any users who might still be using it.
+  static final String NEW_RELIC_URI_OVERRIDE = "newrelic.uri.override";
+
+  private final Config config;
+
+  public NewRelicConfiguration(Config config) {
+    this.config = config;
+  }
+
+  String getApiKey() {
     return config.getString(NEW_RELIC_API_KEY, "");
   }
 
-  static boolean shouldEnableAuditLogging(Config config) {
+  boolean shouldEnableAuditLogging() {
     return config.getBoolean(NEW_RELIC_ENABLE_AUDIT_LOGGING, false);
   }
 
@@ -31,7 +41,28 @@ public class NewRelicConfiguration {
     return config.getString(NEW_RELIC_SERVICE_NAME, DEFAULT_NEW_RELIC_SERVICE_NAME);
   }
 
-  static boolean isSpecified(String s) {
+  public String getServiceName() {
+    return getServiceName(config);
+  }
+
+  public boolean isMetricUriSpecified() {
+    return isSpecified(getMetricUri());
+  }
+
+  public String getMetricUri() {
+    return config.getString(NEW_RELIC_METRIC_URI_OVERRIDE, "");
+  }
+
+  public boolean isTraceUriSpecified() {
+    return isSpecified(getTraceUri());
+  }
+
+  public String getTraceUri() {
+    String deprecatedUriOverride = config.getString(NEW_RELIC_URI_OVERRIDE, "");
+    return config.getString(NEW_RELIC_TRACE_URI_OVERRIDE, deprecatedUriOverride);
+  }
+
+  private boolean isSpecified(String s) {
     return s != null && !s.isEmpty();
   }
 }
