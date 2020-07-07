@@ -4,8 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Coming soon:
-- Support for the version 0.6.0 of OpenTelemetry Java
+## Coming soon
+- Support for version 0.7.0 of OpenTelemetry Java
+
+## [0.6.0] - 2020-07-07
+- Support for version 0.6.0 of OpenTelemetry Java
+- More efficient grouping of span export to share common Resource attributes
 
 ## [0.5.1] - 2020-06-19
 - Support for auto-instrumentation configuration for the MetricsExporter.

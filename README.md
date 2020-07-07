@@ -160,8 +160,8 @@ repositories {
 ```
 
 ```
-implementation("com.newrelic.telemetry:opentelemetry-exporters-newrelic:0.5.1")
-implementation("io.opentelemetry:opentelemetry-sdk:0.5.0")
+implementation("com.newrelic.telemetry:opentelemetry-exporters-newrelic:0.6.0")
+implementation("io.opentelemetry:opentelemetry-sdk:0.6.0")
 implementation("com.newrelic.telemetry:telemetry-core:0.6.1")
 implementation("com.newrelic.telemetry:telemetry-http-okhttp:0.6.1")
 ```
