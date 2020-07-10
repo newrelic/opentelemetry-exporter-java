@@ -1,18 +1,18 @@
 package com.newrelic.telemetry.opentelemetry.export;
 
-import com.newrelic.telemetry.Attributes;
-import io.opentelemetry.common.AttributeValue;
-import io.opentelemetry.common.ReadableAttributes;
-import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
-import io.opentelemetry.sdk.resources.Resource;
-import org.junit.jupiter.api.Test;
-
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.INSTRUMENTATION_NAME;
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.INSTRUMENTATION_VERSION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import com.newrelic.telemetry.Attributes;
+import io.opentelemetry.common.AttributeValue;
+import io.opentelemetry.common.ReadableAttributes;
+import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
+import io.opentelemetry.sdk.resources.Resource;
+import org.junit.jupiter.api.Test;
 
 class AttributesSupportTest {
 
