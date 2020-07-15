@@ -140,7 +140,7 @@ public class MetricPointAdapter {
             point.getSum(),
             min,
             max,
-            NANOSECONDS.toMillis(timeTracker.getPreviousTime()),
+            NANOSECONDS.toMillis(point.getStartEpochNanos()),
             NANOSECONDS.toMillis(point.getEpochNanos()),
             attributes));
   }
