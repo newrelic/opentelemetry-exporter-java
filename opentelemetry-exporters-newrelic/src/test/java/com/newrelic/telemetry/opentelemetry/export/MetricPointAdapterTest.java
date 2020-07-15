@@ -31,7 +31,7 @@ import org.junit.jupiter.api.Test;
 class MetricPointAdapterTest {
 
   @Test
-  void testLongPoint() throws Exception {
+  void testLongPoint() {
     TimeTracker timeTracker = mock(TimeTracker.class);
     when(timeTracker.getPreviousTime()).thenReturn(TimeUnit.MILLISECONDS.toNanos(9_000L));
     MetricPointAdapter metricPointAdapter = new MetricPointAdapter(timeTracker);
@@ -64,7 +64,7 @@ class MetricPointAdapterTest {
   }
 
   @Test
-  void testLongPoint_nonMonotonic() throws Exception {
+  void testLongPoint_nonMonotonic() {
     TimeTracker timeTracker = mock(TimeTracker.class);
     MetricPointAdapter metricPointAdapter = new MetricPointAdapter(timeTracker);
 
@@ -96,7 +96,7 @@ class MetricPointAdapterTest {
   }
 
   @Test
-  void testDoublePoint() throws Exception {
+  void testDoublePoint() {
     TimeTracker timeTracker = mock(TimeTracker.class);
     when(timeTracker.getPreviousTime()).thenReturn(TimeUnit.MILLISECONDS.toNanos(9_000L));
     MetricPointAdapter metricPointAdapter = new MetricPointAdapter(timeTracker);
@@ -128,7 +128,7 @@ class MetricPointAdapterTest {
   }
 
   @Test
-  void testDoublePoint_nonMonotonic() throws Exception {
+  void testDoublePoint_nonMonotonic() {
     TimeTracker timeTracker = mock(TimeTracker.class);
     MetricPointAdapter metricPointAdapter = new MetricPointAdapter(timeTracker);
 
@@ -159,7 +159,7 @@ class MetricPointAdapterTest {
   }
 
   @Test
-  void testSummaryPoint() throws Exception {
+  void testSummaryPoint() {
     TimeTracker timeTracker = mock(TimeTracker.class);
     when(timeTracker.getPreviousTime()).thenReturn(TimeUnit.MILLISECONDS.toNanos(9_000L));
     MetricPointAdapter metricPointAdapter = new MetricPointAdapter(timeTracker);
@@ -177,7 +177,7 @@ class MetricPointAdapterTest {
 
     SummaryPoint summary =
         SummaryPoint.create(
-            100,
+            TimeUnit.MILLISECONDS.toNanos(9_000L),
             TimeUnit.MILLISECONDS.toNanos(10_000L),
             Labels.of("specificKey", "specificValue"),
             200,
