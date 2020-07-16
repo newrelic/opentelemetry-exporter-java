@@ -167,7 +167,7 @@ public class NewRelicSpanExporter implements SpanExporter {
       SenderConfigurationBuilder builder =
           SpanBatchSenderFactory.fromHttpImplementation(OkHttpPoster::new)
               .configureWith(apiKey)
-              .secondaryUserAgent("NewRelic-OpenTelemetry-Exporter");
+              .secondaryUserAgent("NewRelic-OpenTelemetry-Exporter/" + VersionFinder.readVersion());
       if (enableAuditLogging) {
         builder.auditLoggingEnabled(true);
       }
