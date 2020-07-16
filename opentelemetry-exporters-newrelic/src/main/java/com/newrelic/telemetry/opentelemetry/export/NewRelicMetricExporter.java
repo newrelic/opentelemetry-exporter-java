@@ -210,7 +210,7 @@ public class NewRelicMetricExporter implements MetricExporter {
       SenderConfiguration.SenderConfigurationBuilder builder =
           MetricBatchSenderFactory.fromHttpImplementation(OkHttpPoster::new)
               .configureWith(apiKey)
-              .secondaryUserAgent("NewRelic-OpenTelemetry-Exporter")
+              .secondaryUserAgent("NewRelic-OpenTelemetry-Exporter/" + VersionFinder.readVersion())
               .auditLoggingEnabled(enableAuditLogging);
 
       if (uriOverride != null) {
