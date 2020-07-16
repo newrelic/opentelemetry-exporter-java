@@ -3,7 +3,7 @@ dependencies {
     val openTelemetryVersion = "0.6.0"
 
     api("com.newrelic.telemetry:telemetry:$newRelicTelemetrySdkVersion")
-    implementation("org.slf4j:slf4j-simple:1.7.26")
+    api("org.slf4j:slf4j-simple:1.7.26")
     implementation("com.newrelic.telemetry:telemetry-http-okhttp:$newRelicTelemetrySdkVersion")
     implementation("io.opentelemetry:opentelemetry-sdk:$openTelemetryVersion")
 
