@@ -3,10 +3,11 @@ dependencies {
     val openTelemetryVersion = "0.6.0"
 
     api("com.newrelic.telemetry:telemetry:$newRelicTelemetrySdkVersion")
-    api("org.slf4j:slf4j-simple:1.7.26")
+    api("org.slf4j:slf4j-api:1.7.26")
     implementation("com.newrelic.telemetry:telemetry-http-okhttp:$newRelicTelemetrySdkVersion")
     implementation("io.opentelemetry:opentelemetry-sdk:$openTelemetryVersion")
 
+    testRuntimeOnly("org.slf4j:slf4j-simple:1.7.26")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.4.2")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.4.2")
     testImplementation("org.mockito:mockito-core:3.0.0")
