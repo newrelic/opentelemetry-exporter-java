@@ -12,9 +12,30 @@ To send spans or metrics to New Relic, you will need an [Insights Insert API Key
 Note: There is an example [BasicExample.java](opentelemetry-exporters-newrelic/src/test/java/com/newrelic/telemetry/opentelemetry/examples/BasicExample.java)  
 in the test source code hierarchy that matches this example code. It should be considered as the canonical code for this example, since OpenTelemetry internal SDK APIs are still a work in progress.
 
-#### For spans:
+#### Quickstart
+If you want to get started quickly, the easiest way to configure the OpenTelemetry SDK and the
+New Relic exporters is like this:
 
-Important: If you are using [auto-instrumentation](#auto-instrumentation), you should skip the configuration of the SDK, and go right to step 4.
+```java
+    Configuration configuration = new Configuration(apiKey, "My Service Name")
+        .enableAuditLogging()
+        .collectionIntervalSeconds(10);
+    NewRelicExporters.start(configuration);
+```
+
+Be sure to shut down the exporters when your application finishes:
+
+```
+   NewRelicExporters.shutdown();
+```
+
+#### If you need more flexibility, you can set up the individual exporters and the SDK by hand:
+
+##### For spans:
+
+Important: If you are using [auto-instrumentation](#auto-instrumentation), or you have used the
+[quickstart](#quickstart) you should skip the configuration of the SDK, and go right to the next
+section.
 
 1. Create a `NewRelicSpanExporter`
 ```java
@@ -34,7 +55,9 @@ Important: If you are using [auto-instrumentation](#auto-instrumentation), you s
     tracerSdkProvider.addSpanProcessor(spanProcessor);
 ```
 
-4. Create the OpenTelemetry `Tracer` and use it for recording spans.
+##### Use the APIs to record some spans
+
+1. Create the OpenTelemetry `Tracer` and use it for recording spans.
 ```java
     Tracer tracer = OpenTelemetry.getTracerProvider().get("sample-app", "1.0");
     
@@ -46,11 +69,13 @@ Important: If you are using [auto-instrumentation](#auto-instrumentation), you s
     }
 ```
 
-5. Find your spans in New Relic One: go to https://one.newrelic.com/ and select **Distributed Tracing**.
+2. Find your spans in New Relic One: go to https://one.newrelic.com/ and select **Distributed Tracing**.
 
-#### For metrics:
+##### For metrics:
 
-Important: If you are using [auto-instrumentation](#auto-instrumentation), you should skip the configuration of the SDK, and go right to step 3.
+Important: If you are using [auto-instrumentation](#auto-instrumentation), or you have used the
+[quickstart](#quickstart) you should skip the configuration of the SDK, and go right to the next
+section.
 
 1. Create a `NewRelicMetricExporter`
 
@@ -74,13 +99,15 @@ Important: If you are using [auto-instrumentation](#auto-instrumentation), you s
             .build();
 ```
 
-3. Create a sample Meter:
+##### Use the APIs to record some metrics
+
+1. Create a sample Meter:
 
 ```java
     Meter meter = OpenTelemetry.getMeterProvider().get("sample-app", "1.0");
 ```
 
-4. Here is an example of a counter:
+2. Here is an example of a counter:
 
 ```java
     LongCounter spanCounter =
@@ -92,7 +119,7 @@ Important: If you are using [auto-instrumentation](#auto-instrumentation), you s
             .build();
 ```
 
-5. Here is an example of a measure:
+3. Here is an example of a measure:
 
 ```java
     LongMeasure spanTimer =
@@ -104,14 +131,14 @@ Important: If you are using [auto-instrumentation](#auto-instrumentation), you s
             .build();
 ```
 
-6. Use these instruments for recording some metrics:
+4. Use these instruments for recording some metrics:
 
 ```java
    spanCounter.add(1, "spanName", "testSpan", "isItAnError", "true");
    spanTimer.record(1000, "spanName", "testSpan")
 ```
 
-7. Find your metrics in New Relic One: go to https://one.newrelic.com/ and locate your service
+5. Find your metrics in New Relic One: go to https://one.newrelic.com/ and locate your service
 in the **Entity explorer** (based on the `"service.name"` attributes you've used).
 
 ### Auto-Instrumentation
