@@ -17,7 +17,8 @@ If you want to get started quickly, the easiest way to configure the OpenTelemet
 New Relic exporters is like this:
 
 ```java
-    Configuration configuration = new Configuration(apiKey, "My Service Name")
+    NewRelicExporters.Configuration configuration =
+      new NewRelicExporters.Configuration(apiKey, "My Service Name")
         .enableAuditLogging()
         .collectionIntervalSeconds(10);
     NewRelicExporters.start(configuration);
