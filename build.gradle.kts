@@ -106,12 +106,15 @@ listOf(":opentelemetry-exporters-newrelic", ":opentelemetry-exporters-newrelic-a
                         val snapshotsRepoUrl = uri("https://oss.sonatype.org/content/repositories/snapshots/")
                         url = if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl
                         configure<SigningExtension> {
+                            val signingKey: String? by project
+                            val signingPassword: String? by project
+                            useInMemoryPgpKeys(signingKey, signingPassword)
                             sign(publications["mavenJava"])
                         }
                     }
                     credentials {
-                        username = project.properties["sonatypeUsername"] as String?
-                        password = project.properties["sonatypePassword"] as String?
+                        username = System.getenv("SONATYPE_USERNAME")
+                        password = System.getenv("SONATYPE_PASSWORD")
                     }
                 }
             }
