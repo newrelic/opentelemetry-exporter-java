@@ -116,11 +116,11 @@ in the **Entity explorer** (based on the `"service.name"` attributes you've used
 
 ### Auto-Instrumentation
 
-To instrument tracers and meters using [opentelemetry-auto-instr-java](https://github.com/open-telemetry/opentelemetry-auto-instr-java),
+To instrument tracers and meters using the [opentelemetry-javaagent](https://github.com/open-telemetry/opentelemetry-java-instrumentation),
 `opentelemetry-exporter-newrelic-auto-<version>.jar` can be used to provide opentelemetry exporters. Here is an example.
 
 ```bash
-java -javaagent:path/to/opentelemetry-auto-<version>.jar \
+java -javaagent:path/to/opentelemetry-javaagent-<version>-all.jar \
      -Dota.exporter.jar=path/to/opentelemetry-exporter-newrelic-auto-<version>.jar \
      -Dota.exporter.newrelic.api.key=${INSIGHTS_INSERT_KEY} \
      -Dota.exporter.newrelic.service.name=best-service-ever \
