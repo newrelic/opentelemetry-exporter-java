@@ -17,11 +17,8 @@ apply(plugin = "com.github.sherter.google-java-format")
 allprojects {
     group = "com.newrelic.telemetry"
 
-  // Passing in -Prelease=true will render a non-snapshot version
-  // All other values (including unset) will render a snapshot version.
-
     val release: String? by project
-    version = project.findProperty("releaseVersion") as String + if("true" == release) "" else "-SNAPSHOT"
+    version = project.findProperty("baseVersion") as String + if("true" == release) "" else "-SNAPSHOT"
 
     repositories {
         mavenCentral()
