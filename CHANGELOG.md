@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Coming soon
 - Support for version 0.7.0 of OpenTelemetry Java
 
+## [0.6.1] - 2020-07-xx
+- Fix for OpenTelemetry auto-instrumentation SPI package changes.
+
 ## [0.6.0] - 2020-07-07
 - Support for version 0.6.0 of OpenTelemetry Java
 - More efficient grouping of span export to share common Resource attributes
