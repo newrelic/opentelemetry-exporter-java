@@ -8,40 +8,52 @@ package com.newrelic.telemetry.opentelemetry.export;
 import static java.util.Collections.singleton;
 
 import com.newrelic.telemetry.Attributes;
+import com.newrelic.telemetry.opentelemetry.export.NewRelicSpanExporter.Builder;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.metrics.export.IntervalMetricReader;
-import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
-import io.opentelemetry.sdk.trace.export.SpanExporter;
 
 public class NewRelicExporters {
 
   private static IntervalMetricReader intervalMetricReader;
 
+  /**
+   * Start up the New Relic Metric and Span exporters with the provided API key and service name.
+   */
+  public static void start(String apiKey, String serviceName) {
+    start(new Configuration(apiKey, serviceName));
+  }
+
   /** Start up the New Relic Metric and Span exporters with the provided configuration. */
   public static void start(Configuration configuration) {
     Attributes serviceNameAttributes =
         new Attributes().put("service.name", configuration.serviceName);
-    SpanExporter spanExporter =
+
+    Builder spanExporterBuilder =
         NewRelicSpanExporter.newBuilder()
             .apiKey(configuration.apiKey)
-            .commonAttributes(serviceNameAttributes)
-            .build();
+            .commonAttributes(serviceNameAttributes);
+    if (configuration.enableAuditLogging) {
+      spanExporterBuilder.enableAuditLogging();
+    }
+
     BatchSpanProcessor spanProcessor =
-        BatchSpanProcessor.newBuilder(spanExporter)
+        BatchSpanProcessor.newBuilder(spanExporterBuilder.build())
             .setScheduleDelayMillis(configuration.collectionIntervalSeconds * 1000)
             .build();
     OpenTelemetrySdk.getTracerProvider().addSpanProcessor(spanProcessor);
 
-    MetricExporter metricExporter =
+    NewRelicMetricExporter.Builder metricExporterBuilder =
         NewRelicMetricExporter.newBuilder()
             .apiKey(configuration.apiKey)
-            .commonAttributes(serviceNameAttributes)
-            .build();
+            .commonAttributes(serviceNameAttributes);
+    if (configuration.enableAuditLogging) {
+      metricExporterBuilder.enableAuditLogging();
+    }
     intervalMetricReader =
         IntervalMetricReader.builder()
             .setExportIntervalMillis(configuration.collectionIntervalSeconds * 1000)
-            .setMetricExporter(metricExporter)
+            .setMetricExporter(metricExporterBuilder.build())
             .setMetricProducers(singleton(OpenTelemetrySdk.getMeterProvider().getMetricProducer()))
             .build();
   }
