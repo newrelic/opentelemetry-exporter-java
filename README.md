@@ -149,9 +149,9 @@ To instrument tracers and meters using the [opentelemetry-javaagent](https://git
 
 ```bash
 java -javaagent:path/to/opentelemetry-javaagent-<version>-all.jar \
-     -Dota.exporter.jar=path/to/opentelemetry-exporter-newrelic-auto-<version>.jar \
-     -Dota.exporter.newrelic.api.key=${INSIGHTS_INSERT_KEY} \
-     -Dota.exporter.newrelic.service.name=best-service-ever \
+     -Dotel.exporter.jar=path/to/opentelemetry-exporter-newrelic-auto-<version>.jar \
+     -Dotel.exporter.newrelic.api.key=${INSIGHTS_INSERT_KEY} \
+     -Dotel.exporter.newrelic.service.name=best-service-ever \
      -jar myapp.jar
 ```
 
@@ -162,7 +162,7 @@ If you wish to turn on debug logging for the exporter running in the auto-instru
 
 And, if you wish to enable audit logging for the exporter running in the auto-instrumentaiotn agent, use this system property:
 ```
--Dota.exporter.newrelic.enable.audit.logging=true
+-Dotel.exporter.newrelic.enable.audit.logging=true
 ```
 
 ### Javadoc for this project can be found here: [![Javadocs][javadoc-image]][javadoc-url]
@@ -188,8 +188,8 @@ repositories {
 ```
 
 ```
-implementation("com.newrelic.telemetry:opentelemetry-exporters-newrelic:0.6.2")
-implementation("io.opentelemetry:opentelemetry-sdk:0.6.0")
+implementation("com.newrelic.telemetry:opentelemetry-exporters-newrelic:0.7.0")
+implementation("io.opentelemetry:opentelemetry-sdk:0.7.0")
 implementation("com.newrelic.telemetry:telemetry-core:0.7.0")
 implementation("com.newrelic.telemetry:telemetry-http-okhttp:0.7.0")
 ```
