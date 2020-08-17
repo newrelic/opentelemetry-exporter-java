@@ -9,6 +9,7 @@ import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.COLLECT
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.INSTRUMENTATION_NAME;
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.INSTRUMENTATION_PROVIDER;
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.INSTRUMENTATION_VERSION;
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SERVICE_INSTANCE_ID;
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SPAN_KIND;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -70,9 +71,10 @@ class SpanBatchAdapterTest {
                 .put(INSTRUMENTATION_PROVIDER, "opentelemetry")
                 .put(COLLECTOR_NAME, "newrelic-opentelemetry-exporter")
                 .put("host", "bar")
-                .put("datacenter", "boo"));
+                .put("datacenter", "boo")
+                .put(SERVICE_INSTANCE_ID, "instanceId"));
 
-    SpanBatchAdapter testClass = new SpanBatchAdapter(new Attributes());
+    SpanBatchAdapter testClass = new SpanBatchAdapter(new Attributes(), "instanceId");
 
     Resource inputResource =
         Resource.create(
@@ -176,16 +178,18 @@ class SpanBatchAdapterTest {
                     .put(INSTRUMENTATION_PROVIDER, "opentelemetry")
                     .put(COLLECTOR_NAME, "newrelic-opentelemetry-exporter")
                     .put("host", "abcd")
-                    .put("datacenter", "useast-2")),
+                    .put("datacenter", "useast-2")
+                    .put(SERVICE_INSTANCE_ID, "instanceId")),
             new SpanBatch(
                 singletonList(outputSpan),
                 new Attributes()
                     .put(INSTRUMENTATION_PROVIDER, "opentelemetry")
                     .put(COLLECTOR_NAME, "newrelic-opentelemetry-exporter")
                     .put("host", "efgh")
-                    .put("datacenter", "useast-1")));
+                    .put("datacenter", "useast-1")
+                    .put(SERVICE_INSTANCE_ID, "instanceId")));
 
-    SpanBatchAdapter testClass = new SpanBatchAdapter(new Attributes());
+    SpanBatchAdapter testClass = new SpanBatchAdapter(new Attributes(), "instanceId");
 
     Collection<SpanBatch> result =
         testClass.adaptToSpanBatches(Arrays.asList(inputSpan1, inputSpan2));
@@ -215,9 +219,10 @@ class SpanBatchAdapterTest {
             singletonList(resultSpan),
             new Attributes()
                 .put(INSTRUMENTATION_PROVIDER, "opentelemetry")
-                .put(COLLECTOR_NAME, "newrelic-opentelemetry-exporter"));
+                .put(COLLECTOR_NAME, "newrelic-opentelemetry-exporter")
+                .put(AttributeNames.SERVICE_INSTANCE_ID, "1234.5678"));
 
-    SpanBatchAdapter testClass = new SpanBatchAdapter(new Attributes());
+    SpanBatchAdapter testClass = new SpanBatchAdapter(new Attributes(), "instanceId");
 
     SpanData inputSpan =
         TestSpanData.newBuilder()
@@ -239,6 +244,11 @@ class SpanBatchAdapterTest {
             .setKind(Kind.INTERNAL)
             .setStatus(Status.OK)
             .setHasEnded(true)
+            .setResource(
+                Resource.create(
+                    io.opentelemetry.common.Attributes.of(
+                        AttributeNames.SERVICE_INSTANCE_ID,
+                        AttributeValue.stringAttributeValue("1234.5678"))))
             .build();
 
     Collection<SpanBatch> result =
@@ -248,7 +258,7 @@ class SpanBatchAdapterTest {
 
   @Test
   void testMinimalData() {
-    SpanBatchAdapter testClass = new SpanBatchAdapter(new Attributes());
+    SpanBatchAdapter testClass = new SpanBatchAdapter(new Attributes(), "instanceId");
 
     SpanData inputSpan =
         TestSpanData.newBuilder()
@@ -277,9 +287,11 @@ class SpanBatchAdapterTest {
             new Attributes()
                 .put("host", "localhost")
                 .put(INSTRUMENTATION_PROVIDER, "opentelemetry")
-                .put(COLLECTOR_NAME, "newrelic-opentelemetry-exporter"));
+                .put(COLLECTOR_NAME, "newrelic-opentelemetry-exporter")
+                .put(SERVICE_INSTANCE_ID, "instanceId"));
 
-    SpanBatchAdapter testClass = new SpanBatchAdapter(new Attributes().put("host", "localhost"));
+    SpanBatchAdapter testClass =
+        new SpanBatchAdapter(new Attributes().put("host", "localhost"), "instanceId");
 
     Status status = Status.CANCELLED.withDescription("it's broken");
     SpanData inputSpan = buildSpan(status);
@@ -299,9 +311,11 @@ class SpanBatchAdapterTest {
             new Attributes()
                 .put("host", "localhost")
                 .put(INSTRUMENTATION_PROVIDER, "opentelemetry")
-                .put(COLLECTOR_NAME, "newrelic-opentelemetry-exporter"));
+                .put(COLLECTOR_NAME, "newrelic-opentelemetry-exporter")
+                .put(SERVICE_INSTANCE_ID, "instanceId"));
 
-    SpanBatchAdapter testClass = new SpanBatchAdapter(new Attributes().put("host", "localhost"));
+    SpanBatchAdapter testClass =
+        new SpanBatchAdapter(new Attributes().put("host", "localhost"), "instanceId");
 
     SpanData inputSpan = buildSpan(Status.ABORTED);
 
