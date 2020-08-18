@@ -12,8 +12,11 @@ import com.newrelic.telemetry.Attributes;
 import io.opentelemetry.common.ReadableAttributes;
 import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
 import io.opentelemetry.sdk.resources.Resource;
+import java.util.UUID;
 
 public class AttributesSupport {
+
+  static final String SERVICE_INSTANCE_ID = UUID.randomUUID().toString();
 
   static Attributes populateLibraryInfo(
       Attributes attributes, InstrumentationLibraryInfo instrumentationLibraryInfo) {

@@ -18,7 +18,6 @@ import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.Collection;
-import java.util.UUID;
 
 /**
  * The NewRelicSpanExporter takes a list of Span objects, converts them into a New Relic SpanBatch
@@ -162,7 +161,7 @@ public class NewRelicSpanExporter implements SpanExporter {
      */
     public NewRelicSpanExporter build() {
       SpanBatchAdapter spanBatchAdapter =
-          new SpanBatchAdapter(commonAttributes, UUID.randomUUID().toString());
+          new SpanBatchAdapter(commonAttributes, AttributesSupport.SERVICE_INSTANCE_ID);
       if (telemetryClient != null) {
         return new NewRelicSpanExporter(spanBatchAdapter, telemetryClient);
       }

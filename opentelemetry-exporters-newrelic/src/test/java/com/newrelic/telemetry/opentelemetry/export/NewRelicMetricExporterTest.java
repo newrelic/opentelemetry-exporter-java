@@ -9,6 +9,7 @@ import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.COLLECT
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.INSTRUMENTATION_NAME;
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.INSTRUMENTATION_PROVIDER;
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.INSTRUMENTATION_VERSION;
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SERVICE_INSTANCE_ID;
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SERVICE_NAME;
 import static io.opentelemetry.common.AttributeValue.stringAttributeValue;
 import static java.util.Collections.singleton;
@@ -47,7 +48,7 @@ class NewRelicMetricExporterTest {
     TimeTracker timeTracker = mock(TimeTracker.class);
     NewRelicMetricExporter newRelicMetricExporter =
         new NewRelicMetricExporter(
-            telemetryClient, globalAttributes, timeTracker, metricPointAdapter);
+            telemetryClient, globalAttributes, timeTracker, metricPointAdapter, "instanceId");
 
     Descriptor descriptor =
         Descriptor.create(
@@ -89,7 +90,8 @@ class NewRelicMetricExporterTest {
         globalAttributes
             .copy()
             .put(INSTRUMENTATION_PROVIDER, "opentelemetry")
-            .put(COLLECTOR_NAME, "newrelic-opentelemetry-exporter");
+            .put(COLLECTOR_NAME, "newrelic-opentelemetry-exporter")
+            .put(SERVICE_INSTANCE_ID, "instanceId");
 
     ResultCode result =
         newRelicMetricExporter.export(
