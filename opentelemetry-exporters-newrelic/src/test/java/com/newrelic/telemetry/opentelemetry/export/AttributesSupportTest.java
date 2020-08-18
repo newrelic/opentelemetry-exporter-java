@@ -66,11 +66,26 @@ class AttributesSupportTest {
             "r2", AttributeValue.longAttributeValue(23),
             "r3", AttributeValue.booleanAttributeValue(true));
     Attributes expected =
-        new Attributes().put("a", "b").put("r1", "v1").put("r2", 23).put("r3", true);
+        new Attributes().put("a", "b").put("r1", "v1").put("r2", 23L).put("r3", true);
     Resource resource = mock(Resource.class);
     when(resource.getAttributes()).thenReturn(resourceAttributes);
     Attributes result = AttributesSupport.addResourceAttributes(attributes, resource);
-    assertSame(attributes, result);
+    assertEquals(expected, result);
+  }
+
+  @Test
+  void addResourceAttributes_resourceWinsVsInput() {
+    Attributes attributes = new Attributes().put("r1", "v77");
+    ReadableAttributes resourceAttributes =
+        io.opentelemetry.common.Attributes.of(
+            "r1", AttributeValue.stringAttributeValue("v1"),
+            "r2", AttributeValue.longAttributeValue(23),
+            "r3", AttributeValue.booleanAttributeValue(true));
+    Attributes expected = new Attributes().put("r1", "v1").put("r2", 23L).put("r3", true);
+    Resource resource = mock(Resource.class);
+    when(resource.getAttributes()).thenReturn(resourceAttributes);
+    Attributes result = AttributesSupport.addResourceAttributes(attributes, resource);
+    assertEquals(expected, result);
   }
 
   @Test

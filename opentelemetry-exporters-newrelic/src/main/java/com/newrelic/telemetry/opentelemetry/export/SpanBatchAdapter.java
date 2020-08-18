@@ -8,6 +8,7 @@ package com.newrelic.telemetry.opentelemetry.export;
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.COLLECTOR_NAME;
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.ERROR_MESSAGE;
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.INSTRUMENTATION_PROVIDER;
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SERVICE_INSTANCE_ID;
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SPAN_KIND;
 import static com.newrelic.telemetry.opentelemetry.export.AttributesSupport.addResourceAttributes;
 import static com.newrelic.telemetry.opentelemetry.export.AttributesSupport.populateLibraryInfo;
@@ -33,12 +34,18 @@ class SpanBatchAdapter {
 
   private final Attributes commonAttributes;
 
-  SpanBatchAdapter(Attributes commonAttributes) {
+  /**
+   * Note: the serviceInstanceId passed in here will only be used if the OTel Resource that is
+   * associated with a span does not already contain an instance id. See {@link
+   * io.opentelemetry.sdk.resources.ResourceConstants#SERVICE_INSTANCE}.
+   */
+  SpanBatchAdapter(Attributes commonAttributes, String serviceInstanceId) {
     this.commonAttributes =
         commonAttributes
             .copy()
             .put(INSTRUMENTATION_PROVIDER, "opentelemetry")
-            .put(COLLECTOR_NAME, "newrelic-opentelemetry-exporter");
+            .put(COLLECTOR_NAME, "newrelic-opentelemetry-exporter")
+            .put(SERVICE_INSTANCE_ID, serviceInstanceId);
   }
 
   Collection<SpanBatch> adaptToSpanBatches(Collection<SpanData> openTracingSpans) {
