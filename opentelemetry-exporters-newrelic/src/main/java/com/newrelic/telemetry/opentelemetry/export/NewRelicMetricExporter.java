@@ -9,8 +9,13 @@ import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.COLLECT
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.DESCRIPTOR_DESCRIPTION;
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.DESCRIPTOR_UNIT;
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.INSTRUMENTATION_PROVIDER;
+import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SERVICE_INSTANCE_ID;
 
-import com.newrelic.telemetry.*;
+import com.newrelic.telemetry.Attributes;
+import com.newrelic.telemetry.MetricBatchSenderFactory;
+import com.newrelic.telemetry.OkHttpPoster;
+import com.newrelic.telemetry.SenderConfiguration;
+import com.newrelic.telemetry.TelemetryClient;
 import com.newrelic.telemetry.metrics.Metric;
 import com.newrelic.telemetry.metrics.MetricBatchSender;
 import com.newrelic.telemetry.metrics.MetricBuffer;
@@ -51,12 +56,16 @@ public class NewRelicMetricExporter implements MetricExporter {
    *     where necessary.
    * @param metricPointAdapter The {@link MetricPointAdapter} that converts OpenTelemetry Point
    *     instances into New Relic {@link Metric}s.
+   * @param serviceInstanceId The unique identifier for the instance of the service that this is
+   *     reporting telemetry for. This will be overridden by the same attribute in the OTel
+   *     Resource, if it is there.
    */
   NewRelicMetricExporter(
       TelemetryClient telemetryClient,
       Attributes serviceAttributes,
       TimeTracker timeTracker,
-      MetricPointAdapter metricPointAdapter) {
+      MetricPointAdapter metricPointAdapter,
+      String serviceInstanceId) {
     this.telemetryClient = telemetryClient;
     this.timeTracker = timeTracker;
     // todo: these two attributes are the same as the ones in the SpanBatchAdapter. Move to
@@ -65,7 +74,8 @@ public class NewRelicMetricExporter implements MetricExporter {
         serviceAttributes
             .copy()
             .put(INSTRUMENTATION_PROVIDER, "opentelemetry")
-            .put(COLLECTOR_NAME, "newrelic-opentelemetry-exporter");
+            .put(COLLECTOR_NAME, "newrelic-opentelemetry-exporter")
+            .put(SERVICE_INSTANCE_ID, serviceInstanceId);
     this.metricPointAdapter = metricPointAdapter;
   }
 
@@ -205,7 +215,11 @@ public class NewRelicMetricExporter implements MetricExporter {
       TimeTracker timeTracker = new TimeTracker(MillisClock.getInstance());
       if (telemetryClient != null) {
         return new NewRelicMetricExporter(
-            telemetryClient, commonAttributes, timeTracker, new MetricPointAdapter(timeTracker));
+            telemetryClient,
+            commonAttributes,
+            timeTracker,
+            new MetricPointAdapter(timeTracker),
+            AttributesSupport.SERVICE_INSTANCE_ID);
       }
       SenderConfiguration.SenderConfigurationBuilder builder =
           MetricBatchSenderFactory.fromHttpImplementation(OkHttpPoster::new)
@@ -227,7 +241,11 @@ public class NewRelicMetricExporter implements MetricExporter {
       telemetryClient =
           new TelemetryClient(MetricBatchSender.create(builder.build()), null, null, null);
       return new NewRelicMetricExporter(
-          telemetryClient, commonAttributes, timeTracker, new MetricPointAdapter(timeTracker));
+          telemetryClient,
+          commonAttributes,
+          timeTracker,
+          new MetricPointAdapter(timeTracker),
+          AttributesSupport.SERVICE_INSTANCE_ID);
     }
   }
 }
