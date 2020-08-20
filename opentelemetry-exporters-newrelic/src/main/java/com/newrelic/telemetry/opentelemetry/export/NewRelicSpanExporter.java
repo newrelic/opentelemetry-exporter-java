@@ -143,10 +143,10 @@ public class NewRelicSpanExporter implements SpanExporter {
     }
 
     /**
-     * Set a URI to override the default ingest endpoint.
+     * Set a URI to override the default ingest endpoint.  If not provided, the telemetry
+     * SDK will default to the US production endpoint.
      *
-     * @param uriOverride The scheme, host, and port that should be used for the Spans API endpoint.
-     *     The path component of this parameter is unused.
+     * @param uriOverride The fully qualified URI for the spans API endpoint.
      * @return the Builder
      */
     public Builder uriOverride(URI uriOverride) {
@@ -174,7 +174,7 @@ public class NewRelicSpanExporter implements SpanExporter {
       }
       if (uriOverride != null) {
         try {
-          builder.endpoint(uriOverride.getScheme(), uriOverride.getHost(), uriOverride.getPort());
+          builder.endpoint(uriOverride.toURL());
         } catch (MalformedURLException e) {
           throw new IllegalArgumentException("URI Override value must be a valid URI.", e);
         }
