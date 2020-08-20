@@ -195,8 +195,8 @@ public class NewRelicMetricExporter implements MetricExporter {
     }
 
     /**
-     * Set a URI to override the default metric ingest endpoint.  If this is not provided,
-     * the telemetry SDK will choose the US production endpoint as a default.
+     * Set a URI to override the default metric ingest endpoint. If this is not provided, the
+     * telemetry SDK will choose the US production endpoint as a default.
      *
      * @param uriOverride - The fully qualified URI endpoint for the metric ingest api.
      * @return the Builder

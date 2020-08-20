@@ -143,8 +143,8 @@ public class NewRelicSpanExporter implements SpanExporter {
     }
 
     /**
-     * Set a URI to override the default ingest endpoint.  If not provided, the telemetry
-     * SDK will default to the US production endpoint.
+     * Set a URI to override the default ingest endpoint. If not provided, the telemetry SDK will
+     * default to the US production endpoint.
      *
      * @param uriOverride The fully qualified URI for the spans API endpoint.
      * @return the Builder
