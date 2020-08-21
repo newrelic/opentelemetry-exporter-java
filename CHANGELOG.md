@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Coming soon
+- **BREAKING CHANGE** :: URI OVERRIDES THAT DO NOT HAVE A PATH COMPONENT WILL CAUSE YOUR SENDS TO FAIL.  Please specify a full URI including path component when doing a uriOverride.
 - Support for version 0.8.0 of OpenTelemetry Java
 
 ## [0.7.0] - 2020-07-06

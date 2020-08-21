@@ -195,10 +195,10 @@ public class NewRelicMetricExporter implements MetricExporter {
     }
 
     /**
-     * Set a URI to override the default ingest endpoint.
+     * Set a URI to override the default metric ingest endpoint. If this is not provided, the
+     * telemetry SDK will choose the US production endpoint as a default.
      *
-     * @param uriOverride The scheme, host, and port that should be used for the Metric API
-     *     endpoint. The path component of this parameter is unused.
+     * @param uriOverride - The fully qualified URI endpoint for the metric ingest api.
      * @return the Builder
      */
     public NewRelicMetricExporter.Builder uriOverride(URI uriOverride) {
@@ -229,11 +229,7 @@ public class NewRelicMetricExporter implements MetricExporter {
 
       if (uriOverride != null) {
         try {
-          if (uriOverride.getPath() != null && !uriOverride.getPath().isEmpty()) {
-            builder.endpointWithPath(uriOverride.toURL());
-          } else {
-            builder.endpoint(uriOverride.getScheme(), uriOverride.getHost(), uriOverride.getPort());
-          }
+          builder.endpoint(uriOverride.toURL());
         } catch (MalformedURLException e) {
           throw new IllegalArgumentException("Invalid URI for the metric API : " + uriOverride, e);
         }
