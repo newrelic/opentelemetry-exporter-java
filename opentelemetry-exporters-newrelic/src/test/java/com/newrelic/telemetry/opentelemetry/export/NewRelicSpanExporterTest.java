@@ -5,16 +5,15 @@
 
 package com.newrelic.telemetry.opentelemetry.export;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.TelemetryClient;
 import com.newrelic.telemetry.spans.SpanBatch;
+import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.data.SpanData;
-import io.opentelemetry.sdk.trace.data.test.TestSpanData;
-import io.opentelemetry.sdk.trace.export.SpanExporter.ResultCode;
 import io.opentelemetry.trace.Span.Kind;
 import io.opentelemetry.trace.SpanId;
 import io.opentelemetry.trace.Status;
@@ -46,8 +45,8 @@ class NewRelicSpanExporterTest {
     SpanBatch batch = new SpanBatch(Collections.emptyList(), new Attributes());
     when(adapter.adaptToSpanBatches(spans)).thenReturn(Collections.singleton(batch));
 
-    ResultCode result = testClass.export(spans);
-    assertEquals(ResultCode.SUCCESS, result);
+    CompletableResultCode result = testClass.export(spans);
+    assertTrue(result.isSuccess());
   }
 
   private SpanData createMinimalSpanData() {

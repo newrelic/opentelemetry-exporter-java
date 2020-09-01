@@ -13,7 +13,7 @@ import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SERVICE
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SERVICE_NAME;
 import static io.opentelemetry.common.AttributeValue.stringAttributeValue;
 import static java.util.Collections.singleton;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -24,6 +24,7 @@ import com.newrelic.telemetry.metrics.Count;
 import com.newrelic.telemetry.metrics.Gauge;
 import com.newrelic.telemetry.metrics.MetricBatch;
 import io.opentelemetry.common.Labels;
+import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.data.MetricData.Descriptor;
@@ -31,7 +32,6 @@ import io.opentelemetry.sdk.metrics.data.MetricData.Descriptor.Type;
 import io.opentelemetry.sdk.metrics.data.MetricData.DoublePoint;
 import io.opentelemetry.sdk.metrics.data.MetricData.LongPoint;
 import io.opentelemetry.sdk.metrics.data.MetricData.Point;
-import io.opentelemetry.sdk.metrics.export.MetricExporter.ResultCode;
 import io.opentelemetry.sdk.resources.Resource;
 import java.util.Arrays;
 import java.util.Collection;
@@ -93,11 +93,11 @@ class NewRelicMetricExporterTest {
             .put(COLLECTOR_NAME, "newrelic-opentelemetry-exporter")
             .put(SERVICE_INSTANCE_ID, "instanceId");
 
-    ResultCode result =
+    CompletableResultCode result =
         newRelicMetricExporter.export(
             singleton(MetricData.create(descriptor, resource, libraryInfo, points)));
 
-    assertEquals(ResultCode.SUCCESS, result);
+    assertTrue(result.isSuccess());
 
     InOrder inOrder = inOrder(metricPointAdapter, timeTracker, telemetryClient);
     inOrder
