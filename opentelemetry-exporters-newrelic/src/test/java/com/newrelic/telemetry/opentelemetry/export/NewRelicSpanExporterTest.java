@@ -5,6 +5,7 @@
 
 package com.newrelic.telemetry.opentelemetry.export;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -20,6 +21,7 @@ import io.opentelemetry.trace.Status;
 import io.opentelemetry.trace.TraceId;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -46,7 +48,19 @@ class NewRelicSpanExporterTest {
     when(adapter.adaptToSpanBatches(spans)).thenReturn(Collections.singleton(batch));
 
     CompletableResultCode result = testClass.export(spans);
-    assertTrue(result.isSuccess());
+    assertTrue(result.join(1, TimeUnit.SECONDS).isSuccess());
+  }
+
+  @Test
+  void testExportFailure() {
+    NewRelicSpanExporter testClass = new NewRelicSpanExporter(adapter, sender);
+
+    SpanData inputSpan = createMinimalSpanData();
+    List<SpanData> spans = Collections.singletonList(inputSpan);
+    when(adapter.adaptToSpanBatches(spans)).thenThrow(new RuntimeException("oopsie"));
+
+    CompletableResultCode result = testClass.export(spans);
+    assertFalse(result.join(1, TimeUnit.SECONDS).isSuccess());
   }
 
   private SpanData createMinimalSpanData() {

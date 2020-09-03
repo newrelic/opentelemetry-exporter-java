@@ -19,6 +19,9 @@ import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.Collection;
+import java.util.concurrent.CompletableFuture;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The NewRelicSpanExporter takes a list of Span objects, converts them into a New Relic SpanBatch
@@ -27,6 +30,7 @@ import java.util.Collection;
  * @since 0.1.0
  */
 public class NewRelicSpanExporter implements SpanExporter {
+  private static final Logger logger = LoggerFactory.getLogger(NewRelicSpanExporter.class);
 
   private final SpanBatchAdapter adapter;
   private final TelemetryClient telemetryClient;
@@ -56,9 +60,22 @@ public class NewRelicSpanExporter implements SpanExporter {
    */
   @Override
   public CompletableResultCode export(Collection<SpanData> openTelemetrySpans) {
-    Collection<SpanBatch> spanBatch = adapter.adaptToSpanBatches(openTelemetrySpans);
-    spanBatch.forEach(telemetryClient::sendBatch);
-    return CompletableResultCode.ofSuccess();
+    CompletableResultCode result = new CompletableResultCode();
+    CompletableFuture.runAsync(
+            () -> {
+              Collection<SpanBatch> spanBatch = adapter.adaptToSpanBatches(openTelemetrySpans);
+              spanBatch.forEach(telemetryClient::sendBatch);
+            })
+        .whenComplete(
+            (unused, throwable) -> {
+              if (throwable != null) {
+                logger.warn("New Relic span export failed", throwable);
+                result.fail();
+              } else {
+                result.succeed();
+              }
+            });
+    return result;
   }
 
   @Override

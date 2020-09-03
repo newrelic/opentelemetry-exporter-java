@@ -37,7 +37,7 @@ class SpanBatchAdapter {
   /**
    * Note: the serviceInstanceId passed in here will only be used if the OTel Resource that is
    * associated with a span does not already contain an instance id. See {@link
-   * io.opentelemetry.sdk.resources.ResourceConstants#SERVICE_INSTANCE}.
+   * io.opentelemetry.sdk.resources.ResourceAttributes#SERVICE_INSTANCE}.
    */
   SpanBatchAdapter(Attributes commonAttributes, String serviceInstanceId) {
     this.commonAttributes =

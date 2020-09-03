@@ -13,9 +13,11 @@ import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SERVICE
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SERVICE_NAME;
 import static io.opentelemetry.common.AttributeValue.stringAttributeValue;
 import static java.util.Collections.singleton;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import com.newrelic.telemetry.Attributes;
@@ -35,6 +37,7 @@ import io.opentelemetry.sdk.metrics.data.MetricData.Point;
 import io.opentelemetry.sdk.resources.Resource;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 
@@ -97,7 +100,7 @@ class NewRelicMetricExporterTest {
         newRelicMetricExporter.export(
             singleton(MetricData.create(descriptor, resource, libraryInfo, points)));
 
-    assertTrue(result.isSuccess());
+    assertTrue(result.join(1, TimeUnit.SECONDS).isSuccess());
 
     InOrder inOrder = inOrder(metricPointAdapter, timeTracker, telemetryClient);
     inOrder
@@ -110,5 +113,53 @@ class NewRelicMetricExporterTest {
     inOrder
         .verify(telemetryClient)
         .sendBatch(new MetricBatch(Arrays.asList(metric1, metric2), amendedGlobalAttributes));
+  }
+
+  @Test
+  void testExport_failure() {
+    MetricPointAdapter metricPointAdapter = mock(MetricPointAdapter.class);
+    Attributes globalAttributes = new Attributes().put("globalKey", "globalValue");
+    TelemetryClient telemetryClient = mock(TelemetryClient.class);
+    TimeTracker timeTracker = mock(TimeTracker.class);
+    NewRelicMetricExporter newRelicMetricExporter =
+        new NewRelicMetricExporter(
+            telemetryClient, globalAttributes, timeTracker, metricPointAdapter, "instanceId");
+
+    Descriptor descriptor =
+        Descriptor.create(
+            "metricName",
+            "metricDescription",
+            "units",
+            Type.SUMMARY,
+            Labels.of("constantKey", "constantValue"));
+    Resource resource =
+        Resource.create(
+            io.opentelemetry.common.Attributes.of(SERVICE_NAME, stringAttributeValue("myService")));
+    InstrumentationLibraryInfo libraryInfo =
+        InstrumentationLibraryInfo.create("instrumentationName", "1.0");
+    LongPoint point1 = LongPoint.create(1000, 2000, Labels.of("longLabel", "longValue"), 100L);
+    DoublePoint point2 =
+        DoublePoint.create(2001, 3001, Labels.of("doubleLabel", "doubleValue"), 100.33d);
+    Collection<Point> points = Arrays.asList(point1, point2);
+
+    Attributes updatedAttributes =
+        new Attributes()
+            .put(SERVICE_NAME, "myService")
+            .put("unit", "units")
+            .put("description", "metricDescription")
+            .put(INSTRUMENTATION_VERSION, "1.0")
+            .put(INSTRUMENTATION_NAME, "instrumentationName")
+            .put("constantKey", "constantValue");
+
+    when(metricPointAdapter.buildMetricsFromPoint(
+            descriptor, Type.SUMMARY, updatedAttributes, point1))
+        .thenThrow(new RuntimeException());
+
+    CompletableResultCode result =
+        newRelicMetricExporter.export(
+            singleton(MetricData.create(descriptor, resource, libraryInfo, points)));
+
+    assertFalse(result.join(1, TimeUnit.SECONDS).isSuccess());
+    verifyZeroInteractions(telemetryClient);
   }
 }

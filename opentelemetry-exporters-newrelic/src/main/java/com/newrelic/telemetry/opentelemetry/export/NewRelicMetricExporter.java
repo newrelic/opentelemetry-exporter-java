@@ -29,6 +29,9 @@ import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.Collection;
+import java.util.concurrent.CompletableFuture;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The NewRelicMetricExporter takes a collection of MetricData objects, converts them into a New
@@ -41,6 +44,7 @@ import java.util.Collection;
  * @since 0.3.0
  */
 public class NewRelicMetricExporter implements MetricExporter {
+  private static final Logger logger = LoggerFactory.getLogger(NewRelicMetricExporter.class);
 
   private final Attributes commonAttributes;
   private final TelemetryClient telemetryClient;
@@ -91,6 +95,27 @@ public class NewRelicMetricExporter implements MetricExporter {
 
   @Override
   public CompletableResultCode export(Collection<MetricData> metrics) {
+    CompletableResultCode result = new CompletableResultCode();
+    CompletableFuture.runAsync(
+            () -> {
+              MetricBuffer buffer = buildMetricBatch(metrics);
+              timeTracker.tick();
+              telemetryClient.sendBatch(buffer.createBatch());
+            })
+        .whenComplete(
+            (unused, throwable) -> {
+              if (throwable != null) {
+                logger.warn("New Relic metric export failed", throwable);
+                result.fail();
+              } else {
+                result.succeed();
+              }
+            });
+
+    return result;
+  }
+
+  private MetricBuffer buildMetricBatch(Collection<MetricData> metrics) {
     MetricBuffer buffer = MetricBuffer.builder().attributes(commonAttributes).build();
     for (MetricData metric : metrics) {
       Descriptor descriptor = metric.getDescriptor();
@@ -105,9 +130,7 @@ public class NewRelicMetricExporter implements MetricExporter {
         metricsFromPoint.forEach(buffer::addMetric);
       }
     }
-    timeTracker.tick();
-    telemetryClient.sendBatch(buffer.createBatch());
-    return CompletableResultCode.ofSuccess();
+    return buffer;
   }
 
   @Override
