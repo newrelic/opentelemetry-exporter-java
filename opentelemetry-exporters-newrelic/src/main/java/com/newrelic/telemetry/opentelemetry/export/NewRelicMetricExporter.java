@@ -19,6 +19,7 @@ import com.newrelic.telemetry.TelemetryClient;
 import com.newrelic.telemetry.metrics.Metric;
 import com.newrelic.telemetry.metrics.MetricBatchSender;
 import com.newrelic.telemetry.metrics.MetricBuffer;
+import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.internal.MillisClock;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.data.MetricData.Descriptor;
@@ -89,7 +90,7 @@ public class NewRelicMetricExporter implements MetricExporter {
   }
 
   @Override
-  public ResultCode export(Collection<MetricData> metrics) {
+  public CompletableResultCode export(Collection<MetricData> metrics) {
     MetricBuffer buffer = MetricBuffer.builder().attributes(commonAttributes).build();
     for (MetricData metric : metrics) {
       Descriptor descriptor = metric.getDescriptor();
@@ -106,13 +107,13 @@ public class NewRelicMetricExporter implements MetricExporter {
     }
     timeTracker.tick();
     telemetryClient.sendBatch(buffer.createBatch());
-    return ResultCode.SUCCESS;
+    return CompletableResultCode.ofSuccess();
   }
 
   @Override
-  public ResultCode flush() {
+  public CompletableResultCode flush() {
     // no-op for this exporter
-    return ResultCode.SUCCESS;
+    return CompletableResultCode.ofSuccess();
   }
 
   @Override

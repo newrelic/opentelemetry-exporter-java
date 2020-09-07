@@ -13,6 +13,7 @@ import com.newrelic.telemetry.SpanBatchSenderFactory;
 import com.newrelic.telemetry.TelemetryClient;
 import com.newrelic.telemetry.spans.SpanBatch;
 import com.newrelic.telemetry.spans.SpanBatchSender;
+import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.net.MalformedURLException;
@@ -50,24 +51,26 @@ public class NewRelicSpanExporter implements SpanExporter {
    * export() is the primary interface action method of all SpanExporters.
    *
    * @param openTelemetrySpans A list of spans to export to New Relic trace ingest API
-   * @return A ResultCode that indicates the execution status of the export operation
+   * @return A {@link CompletableResultCode} that indicates the execution status of the export
+   *     operation
    */
   @Override
-  public ResultCode export(Collection<SpanData> openTelemetrySpans) {
+  public CompletableResultCode export(Collection<SpanData> openTelemetrySpans) {
     Collection<SpanBatch> spanBatch = adapter.adaptToSpanBatches(openTelemetrySpans);
     spanBatch.forEach(telemetryClient::sendBatch);
-    return ResultCode.SUCCESS;
+    return CompletableResultCode.ofSuccess();
   }
 
   @Override
-  public ResultCode flush() {
+  public CompletableResultCode flush() {
     // no-op for this exporter
-    return ResultCode.SUCCESS;
+    return CompletableResultCode.ofSuccess();
   }
 
   @Override
-  public void shutdown() {
+  public CompletableResultCode shutdown() {
     telemetryClient.shutdown();
+    return CompletableResultCode.ofSuccess();
   }
 
   /**
