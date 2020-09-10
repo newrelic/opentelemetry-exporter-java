@@ -6,13 +6,12 @@
 package com.newrelic.telemetry.opentelemetry.export.auto;
 
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SERVICE_NAME;
-import static com.newrelic.telemetry.opentelemetry.export.auto.NewRelicConfiguration.*;
 
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.opentelemetry.export.NewRelicMetricExporter;
 import com.newrelic.telemetry.opentelemetry.export.NewRelicMetricExporter.Builder;
-import io.opentelemetry.sdk.extensions.auto.config.Config;
-import io.opentelemetry.sdk.extensions.auto.config.MetricExporterFactory;
+import io.opentelemetry.javaagent.tooling.exporter.ExporterConfig;
+import io.opentelemetry.javaagent.tooling.exporter.MetricExporterFactory;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import java.net.URI;
 
@@ -29,7 +28,7 @@ public class NewRelicMetricExporterFactory implements MetricExporterFactory {
    * @return An implementation of a {@link MetricExporter}
    */
   @Override
-  public MetricExporter fromConfig(Config config) {
+  public MetricExporter fromConfig(ExporterConfig config) {
     NewRelicConfiguration newRelicConfiguration = new NewRelicConfiguration(config);
 
     Builder builder =

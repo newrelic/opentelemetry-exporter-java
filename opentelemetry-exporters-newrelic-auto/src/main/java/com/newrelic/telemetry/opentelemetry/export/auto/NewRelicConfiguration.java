@@ -5,7 +5,7 @@
 
 package com.newrelic.telemetry.opentelemetry.export.auto;
 
-import io.opentelemetry.sdk.extensions.auto.config.Config;
+import io.opentelemetry.javaagent.tooling.exporter.ExporterConfig;
 
 class NewRelicConfiguration {
   static final String NEW_RELIC_API_KEY = "newrelic.api.key";
@@ -19,9 +19,9 @@ class NewRelicConfiguration {
   // for any users who might still be using it.
   static final String NEW_RELIC_URI_OVERRIDE = "newrelic.uri.override";
 
-  private final Config config;
+  private final ExporterConfig config;
 
-  NewRelicConfiguration(Config config) {
+  NewRelicConfiguration(ExporterConfig config) {
     this.config = config;
   }
 
@@ -37,7 +37,7 @@ class NewRelicConfiguration {
   // provided via the Resource in the SDK.  See
   // https://github.com/newrelic/opentelemetry-exporter-java/issues/62
   // for the tracking issue.
-  static String getServiceName(Config config) {
+  static String getServiceName(ExporterConfig config) {
     return config.getString(NEW_RELIC_SERVICE_NAME, DEFAULT_NEW_RELIC_SERVICE_NAME);
   }
 

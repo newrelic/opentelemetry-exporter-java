@@ -157,7 +157,7 @@ java -javaagent:path/to/opentelemetry-javaagent-<version>-all.jar \
 
 If you wish to turn on debug logging for the exporter running in the auto-instrumentation agent, use the following system property:
 ```
--Dio.opentelemetry.auto.slf4j.simpleLogger.log.com.newrelic.telemetry=debug
+-Dio.opentelemetry.javaagent.slf4j.simpleLogger.log.com.newrelic.telemetry=debug
 ```
 
 And, if you wish to enable audit logging for the exporter running in the auto-instrumentaiotn agent, use this system property:
