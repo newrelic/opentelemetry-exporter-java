@@ -7,8 +7,14 @@ plugins {
 apply(plugin = "com.github.johnrengelman.shadow")
 
 dependencies {
+    repositories {
+        maven("https://dl.bintray.com/open-telemetry/maven")
+//    jcenter()
+    }
+
     api(project(":opentelemetry-exporters-newrelic"))
-    implementation("io.opentelemetry:opentelemetry-sdk-extension-auto-config:0.6.0")
+    implementation("io.opentelemetry.instrumentation.auto:opentelemetry-javaagent-tooling:0.8.0")
+    implementation("io.opentelemetry:opentelemetry-sdk:0.8.0")
 
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.4.2")
     testRuntimeOnly("org.slf4j:slf4j-simple:1.7.26")

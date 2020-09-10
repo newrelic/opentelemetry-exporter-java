@@ -13,7 +13,7 @@ import static com.newrelic.telemetry.opentelemetry.export.auto.NewRelicConfigura
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
-import io.opentelemetry.sdk.extensions.auto.config.Config;
+import io.opentelemetry.javaagent.tooling.exporter.ExporterConfig;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,7 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class NewRelicSpanExporterFactoryTest {
 
-  @Mock private Config config;
+  @Mock private ExporterConfig config;
 
   @Test
   void testFromConfig_HappyPath() {

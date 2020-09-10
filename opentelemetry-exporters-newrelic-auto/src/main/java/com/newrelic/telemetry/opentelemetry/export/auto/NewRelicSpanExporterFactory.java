@@ -9,8 +9,8 @@ import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SERVICE
 
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.opentelemetry.export.NewRelicSpanExporter;
-import io.opentelemetry.sdk.extensions.auto.config.Config;
-import io.opentelemetry.sdk.extensions.auto.config.SpanExporterFactory;
+import io.opentelemetry.javaagent.tooling.exporter.ExporterConfig;
+import io.opentelemetry.javaagent.tooling.exporter.SpanExporterFactory;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.net.URI;
 
@@ -26,7 +26,7 @@ public class NewRelicSpanExporterFactory implements SpanExporterFactory {
    * @return An implementation of a {@link SpanExporter}
    */
   @Override
-  public SpanExporter fromConfig(Config config) {
+  public SpanExporter fromConfig(ExporterConfig config) {
     NewRelicConfiguration newRelicConfiguration = new NewRelicConfiguration(config);
     NewRelicSpanExporter.Builder newRelicSpanExporterBuilder =
         NewRelicSpanExporter.newBuilder()
