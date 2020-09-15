@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Coming soon
 
+## [0.8.1] - 2020-09-10
+- Fixes the inability to use the exporter with the auto-instrumentation agent version 0.8.0
+
 ## [0.8.0] - 2020-09-08
 - **BREAKING CHANGE** :: URI OVERRIDES THAT DO NOT HAVE A PATH COMPONENT WILL CAUSE YOUR SENDS TO FAIL.  Please specify a full URI including path component when doing a uriOverride.
 - Support for version 0.8.0 of OpenTelemetry Java
