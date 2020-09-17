@@ -12,6 +12,8 @@ dependencies {
 //    jcenter()
     }
 
+    annotationProcessor("com.google.auto.service:auto-service:1.0-rc7")
+    api("com.google.auto.service:auto-service-annotations:1.0-rc7")
     api(project(":opentelemetry-exporters-newrelic"))
     implementation("io.opentelemetry.instrumentation.auto:opentelemetry-javaagent-tooling:0.8.0")
     implementation("io.opentelemetry:opentelemetry-sdk:0.8.0")

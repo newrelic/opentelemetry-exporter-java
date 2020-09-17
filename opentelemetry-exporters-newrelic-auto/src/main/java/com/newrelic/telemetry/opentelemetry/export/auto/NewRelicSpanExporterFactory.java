@@ -7,6 +7,7 @@ package com.newrelic.telemetry.opentelemetry.export.auto;
 
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SERVICE_NAME;
 
+import com.google.auto.service.AutoService;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.opentelemetry.export.NewRelicSpanExporter;
 import io.opentelemetry.javaagent.tooling.exporter.ExporterConfig;
@@ -17,6 +18,7 @@ import java.net.URI;
 /**
  * A {@link SpanExporterFactory} that creates a {@link SpanExporter} that sends spans to New Relic.
  */
+@AutoService(SpanExporterFactory.class)
 public class NewRelicSpanExporterFactory implements SpanExporterFactory {
 
   /**
