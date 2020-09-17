@@ -7,6 +7,7 @@ package com.newrelic.telemetry.opentelemetry.export.auto;
 
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.SERVICE_NAME;
 
+import com.google.auto.service.AutoService;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.opentelemetry.export.NewRelicMetricExporter;
 import com.newrelic.telemetry.opentelemetry.export.NewRelicMetricExporter.Builder;
@@ -19,6 +20,7 @@ import java.net.URI;
  * A {@link MetricExporterFactory} that creates a {@link MetricExporter} that sends metrics to New
  * Relic.
  */
+@AutoService(MetricExporterFactory.class)
 public class NewRelicMetricExporterFactory implements MetricExporterFactory {
 
   /**
