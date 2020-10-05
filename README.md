@@ -1,3 +1,5 @@
+[![Community Project header](https://github.com/newrelic/open-source-office/raw/master/examples/categories/images/Community_Project.png)](https://github.com/newrelic/open-source-office/blob/master/examples/categories/index.md#community-project)
+
 # New Relic OpenTelemetry exporter
 An [OpenTelemetry](https://github.com/open-telemetry/opentelemetry-java) reporter for sending spans and metrics
 to New Relic using the New Relic Java Telemetry SDK.
@@ -12,27 +14,11 @@ To send spans or metrics to New Relic, you will need an [Insights Insert API Key
 Note: There is an example [BasicExample.java](opentelemetry-exporters-newrelic/src/test/java/com/newrelic/telemetry/opentelemetry/examples/BasicExample.java)  
 in the test source code hierarchy that matches this example code. It should be considered as the canonical code for this example, since OpenTelemetry internal SDK APIs are still a work in progress.
 
-#### Quickstart
-If you want to get started quickly, the easiest way to configure the OpenTelemetry SDK and the
-New Relic exporters is like this:
+## Installation
 
-```java
-    NewRelicExporters.Configuration configuration =
-      new NewRelicExporters.Configuration(apiKey, "My Service Name")
-        .enableAuditLogging()
-        .collectionIntervalSeconds(10);
-    NewRelicExporters.start(configuration);
-```
+If you need more flexibility, you can set up the individual exporters and the SDK by hand:
 
-Be sure to shut down the exporters when your application finishes:
-
-```
-   NewRelicExporters.shutdown();
-```
-
-#### If you need more flexibility, you can set up the individual exporters and the SDK by hand:
-
-##### For spans:
+### For spans:
 
 Important: If you are using [auto-instrumentation](#auto-instrumentation), or you have used the
 [quickstart](#quickstart) you should skip the configuration of the SDK, and go right to the next
@@ -56,7 +42,7 @@ section.
     tracerSdkProvider.addSpanProcessor(spanProcessor);
 ```
 
-##### Use the APIs to record some spans
+### Use the APIs to record some spans
 
 1. Create the OpenTelemetry `Tracer` and use it for recording spans.
 ```java
@@ -72,7 +58,7 @@ section.
 
 2. Find your spans in New Relic One: go to https://one.newrelic.com/ and select **Distributed Tracing**.
 
-##### For metrics:
+### For metrics:
 
 Important: If you are using [auto-instrumentation](#auto-instrumentation), or you have used the
 [quickstart](#quickstart) you should skip the configuration of the SDK, and go right to the next
@@ -100,7 +86,7 @@ section.
             .build();
 ```
 
-##### Use the APIs to record some metrics
+### Use the APIs to record some metrics
 
 1. Create a sample Meter:
 
@@ -194,7 +180,26 @@ implementation("com.newrelic.telemetry:telemetry-core:0.7.0")
 implementation("com.newrelic.telemetry:telemetry-http-okhttp:0.7.0")
 ```
 
-### Building
+## Getting Started
+
+If you want to get started quickly, the easiest way is to configure the OpenTelemetry SDK and the New Relic exporters like this:
+
+```java
+    NewRelicExporters.Configuration configuration =
+      new NewRelicExporters.Configuration(apiKey, "My Service Name")
+        .enableAuditLogging()
+        .collectionIntervalSeconds(10);
+    NewRelicExporters.start(configuration);
+```
+
+Be sure to shut down the exporters when your application finishes:
+
+```
+   NewRelicExporters.shutdown();
+```
+
+## Building
+
 CI builds are run on Github Actions:
 
 ![PR build](https://github.com/newrelic/opentelemetry-exporter-java/workflows/Java%20PR%20build%20(gradle)/badge.svg?branch=main)
@@ -207,8 +212,44 @@ To compile, run the tests and build the jar:
 
 `$ ./gradlew build`
 
-### Contributing
-Full details are available in our [CONTRIBUTING.md file](CONTRIBUTING.md). We'd love to get your contributions to improve the New Relic OpenTelemetry exporter! Keep in mind when you submit your pull request, you'll need to sign the CLA via the click-through using CLA-Assistant. You only have to sign the CLA one time per project. To execute our corporate CLA, which is required if your contribution is on behalf of a company, or if you have any questions, please drop us an email at open-source@newrelic.com.
+## Support
+
+Should you need assistance with New Relic products, you are in good hands with several support channels.
+
+If the issue has been confirmed as a bug or is a feature request, file a GitHub issue.
+
+**Support Channels**
+
+* [New Relic Documentation](https://docs.newrelic.com/docs/integrations/open-source-telemetry-integrations/open-source-telemetry-integration-list/new-relics-opentelemetry-integration): Comprehensive guidance for using our platform
+* [New Relic Community](https://discuss.newrelic.com/tags/javaagent): The best place to engage in troubleshooting questions
+* [New Relic Developer](https://developer.newrelic.com/): Resources for building a custom observability applications
+* [New Relic University](https://learn.newrelic.com/): A range of online training for New Relic users of every level
+
+## Privacy
+At New Relic we take your privacy and the security of your information seriously, and are committed to protecting your information. We must emphasize the importance of not sharing personal data in public forums, and ask all users to scrub logs and diagnostic information for sensitive information, whether personal, proprietary, or otherwise.
+
+We define “Personal Data” as any information relating to an identified or identifiable individual, including, for example, your name, phone number, post code or zip code, Device ID, IP address, and email address.
+
+For more information, review [New Relic’s General Data Privacy Notice](https://newrelic.com/termsandconditions/privacy).
+
+## Contribute
+
+We encourage your contributions to improve [project name]! Keep in mind that when you submit your pull request, you'll need to sign the CLA via the click-through using CLA-Assistant. You only have to sign the CLA one time per project.
+
+If you have any questions, or to execute our corporate CLA (which is required if your contribution is on behalf of a company), drop us an email at opensource@newrelic.com.
+
+**A note about vulnerabilities**
+
+As noted in our [security policy](../../security/policy), New Relic is committed to the privacy and security of our customers and their data. We believe that providing coordinated disclosure by security researchers and engaging with the security community are important means to achieve our security goals.
+
+If you believe you have found a security vulnerability in this project or any of New Relic's products or websites, we welcome and greatly appreciate you reporting it to New Relic through [HackerOne](https://hackerone.com/newrelic).
+
+If you would like to contribute to this project, review [these guidelines](./CONTRIBUTING.md).
+
+To [all contributors](https://github.com/newrelic/opentelemetry-exporter-java/graphs/contributors), we thank you!  Without your contribution, this project would not be what it is today.  We also host a community project page dedicated to [OpenTelemetry Exporter (Java)](https://opensource.newrelic.com/projects/newrelic/opentelemetry-exporter-java).
+
+## License
+[Project Name] is licensed under the [Apache 2.0](http://apache.org/licenses/LICENSE-2.0.txt) License.
 
 [javadoc-image]: https://www.javadoc.io/badge/com.newrelic.telemetry/opentelemetry-exporters-newrelic.svg
 [javadoc-url]: https://www.javadoc.io/doc/com.newrelic.telemetry/opentelemetry-exporters-newrelic
