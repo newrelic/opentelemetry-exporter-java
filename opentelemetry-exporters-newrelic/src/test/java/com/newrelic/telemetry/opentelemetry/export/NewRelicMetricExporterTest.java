@@ -82,8 +82,8 @@ class NewRelicMetricExporterTest {
             "metricDescription",
             "units",
             MetricData.Type.SUMMARY,
-            List.of(point1, point2));
-    ;
+            Arrays.asList(point1, point2));
+
     when(metricPointAdapter.buildMetricsFromPoint(metricData, updatedAttributes, point1))
         .thenReturn(singleton(metric1));
     when(metricPointAdapter.buildMetricsFromPoint(metricData, updatedAttributes, point2))
