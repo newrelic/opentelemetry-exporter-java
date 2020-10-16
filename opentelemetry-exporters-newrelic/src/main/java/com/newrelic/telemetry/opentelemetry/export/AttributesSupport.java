@@ -53,7 +53,7 @@ public class AttributesSupport {
                 attributes.put(key.getKey(), (String) value);
                 break;
               case BOOLEAN:
-                attributes.put(key.getKey(), (boolean) value);
+                attributes.put(key.getKey(), (Boolean) value);
                 break;
               case LONG:
               case DOUBLE:
