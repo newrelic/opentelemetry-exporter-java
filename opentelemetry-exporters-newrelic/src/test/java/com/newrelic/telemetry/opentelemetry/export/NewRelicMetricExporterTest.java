@@ -33,7 +33,6 @@ import io.opentelemetry.sdk.metrics.data.MetricData.Point;
 import io.opentelemetry.sdk.resources.Resource;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 
