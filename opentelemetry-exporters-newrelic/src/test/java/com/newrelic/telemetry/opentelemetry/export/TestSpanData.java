@@ -12,10 +12,8 @@ import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.trace.Span;
 import io.opentelemetry.trace.SpanId;
-import io.opentelemetry.trace.StatusCanonicalCode;
 import io.opentelemetry.trace.TraceFlags;
 import io.opentelemetry.trace.TraceState;
-
 import java.util.List;
 
 public class TestSpanData implements SpanData {

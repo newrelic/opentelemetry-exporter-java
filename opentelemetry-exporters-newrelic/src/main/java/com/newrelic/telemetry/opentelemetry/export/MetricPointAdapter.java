@@ -16,11 +16,11 @@ import com.newrelic.telemetry.metrics.Metric;
 import com.newrelic.telemetry.metrics.Summary;
 import io.opentelemetry.common.Labels;
 import io.opentelemetry.sdk.metrics.data.MetricData;
-import io.opentelemetry.sdk.metrics.data.MetricData.Type;
 import io.opentelemetry.sdk.metrics.data.MetricData.DoublePoint;
 import io.opentelemetry.sdk.metrics.data.MetricData.LongPoint;
 import io.opentelemetry.sdk.metrics.data.MetricData.Point;
 import io.opentelemetry.sdk.metrics.data.MetricData.SummaryPoint;
+import io.opentelemetry.sdk.metrics.data.MetricData.Type;
 import io.opentelemetry.sdk.metrics.data.MetricData.ValueAtPercentile;
 import java.util.Collection;
 import java.util.HashMap;
@@ -59,7 +59,8 @@ public class MetricPointAdapter {
     return type != Type.NON_MONOTONIC_DOUBLE && type != Type.NON_MONOTONIC_LONG;
   }
 
-  private Collection<Metric> buildDoublePointMetrics(MetricData metric, Attributes attributes, DoublePoint point) {
+  private Collection<Metric> buildDoublePointMetrics(
+      MetricData metric, Attributes attributes, DoublePoint point) {
 
     double value = point.getValue();
     if (isNonMonotonic(metric)) {
@@ -68,10 +69,12 @@ public class MetricPointAdapter {
               new Key(metric, point.getLabels()), d -> new DeltaDoubleCounter());
       value = deltaDoubleCounter.delta(point);
     }
-    return buildMetricsFromSimpleType(metric, attributes, value, point.getEpochNanos(), timeTracker.getPreviousTime());
+    return buildMetricsFromSimpleType(
+        metric, attributes, value, point.getEpochNanos(), timeTracker.getPreviousTime());
   }
 
-  private Collection<Metric> buildLongPointMetrics(MetricData metric, Attributes attributes, LongPoint point) {
+  private Collection<Metric> buildLongPointMetrics(
+      MetricData metric, Attributes attributes, LongPoint point) {
     long value = point.getValue();
     if (isNonMonotonic(metric)) {
       DeltaLongCounter deltaLongCounter =
@@ -112,7 +115,8 @@ public class MetricPointAdapter {
     return emptyList();
   }
 
-  private Collection<Metric> buildSummaryPointMetrics(MetricData metric, Attributes attributes, SummaryPoint point) {
+  private Collection<Metric> buildSummaryPointMetrics(
+      MetricData metric, Attributes attributes, SummaryPoint point) {
     List<ValueAtPercentile> percentileValues = point.getPercentileValues();
 
     double min = Double.NaN;
@@ -165,11 +169,11 @@ public class MetricPointAdapter {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
       Key key = (Key) o;
-      return name.equals(key.name) &&
-              Objects.equals(description, key.description) &&
-              Objects.equals(unit, key.unit) &&
-              type == key.type &&
-              Objects.equals(labels, key.labels);
+      return name.equals(key.name)
+          && Objects.equals(description, key.description)
+          && Objects.equals(unit, key.unit)
+          && type == key.type
+          && Objects.equals(labels, key.labels);
     }
 
     @Override

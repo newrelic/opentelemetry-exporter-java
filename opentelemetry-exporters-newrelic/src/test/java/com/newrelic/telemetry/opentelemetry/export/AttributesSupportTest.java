@@ -12,9 +12,8 @@ import io.opentelemetry.common.AttributeKey;
 import io.opentelemetry.common.ReadableAttributes;
 import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
 import io.opentelemetry.sdk.resources.Resource;
-import org.junit.jupiter.api.Test;
-
 import java.util.Arrays;
+import org.junit.jupiter.api.Test;
 
 class AttributesSupportTest {
 
@@ -64,9 +63,12 @@ class AttributesSupportTest {
     Attributes attributes = new Attributes().put("a", "b");
     ReadableAttributes resourceAttributes =
         io.opentelemetry.common.Attributes.of(
-                AttributeKey.stringKey("r1"), "v1",
-                AttributeKey.longKey("r2"), 23L,
-                AttributeKey.booleanKey("r3"), true);
+            AttributeKey.stringKey("r1"),
+            "v1",
+            AttributeKey.longKey("r2"),
+            23L,
+            AttributeKey.booleanKey("r3"),
+            true);
     Attributes expected =
         new Attributes().put("a", "b").put("r1", "v1").put("r2", 23L).put("r3", true);
     Resource resource = mock(Resource.class);
@@ -80,9 +82,12 @@ class AttributesSupportTest {
     Attributes attributes = new Attributes().put("r1", "v77");
     ReadableAttributes resourceAttributes =
         io.opentelemetry.common.Attributes.of(
-            AttributeKey.stringKey("r1"), "v1",
-            AttributeKey.longKey("r2"), 23L,
-            AttributeKey.booleanKey("r3"), true);
+            AttributeKey.stringKey("r1"),
+            "v1",
+            AttributeKey.longKey("r2"),
+            23L,
+            AttributeKey.booleanKey("r3"),
+            true);
     Attributes expected = new Attributes().put("r1", "v1").put("r2", 23L).put("r3", true);
     Resource resource = mock(Resource.class);
     when(resource.getAttributes()).thenReturn(resourceAttributes);
@@ -95,11 +100,16 @@ class AttributesSupportTest {
     Attributes attrs = new Attributes().put("y", "z");
     ReadableAttributes original =
         io.opentelemetry.common.Attributes.of(
-            AttributeKey.stringKey("r1"), "v1",
-            AttributeKey.longKey("r2"), 23L,
-            AttributeKey.booleanKey("r3"), true,
-            AttributeKey.doubleKey( "r4"), 23.7d,
-              AttributeKey.doubleArrayKey("r5"), Arrays.asList(12d, 11d, 9d));
+            AttributeKey.stringKey("r1"),
+            "v1",
+            AttributeKey.longKey("r2"),
+            23L,
+            AttributeKey.booleanKey("r3"),
+            true,
+            AttributeKey.doubleKey("r4"),
+            23.7d,
+            AttributeKey.doubleArrayKey("r5"),
+            Arrays.asList(12d, 11d, 9d));
     Attributes expected =
         attrs.copy().put("r1", "v1").put("r2", 23L).put("r3", true).put("r4", 23.7d);
     AttributesSupport.putInAttributes(attrs, original);

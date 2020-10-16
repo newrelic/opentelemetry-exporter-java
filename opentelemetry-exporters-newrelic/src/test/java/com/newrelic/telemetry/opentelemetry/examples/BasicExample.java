@@ -58,11 +58,11 @@ public class BasicExample {
             .build();
 
     LongUpDownCounter upDownCounter =
-            meter.longUpDownCounterBuilder("jim")
-                    .setDescription("some good testing")
-                    .setUnit("1")
-                    .build();
-
+        meter
+            .longUpDownCounterBuilder("jim")
+            .setDescription("some good testing")
+            .setUnit("1")
+            .build();
 
     // 5. Optionally, you can pre-bind a set of labels, rather than passing them in every time.
     BoundLongValueRecorder boundTimer = spanTimer.bind(Labels.of("spanName", "testSpan"));
@@ -76,7 +76,10 @@ public class BasicExample {
   }
 
   private static void doSomeSimulatedWork(
-      Tracer tracer, LongCounter spanCounter, LongUpDownCounter upDownCounter, BoundLongValueRecorder boundTimer)
+      Tracer tracer,
+      LongCounter spanCounter,
+      LongUpDownCounter upDownCounter,
+      BoundLongValueRecorder boundTimer)
       throws InterruptedException {
     Random random = new Random();
     for (int i = 0; i < 10; i++) {
@@ -89,7 +92,7 @@ public class BasicExample {
           span.setStatus(StatusCanonicalCode.ERROR, "internalError");
         }
         spanCounter.add(1, Labels.of("spanName", "testSpan", "isItAnError", "" + markAsError));
-        upDownCounter.add(random.nextInt(100)-50);
+        upDownCounter.add(random.nextInt(100) - 50);
         // do some work
         Thread.sleep(random.nextInt(1000));
         span.end();

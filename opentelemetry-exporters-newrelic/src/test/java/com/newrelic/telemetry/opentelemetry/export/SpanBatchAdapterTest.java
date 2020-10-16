@@ -25,9 +25,7 @@ import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.data.ImmutableStatus;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.trace.Span.Kind;
-import io.opentelemetry.trace.SpanId;
 import io.opentelemetry.trace.StatusCanonicalCode;
-import io.opentelemetry.trace.TraceId;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -113,8 +111,8 @@ class SpanBatchAdapterTest {
     Resource resource2 =
         Resource.create(
             io.opentelemetry.common.Attributes.of(
-                    AttributeKey.stringKey("host"), "efgh",
-                    AttributeKey.stringKey("datacenter"), "useast-1"));
+                AttributeKey.stringKey("host"), "efgh",
+                AttributeKey.stringKey("datacenter"), "useast-1"));
 
     SpanData inputSpan1 =
         TestSpanData.newBuilder()
@@ -223,11 +221,14 @@ class SpanBatchAdapterTest {
             .setEndEpochNanos(1_000_456_001_100L)
             .setAttributes(
                 io.opentelemetry.common.Attributes.of(
-                        AttributeKey.booleanKey("myBooleanKey"), true,
-                        AttributeKey.longKey("myIntKey"), 123L,
-                        AttributeKey.stringKey("myStringKey"), "attrValue",
-                        AttributeKey.doubleKey("myDoubleKey"), 123.45)
-            )
+                    AttributeKey.booleanKey("myBooleanKey"),
+                    true,
+                    AttributeKey.longKey("myIntKey"),
+                    123L,
+                    AttributeKey.stringKey("myStringKey"),
+                    "attrValue",
+                    AttributeKey.doubleKey("myDoubleKey"),
+                    123.45))
             .setName("spanName")
             .setKind(Kind.INTERNAL)
             .setStatus(ImmutableStatus.OK)
@@ -235,10 +236,7 @@ class SpanBatchAdapterTest {
             .setResource(
                 Resource.create(
                     io.opentelemetry.common.Attributes.of(
-                        AttributeKey.stringKey(AttributeNames.SERVICE_INSTANCE_ID), "1234.5678"
-                    )
-                )
-            )
+                        AttributeKey.stringKey(AttributeNames.SERVICE_INSTANCE_ID), "1234.5678")))
             .build();
 
     Collection<SpanBatch> result =
@@ -283,7 +281,8 @@ class SpanBatchAdapterTest {
     SpanBatchAdapter testClass =
         new SpanBatchAdapter(new Attributes().put("host", "localhost"), "instanceId");
 
-    SpanData inputSpan = buildSpan(ImmutableStatus.create(StatusCanonicalCode.ERROR, "it's broken"));
+    SpanData inputSpan =
+        buildSpan(ImmutableStatus.create(StatusCanonicalCode.ERROR, "it's broken"));
 
     Collection<SpanBatch> result =
         testClass.adaptToSpanBatches(Collections.singletonList(inputSpan));
