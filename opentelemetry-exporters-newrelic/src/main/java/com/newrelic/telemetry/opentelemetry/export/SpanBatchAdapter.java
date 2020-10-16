@@ -24,7 +24,6 @@ import io.opentelemetry.common.ReadableAttributes;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.trace.SpanId;
-import io.opentelemetry.trace.Status;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +36,7 @@ class SpanBatchAdapter {
   /**
    * Note: the serviceInstanceId passed in here will only be used if the OTel Resource that is
    * associated with a span does not already contain an instance id. See {@link
-   * io.opentelemetry.sdk.resources.ResourceConstants#SERVICE_INSTANCE}.
+   * io.opentelemetry.sdk.resources.ResourceAttributes#SERVICE_INSTANCE}.
    */
   SpanBatchAdapter(Attributes commonAttributes, String serviceInstanceId) {
     this.commonAttributes =
@@ -70,10 +69,10 @@ class SpanBatchAdapter {
 
   private static com.newrelic.telemetry.spans.Span makeNewRelicSpan(SpanData span) {
     SpanBuilder spanBuilder =
-        com.newrelic.telemetry.spans.Span.builder(span.getSpanId().toLowerBase16())
+        com.newrelic.telemetry.spans.Span.builder(span.getSpanId())
             .name(span.getName().isEmpty() ? null : span.getName())
             .parentId(makeParentSpanId(span.getParentSpanId()))
-            .traceId(span.getTraceId().toLowerBase16())
+            .traceId(span.getTraceId())
             .attributes(generateSpanAttributes(span));
 
     spanBuilder.timestamp(calculateTimestampMillis(span));
@@ -81,9 +80,9 @@ class SpanBatchAdapter {
     return spanBuilder.build();
   }
 
-  private static String makeParentSpanId(SpanId parentSpanId) {
-    if (parentSpanId.isValid()) {
-      return parentSpanId.toLowerBase16();
+  private static String makeParentSpanId(String parentSpanId) {
+    if (SpanId.isValid(parentSpanId)) {
+      return parentSpanId;
     }
     return null;
   }
@@ -109,14 +108,14 @@ class SpanBatchAdapter {
   }
 
   private static Attributes addPossibleErrorAttribute(SpanData span, Attributes attributes) {
-    Status status = span.getStatus();
+    SpanData.Status status = span.getStatus();
     if (!status.isOk()) {
       attributes.put(ERROR_MESSAGE, getErrorMessage(status));
     }
     return attributes;
   }
 
-  private static String getErrorMessage(Status status) {
+  private static String getErrorMessage(SpanData.Status status) {
     String description = status.getDescription();
     return isNullOrEmpty(description) ? status.getCanonicalCode().name() : description;
   }

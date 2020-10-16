@@ -8,11 +8,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.newrelic.telemetry.Attributes;
-import io.opentelemetry.common.AttributeValue;
+import io.opentelemetry.common.AttributeKey;
 import io.opentelemetry.common.ReadableAttributes;
 import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
 import io.opentelemetry.sdk.resources.Resource;
 import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
 
 class AttributesSupportTest {
 
@@ -62,9 +64,9 @@ class AttributesSupportTest {
     Attributes attributes = new Attributes().put("a", "b");
     ReadableAttributes resourceAttributes =
         io.opentelemetry.common.Attributes.of(
-            "r1", AttributeValue.stringAttributeValue("v1"),
-            "r2", AttributeValue.longAttributeValue(23),
-            "r3", AttributeValue.booleanAttributeValue(true));
+                AttributeKey.stringKey("r1"), "v1",
+                AttributeKey.longKey("r2"), 23L,
+                AttributeKey.booleanKey("r3"), true);
     Attributes expected =
         new Attributes().put("a", "b").put("r1", "v1").put("r2", 23L).put("r3", true);
     Resource resource = mock(Resource.class);
@@ -78,9 +80,9 @@ class AttributesSupportTest {
     Attributes attributes = new Attributes().put("r1", "v77");
     ReadableAttributes resourceAttributes =
         io.opentelemetry.common.Attributes.of(
-            "r1", AttributeValue.stringAttributeValue("v1"),
-            "r2", AttributeValue.longAttributeValue(23),
-            "r3", AttributeValue.booleanAttributeValue(true));
+            AttributeKey.stringKey("r1"), "v1",
+            AttributeKey.longKey("r2"), 23L,
+            AttributeKey.booleanKey("r3"), true);
     Attributes expected = new Attributes().put("r1", "v1").put("r2", 23L).put("r3", true);
     Resource resource = mock(Resource.class);
     when(resource.getAttributes()).thenReturn(resourceAttributes);
@@ -91,15 +93,13 @@ class AttributesSupportTest {
   @Test
   void putInAttributes_allTypes() {
     Attributes attrs = new Attributes().put("y", "z");
-    AttributeValue superBrokenValue = AttributeValue.arrayAttributeValue(12d, 11d, 9d);
-
     ReadableAttributes original =
         io.opentelemetry.common.Attributes.of(
-            "r1", AttributeValue.stringAttributeValue("v1"),
-            "r2", AttributeValue.longAttributeValue(23),
-            "r3", AttributeValue.booleanAttributeValue(true),
-            "r4", AttributeValue.doubleAttributeValue(23.7),
-            "r5", superBrokenValue);
+            AttributeKey.stringKey("r1"), "v1",
+            AttributeKey.longKey("r2"), 23L,
+            AttributeKey.booleanKey("r3"), true,
+            AttributeKey.doubleKey( "r4"), 23.7d,
+              AttributeKey.doubleArrayKey("r5"), Arrays.asList(12d, 11d, 9d));
     Attributes expected =
         attrs.copy().put("r1", "v1").put("r2", 23L).put("r3", true).put("r4", 23.7d);
     AttributesSupport.putInAttributes(attrs, original);

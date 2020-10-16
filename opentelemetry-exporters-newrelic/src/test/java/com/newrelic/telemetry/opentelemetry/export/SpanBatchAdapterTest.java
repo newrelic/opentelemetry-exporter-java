@@ -19,13 +19,14 @@ import static org.mockito.Mockito.when;
 import com.google.common.collect.Sets;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.spans.SpanBatch;
-import io.opentelemetry.common.AttributeValue;
+import io.opentelemetry.common.AttributeKey;
 import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
 import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.sdk.trace.data.ImmutableStatus;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.trace.Span.Kind;
 import io.opentelemetry.trace.SpanId;
-import io.opentelemetry.trace.Status;
+import io.opentelemetry.trace.StatusCanonicalCode;
 import io.opentelemetry.trace.TraceId;
 import java.util.Arrays;
 import java.util.Collection;
@@ -36,12 +37,9 @@ import org.junit.jupiter.api.Test;
 
 class SpanBatchAdapterTest {
 
-  private final String hexSpanId = "000000000012d685";
-  private final SpanId spanId = SpanId.fromLowerBase16(hexSpanId, 0);
-  private final String hexTraceId = "000000000063d76f0000000037fe0393";
-  private final TraceId traceId = TraceId.fromLowerBase16(hexTraceId, 0);
-  private final String hexParentSpanId = "000000002e5a40d9";
-  private final SpanId parentSpanId = SpanId.fromLowerBase16(hexParentSpanId, 0);
+  private final String spanId = "000000000012d685";
+  private final String traceId = "000000000063d76f0000000037fe0393";
+  private final String parentSpanId = "000000002e5a40d9";
 
   @Test
   void testSendBatchWithSingleSpan() {
@@ -55,11 +53,11 @@ class SpanBatchAdapterTest {
             .put(INSTRUMENTATION_VERSION, "3.14.159")
             .put(SPAN_KIND, "SERVER");
     com.newrelic.telemetry.spans.Span span1 =
-        com.newrelic.telemetry.spans.Span.builder(hexSpanId)
-            .traceId(hexTraceId)
+        com.newrelic.telemetry.spans.Span.builder(spanId)
+            .traceId(traceId)
             .timestamp(1000456)
             .name("spanName")
-            .parentId(hexParentSpanId)
+            .parentId(parentSpanId)
             .durationMs(1333.020111d)
             .attributes(expectedAttributes)
             .build();
@@ -78,10 +76,8 @@ class SpanBatchAdapterTest {
     Resource inputResource =
         Resource.create(
             io.opentelemetry.common.Attributes.of(
-                "host",
-                AttributeValue.stringAttributeValue("bar"),
-                "datacenter",
-                AttributeValue.stringAttributeValue("boo")));
+                AttributeKey.stringKey("host"), "bar",
+                AttributeKey.stringKey("datacenter"), "boo"));
     SpanData inputSpan =
         TestSpanData.newBuilder()
             .setTraceId(traceId)
@@ -90,7 +86,7 @@ class SpanBatchAdapterTest {
             .setParentSpanId(parentSpanId)
             .setEndEpochNanos(1_001_789_021_111L)
             .setName("spanName")
-            .setStatus(Status.OK)
+            .setStatus(ImmutableStatus.OK)
             .setResource(inputResource)
             .setInstrumentationLibraryInfo(instrumentationLibraryInfo)
             .setKind(Kind.SERVER)
@@ -111,18 +107,14 @@ class SpanBatchAdapterTest {
     Resource resource1 =
         Resource.create(
             io.opentelemetry.common.Attributes.of(
-                "host",
-                AttributeValue.stringAttributeValue("abcd"),
-                "datacenter",
-                AttributeValue.stringAttributeValue("useast-2")));
+                AttributeKey.stringKey("host"), "abcd",
+                AttributeKey.stringKey("datacenter"), "useast-2"));
 
     Resource resource2 =
         Resource.create(
             io.opentelemetry.common.Attributes.of(
-                "host",
-                AttributeValue.stringAttributeValue("efgh"),
-                "datacenter",
-                AttributeValue.stringAttributeValue("useast-1")));
+                    AttributeKey.stringKey("host"), "efgh",
+                    AttributeKey.stringKey("datacenter"), "useast-1"));
 
     SpanData inputSpan1 =
         TestSpanData.newBuilder()
@@ -132,7 +124,7 @@ class SpanBatchAdapterTest {
             .setParentSpanId(parentSpanId)
             .setEndEpochNanos(1_001_789_021_111L)
             .setName("spanName")
-            .setStatus(Status.OK)
+            .setStatus(ImmutableStatus.OK)
             .setResource(resource1)
             .setInstrumentationLibraryInfo(instrumentationLibraryInfo)
             .setKind(Kind.SERVER)
@@ -147,7 +139,7 @@ class SpanBatchAdapterTest {
             .setParentSpanId(parentSpanId)
             .setEndEpochNanos(1_001_789_021_111L)
             .setName("spanName")
-            .setStatus(Status.OK)
+            .setStatus(ImmutableStatus.OK)
             .setResource(resource2)
             .setInstrumentationLibraryInfo(instrumentationLibraryInfo)
             .setKind(Kind.SERVER)
@@ -161,11 +153,11 @@ class SpanBatchAdapterTest {
             .put(SPAN_KIND, "SERVER");
 
     com.newrelic.telemetry.spans.Span outputSpan =
-        com.newrelic.telemetry.spans.Span.builder(hexSpanId)
-            .traceId(hexTraceId)
+        com.newrelic.telemetry.spans.Span.builder(spanId)
+            .traceId(traceId)
             .timestamp(1000456)
             .name("spanName")
-            .parentId(hexParentSpanId)
+            .parentId(parentSpanId)
             .durationMs(1333.020111d)
             .attributes(expectedAttributes)
             .build();
@@ -199,8 +191,8 @@ class SpanBatchAdapterTest {
   @Test
   void testAttributes() {
     com.newrelic.telemetry.spans.Span resultSpan =
-        com.newrelic.telemetry.spans.Span.builder(hexSpanId)
-            .traceId(hexTraceId)
+        com.newrelic.telemetry.spans.Span.builder(spanId)
+            .traceId(traceId)
             .timestamp(1000456)
             .name("spanName")
             .durationMs(0.0001)
@@ -231,23 +223,22 @@ class SpanBatchAdapterTest {
             .setEndEpochNanos(1_000_456_001_100L)
             .setAttributes(
                 io.opentelemetry.common.Attributes.of(
-                    "myBooleanKey",
-                    AttributeValue.booleanAttributeValue(true),
-                    "myIntKey",
-                    AttributeValue.longAttributeValue(123),
-                    "myStringKey",
-                    AttributeValue.stringAttributeValue("attrValue"),
-                    "myDoubleKey",
-                    AttributeValue.doubleAttributeValue(123.45)))
+                        AttributeKey.booleanKey("myBooleanKey"), true,
+                        AttributeKey.longKey("myIntKey"), 123L,
+                        AttributeKey.stringKey("myStringKey"), "attrValue",
+                        AttributeKey.doubleKey("myDoubleKey"), 123.45)
+            )
             .setName("spanName")
             .setKind(Kind.INTERNAL)
-            .setStatus(Status.OK)
+            .setStatus(ImmutableStatus.OK)
             .setHasEnded(true)
             .setResource(
                 Resource.create(
                     io.opentelemetry.common.Attributes.of(
-                        AttributeNames.SERVICE_INSTANCE_ID,
-                        AttributeValue.stringAttributeValue("1234.5678"))))
+                        AttributeKey.stringKey(AttributeNames.SERVICE_INSTANCE_ID), "1234.5678"
+                    )
+                )
+            )
             .build();
 
     Collection<SpanBatch> result =
@@ -267,7 +258,7 @@ class SpanBatchAdapterTest {
             .setEndEpochNanos(456_001_100L)
             .setName("spanName")
             .setKind(Kind.SERVER)
-            .setStatus(Status.OK)
+            .setStatus(ImmutableStatus.OK)
             .setHasEnded(true)
             .build();
     Collection<SpanBatch> result =
@@ -292,8 +283,7 @@ class SpanBatchAdapterTest {
     SpanBatchAdapter testClass =
         new SpanBatchAdapter(new Attributes().put("host", "localhost"), "instanceId");
 
-    Status status = Status.CANCELLED.withDescription("it's broken");
-    SpanData inputSpan = buildSpan(status);
+    SpanData inputSpan = buildSpan(ImmutableStatus.create(StatusCanonicalCode.ERROR, "it's broken"));
 
     Collection<SpanBatch> result =
         testClass.adaptToSpanBatches(Collections.singletonList(inputSpan));
@@ -303,7 +293,7 @@ class SpanBatchAdapterTest {
 
   @Test
   void testErrorWithNoMessage() {
-    com.newrelic.telemetry.spans.Span resultSpan = buildResultSpan("ABORTED");
+    com.newrelic.telemetry.spans.Span resultSpan = buildResultSpan("ERROR");
     SpanBatch expected =
         new SpanBatch(
             singletonList(resultSpan),
@@ -316,7 +306,7 @@ class SpanBatchAdapterTest {
     SpanBatchAdapter testClass =
         new SpanBatchAdapter(new Attributes().put("host", "localhost"), "instanceId");
 
-    SpanData inputSpan = buildSpan(Status.ABORTED);
+    SpanData inputSpan = buildSpan(ImmutableStatus.ERROR);
 
     Collection<SpanBatch> result =
         testClass.adaptToSpanBatches(Collections.singletonList(inputSpan));
@@ -326,7 +316,7 @@ class SpanBatchAdapterTest {
 
   private com.newrelic.telemetry.spans.Span buildResultSpan(String expectedMessage) {
     return com.newrelic.telemetry.spans.Span.builder("000000000012d685")
-        .traceId(hexTraceId)
+        .traceId(traceId)
         .timestamp(1000456)
         .name("spanName")
         .durationMs(0.0001)
@@ -335,7 +325,7 @@ class SpanBatchAdapterTest {
         .build();
   }
 
-  private SpanData buildSpan(Status status) {
+  private SpanData buildSpan(SpanData.Status status) {
     TestSpanData.Builder builder =
         TestSpanData.newBuilder()
             .setTraceId(traceId)

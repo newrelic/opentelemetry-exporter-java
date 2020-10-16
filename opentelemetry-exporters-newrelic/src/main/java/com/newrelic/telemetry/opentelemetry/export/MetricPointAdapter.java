@@ -15,8 +15,8 @@ import com.newrelic.telemetry.metrics.Gauge;
 import com.newrelic.telemetry.metrics.Metric;
 import com.newrelic.telemetry.metrics.Summary;
 import io.opentelemetry.common.Labels;
-import io.opentelemetry.sdk.metrics.data.MetricData.Descriptor;
-import io.opentelemetry.sdk.metrics.data.MetricData.Descriptor.Type;
+import io.opentelemetry.sdk.metrics.data.MetricData;
+import io.opentelemetry.sdk.metrics.data.MetricData.Type;
 import io.opentelemetry.sdk.metrics.data.MetricData.DoublePoint;
 import io.opentelemetry.sdk.metrics.data.MetricData.LongPoint;
 import io.opentelemetry.sdk.metrics.data.MetricData.Point;
@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class MetricPointAdapter {
 
@@ -39,70 +40,66 @@ public class MetricPointAdapter {
     this.timeTracker = timeTracker;
   }
 
-  Collection<Metric> buildMetricsFromPoint(
-      Descriptor descriptor, Type type, Attributes attributes, Point point) {
+  Collection<Metric> buildMetricsFromPoint(MetricData metric, Attributes attributes, Point point) {
     point.getLabels().forEach(attributes::put);
     if (point instanceof LongPoint) {
-      return buildLongPointMetrics(descriptor, type, attributes, (LongPoint) point);
+      return buildLongPointMetrics(metric, attributes, (LongPoint) point);
     }
     if (point instanceof DoublePoint) {
-      return buildDoublePointMetrics(descriptor, type, attributes, (DoublePoint) point);
+      return buildDoublePointMetrics(metric, attributes, (DoublePoint) point);
     }
     if (point instanceof SummaryPoint) {
-      return buildSummaryPointMetrics(descriptor, attributes, (SummaryPoint) point);
+      return buildSummaryPointMetrics(metric, attributes, (SummaryPoint) point);
     }
     return emptyList();
   }
 
-  private boolean isNonMonotonic(Type type) {
+  private boolean isNonMonotonic(MetricData metric) {
+    Type type = metric.getType();
     return type != Type.NON_MONOTONIC_DOUBLE && type != Type.NON_MONOTONIC_LONG;
   }
 
-  private Collection<Metric> buildDoublePointMetrics(
-      Descriptor descriptor, Type type, Attributes attributes, DoublePoint point) {
+  private Collection<Metric> buildDoublePointMetrics(MetricData metric, Attributes attributes, DoublePoint point) {
 
     double value = point.getValue();
-    if (isNonMonotonic(type)) {
+    if (isNonMonotonic(metric)) {
       DeltaDoubleCounter deltaDoubleCounter =
           deltaDoubleCountersByDescriptor.computeIfAbsent(
-              new Key(descriptor, type, point.getLabels()), d -> new DeltaDoubleCounter());
+              new Key(metric, point.getLabels()), d -> new DeltaDoubleCounter());
       value = deltaDoubleCounter.delta(point);
     }
-    return buildMetricsFromSimpleType(
-        descriptor, type, attributes, value, point.getEpochNanos(), timeTracker.getPreviousTime());
+    return buildMetricsFromSimpleType(metric, attributes, value, point.getEpochNanos(), timeTracker.getPreviousTime());
   }
 
-  private Collection<Metric> buildLongPointMetrics(
-      Descriptor descriptor, Type type, Attributes attributes, LongPoint point) {
+  private Collection<Metric> buildLongPointMetrics(MetricData metric, Attributes attributes, LongPoint point) {
     long value = point.getValue();
-    if (isNonMonotonic(type)) {
+    if (isNonMonotonic(metric)) {
       DeltaLongCounter deltaLongCounter =
           deltaLongCountersByDescriptor.computeIfAbsent(
-              new Key(descriptor, type, point.getLabels()), d -> new DeltaLongCounter());
+              new Key(metric, point.getLabels()), d -> new DeltaLongCounter());
       value = deltaLongCounter.delta(point);
     }
     return buildMetricsFromSimpleType(
-        descriptor, type, attributes, value, point.getEpochNanos(), timeTracker.getPreviousTime());
+        metric, attributes, value, point.getEpochNanos(), timeTracker.getPreviousTime());
   }
 
   private Collection<Metric> buildMetricsFromSimpleType(
-      Descriptor descriptor,
-      Type type,
+      MetricData metric,
       Attributes attributes,
       double value,
       long epochNanos,
       long startEpochNanos) {
-    switch (type) {
+    switch (metric.getType()) {
       case NON_MONOTONIC_LONG:
       case NON_MONOTONIC_DOUBLE:
         return singleton(
-            new Gauge(descriptor.getName(), value, NANOSECONDS.toMillis(epochNanos), attributes));
+            new Gauge(metric.getName(), value, NANOSECONDS.toMillis(epochNanos), attributes));
 
       case MONOTONIC_LONG:
       case MONOTONIC_DOUBLE:
         return singleton(
             new Count(
-                descriptor.getName(),
+                metric.getName(),
                 value,
                 NANOSECONDS.toMillis(startEpochNanos),
                 NANOSECONDS.toMillis(epochNanos),
@@ -115,8 +112,7 @@ public class MetricPointAdapter {
     return emptyList();
   }
 
-  private Collection<Metric> buildSummaryPointMetrics(
-      Descriptor descriptor, Attributes attributes, SummaryPoint point) {
+  private Collection<Metric> buildSummaryPointMetrics(MetricData metric, Attributes attributes, SummaryPoint point) {
     List<ValueAtPercentile> percentileValues = point.getPercentileValues();
 
     double min = Double.NaN;
@@ -135,7 +131,7 @@ public class MetricPointAdapter {
 
     return singleton(
         new Summary(
-            descriptor.getName(),
+            metric.getName(),
             (int) point.getCount(),
             point.getSum(),
             min,
@@ -146,42 +142,39 @@ public class MetricPointAdapter {
   }
 
   private static class Key {
-    private final Descriptor descriptor;
+    private final String name;
+    private final String description;
+    private final String unit;
     private final Type type;
     private final Labels labels;
 
-    public Key(Descriptor descriptor, Type type, Labels labels) {
-      this.descriptor = descriptor;
+    public Key(MetricData metric, Labels labels) {
+      this(metric.getName(), metric.getDescription(), metric.getUnit(), metric.getType(), labels);
+    }
+
+    public Key(String name, String description, String unit, Type type, Labels labels) {
+      this.name = name;
+      this.description = description;
+      this.unit = unit;
       this.type = type;
       this.labels = labels;
     }
 
     @Override
     public boolean equals(Object o) {
-      if (this == o) {
-        return true;
-      }
-      if (!(o instanceof Key)) {
-        return false;
-      }
-
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
       Key key = (Key) o;
-
-      if (descriptor != null ? !descriptor.equals(key.descriptor) : key.descriptor != null) {
-        return false;
-      }
-      if (type != key.type) {
-        return false;
-      }
-      return labels != null ? labels.equals(key.labels) : key.labels == null;
+      return name.equals(key.name) &&
+              Objects.equals(description, key.description) &&
+              Objects.equals(unit, key.unit) &&
+              type == key.type &&
+              Objects.equals(labels, key.labels);
     }
 
     @Override
     public int hashCode() {
-      int result = descriptor != null ? descriptor.hashCode() : 0;
-      result = 31 * result + (type != null ? type.hashCode() : 0);
-      result = 31 * result + (labels != null ? labels.hashCode() : 0);
-      return result;
+      return Objects.hash(name, description, unit, type, labels);
     }
   }
 }

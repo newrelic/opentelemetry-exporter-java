@@ -41,7 +41,7 @@ public class NewRelicExporters {
         BatchSpanProcessor.newBuilder(spanExporterBuilder.build())
             .setScheduleDelayMillis(configuration.collectionIntervalSeconds * 1000)
             .build();
-    OpenTelemetrySdk.getTracerProvider().addSpanProcessor(spanProcessor);
+    OpenTelemetrySdk.getTracerManagement().addSpanProcessor(spanProcessor);
 
     NewRelicMetricExporter.Builder metricExporterBuilder =
         NewRelicMetricExporter.newBuilder()
@@ -60,7 +60,7 @@ public class NewRelicExporters {
 
   /** Shutdown the OpenTelemetry SDK and the NewRelic exporters. */
   public static void shutdown() {
-    OpenTelemetrySdk.getTracerProvider().shutdown();
+    OpenTelemetrySdk.getTracerManagement().shutdown();
     intervalMetricReader.shutdown();
   }
 
