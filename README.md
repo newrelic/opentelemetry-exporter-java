@@ -36,10 +36,10 @@ section.
     BatchSpanProcessor spanProcessor = BatchSpanProcessor.newBuilder(exporter).build();
 ```
 
-3. Add the span processor to the default TracerSdkProvider
+3. Add the span processor to the default TracerSdkManagement:
 ```java
-    TracerSdkProvider tracerSdkProvider = (TracerSdkProvider) OpenTelemetry.getTracerProvider();
-    tracerSdkProvider.addSpanProcessor(spanProcessor);
+   TracerSdkManagement tracerManagement = OpenTelemetrySdk.getTracerManagement();
+   tracerManagement.addSpanProcessor(spanProcessor);
 ```
 
 ### Use the APIs to record some spans
