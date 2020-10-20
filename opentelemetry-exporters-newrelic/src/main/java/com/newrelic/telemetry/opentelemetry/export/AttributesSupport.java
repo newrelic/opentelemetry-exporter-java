@@ -9,6 +9,8 @@ import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.INSTRUM
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.INSTRUMENTATION_VERSION;
 
 import com.newrelic.telemetry.Attributes;
+import io.opentelemetry.common.AttributeConsumer;
+import io.opentelemetry.common.AttributeKey;
 import io.opentelemetry.common.ReadableAttributes;
 import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
 import io.opentelemetry.sdk.resources.Resource;
@@ -43,20 +45,21 @@ public class AttributesSupport {
 
   static void putInAttributes(Attributes attributes, ReadableAttributes originalAttributes) {
     originalAttributes.forEach(
-        (key, value) -> {
-          switch (value.getType()) {
-            case STRING:
-              attributes.put(key, value.getStringValue());
-              break;
-            case LONG:
-              attributes.put(key, value.getLongValue());
-              break;
-            case BOOLEAN:
-              attributes.put(key, value.getBooleanValue());
-              break;
-            case DOUBLE:
-              attributes.put(key, value.getDoubleValue());
-              break;
+        new AttributeConsumer() {
+          @Override
+          public <T> void consume(AttributeKey<T> key, T value) {
+            switch (key.getType()) {
+              case STRING:
+                attributes.put(key.getKey(), (String) value);
+                break;
+              case BOOLEAN:
+                attributes.put(key.getKey(), (Boolean) value);
+                break;
+              case LONG:
+              case DOUBLE:
+                attributes.put(key.getKey(), (Number) value);
+                break;
+            }
           }
         });
   }

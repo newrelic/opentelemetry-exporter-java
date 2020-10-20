@@ -12,19 +12,17 @@ import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.trace.Span;
 import io.opentelemetry.trace.SpanId;
-import io.opentelemetry.trace.Status;
 import io.opentelemetry.trace.TraceFlags;
-import io.opentelemetry.trace.TraceId;
 import io.opentelemetry.trace.TraceState;
 import java.util.List;
 
 public class TestSpanData implements SpanData {
-  private final TraceId traceId;
-  private final SpanId spanId;
-  private final TraceFlags traceFlags;
+  private final String traceId;
+  private final String spanId;
+  private final byte traceFlags;
   private final long startEpochNanos;
   private final long endEpochNanos;
-  private final SpanId parentSpanId;
+  private final String parentSpanId;
   private final String spanName;
   private final Span.Kind kind;
   private final Status status;
@@ -54,18 +52,18 @@ public class TestSpanData implements SpanData {
   }
 
   @Override
-  public TraceId getTraceId() {
+  public String getTraceId() {
     return traceId;
   }
 
   @Override
-  public SpanId getSpanId() {
+  public String getSpanId() {
     return spanId;
   }
 
   @Override
-  public TraceFlags getTraceFlags() {
-    return traceFlags;
+  public boolean isSampled() {
+    return false;
   }
 
   @Override
@@ -74,7 +72,7 @@ public class TestSpanData implements SpanData {
   }
 
   @Override
-  public SpanId getParentSpanId() {
+  public String getParentSpanId() {
     return parentSpanId;
   }
 
@@ -155,10 +153,10 @@ public class TestSpanData implements SpanData {
 
   public static class Builder {
 
-    private TraceId traceId;
-    private SpanId spanId;
+    private String traceId;
+    private String spanId;
     private long startEpochNanos;
-    private SpanId parentSpanId = SpanId.getInvalid();
+    private String parentSpanId = SpanId.getInvalid();
     private long endEpochNanos;
     private String spanName;
     private Status status;
@@ -168,12 +166,12 @@ public class TestSpanData implements SpanData {
     private boolean hasEnded;
     private Attributes attributes = Attributes.empty();
 
-    public Builder setTraceId(TraceId traceId) {
+    public Builder setTraceId(String traceId) {
       this.traceId = traceId;
       return this;
     }
 
-    public Builder setSpanId(SpanId spanId) {
+    public Builder setSpanId(String spanId) {
       this.spanId = spanId;
       return this;
     }
@@ -183,7 +181,7 @@ public class TestSpanData implements SpanData {
       return this;
     }
 
-    public Builder setParentSpanId(SpanId parentSpanId) {
+    public Builder setParentSpanId(String parentSpanId) {
       this.parentSpanId = parentSpanId;
       return this;
     }

@@ -11,12 +11,13 @@ import io.opentelemetry.OpenTelemetry;
 import io.opentelemetry.common.Labels;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.metrics.LongCounter;
+import io.opentelemetry.metrics.LongUpDownCounter;
 import io.opentelemetry.metrics.LongValueRecorder;
 import io.opentelemetry.metrics.LongValueRecorder.BoundLongValueRecorder;
 import io.opentelemetry.metrics.Meter;
 import io.opentelemetry.trace.Span;
 import io.opentelemetry.trace.Span.Kind;
-import io.opentelemetry.trace.Status;
+import io.opentelemetry.trace.StatusCanonicalCode;
 import io.opentelemetry.trace.Tracer;
 import java.util.Random;
 
@@ -56,11 +57,18 @@ public class BasicExample {
             .setDescription("How long the spans take")
             .build();
 
+    LongUpDownCounter upDownCounter =
+        meter
+            .longUpDownCounterBuilder("jim")
+            .setDescription("some good testing")
+            .setUnit("1")
+            .build();
+
     // 5. Optionally, you can pre-bind a set of labels, rather than passing them in every time.
     BoundLongValueRecorder boundTimer = spanTimer.bind(Labels.of("spanName", "testSpan"));
 
     // 6. use these to instrument some work
-    doSomeSimulatedWork(tracer, spanCounter, boundTimer);
+    doSomeSimulatedWork(tracer, spanCounter, upDownCounter, boundTimer);
 
     // clean up so the JVM can exit. Note: these will flush any data to the exporter
     // before they exit.
@@ -68,7 +76,10 @@ public class BasicExample {
   }
 
   private static void doSomeSimulatedWork(
-      Tracer tracer, LongCounter spanCounter, BoundLongValueRecorder boundTimer)
+      Tracer tracer,
+      LongCounter spanCounter,
+      LongUpDownCounter upDownCounter,
+      BoundLongValueRecorder boundTimer)
       throws InterruptedException {
     Random random = new Random();
     for (int i = 0; i < 10; i++) {
@@ -78,9 +89,10 @@ public class BasicExample {
       try (Scope ignored = tracer.withSpan(span)) {
         boolean markAsError = random.nextBoolean();
         if (markAsError) {
-          span.setStatus(Status.INTERNAL.withDescription("internalError"));
+          span.setStatus(StatusCanonicalCode.ERROR, "internalError");
         }
         spanCounter.add(1, Labels.of("spanName", "testSpan", "isItAnError", "" + markAsError));
+        upDownCounter.add(random.nextInt(100) - 50);
         // do some work
         Thread.sleep(random.nextInt(1000));
         span.end();

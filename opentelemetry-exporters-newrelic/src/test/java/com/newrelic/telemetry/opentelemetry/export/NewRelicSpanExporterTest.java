@@ -13,11 +13,9 @@ import com.newrelic.telemetry.TelemetryClient;
 import com.newrelic.telemetry.spans.SpanBatch;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.sdk.trace.data.ImmutableStatus;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.trace.Span.Kind;
-import io.opentelemetry.trace.SpanId;
-import io.opentelemetry.trace.Status;
-import io.opentelemetry.trace.TraceId;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -28,10 +26,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class NewRelicSpanExporterTest {
 
-  private final String hexSpanId = "000000000012d685";
-  private final SpanId spanId = SpanId.fromLowerBase16(hexSpanId, 0);
-  private final String hexTraceId = "000000000063d76f0000000037fe0393";
-  private final TraceId traceId = TraceId.fromLowerBase16(hexTraceId, 0);
+  private final String spanId = "000000000012d685";
+  private final String traceId = "000000000063d76f0000000037fe0393";
 
   @Mock private TelemetryClient sender;
   @Mock private SpanBatchAdapter adapter;
@@ -56,7 +52,7 @@ class NewRelicSpanExporterTest {
         .setResource(Resource.create(io.opentelemetry.common.Attributes.empty()))
         .setName("spanName")
         .setKind(Kind.SERVER)
-        .setStatus(Status.OK)
+        .setStatus(ImmutableStatus.OK)
         .setStartEpochNanos(456_001_000L)
         .setEndEpochNanos(456_001_100L)
         .setHasEnded(true)

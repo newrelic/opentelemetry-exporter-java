@@ -17,18 +17,23 @@ import com.newrelic.telemetry.metrics.Gauge;
 import com.newrelic.telemetry.metrics.Metric;
 import com.newrelic.telemetry.metrics.Summary;
 import io.opentelemetry.common.Labels;
-import io.opentelemetry.sdk.metrics.data.MetricData.Descriptor;
-import io.opentelemetry.sdk.metrics.data.MetricData.Descriptor.Type;
+import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
+import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.data.MetricData.DoublePoint;
 import io.opentelemetry.sdk.metrics.data.MetricData.LongPoint;
 import io.opentelemetry.sdk.metrics.data.MetricData.SummaryPoint;
 import io.opentelemetry.sdk.metrics.data.MetricData.ValueAtPercentile;
+import io.opentelemetry.sdk.resources.Resource;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 
 class MetricPointAdapterTest {
+
+  final InstrumentationLibraryInfo libraryInfo =
+      InstrumentationLibraryInfo.create("testin", "99.67");
 
   @Test
   void testLongPoint() {
@@ -37,13 +42,6 @@ class MetricPointAdapterTest {
     MetricPointAdapter metricPointAdapter = new MetricPointAdapter(timeTracker);
 
     Attributes commonAttributes = new Attributes().put(SERVICE_NAME, "fooService");
-    Descriptor metricDescriptor =
-        Descriptor.create(
-            "metricName",
-            "metricDescription",
-            "units",
-            Type.MONOTONIC_LONG,
-            Labels.of("commonKey", "commonValue"));
 
     LongPoint longPoint =
         LongPoint.create(
@@ -51,14 +49,13 @@ class MetricPointAdapterTest {
             TimeUnit.MILLISECONDS.toNanos(10_000L),
             Labels.of("specificKey", "specificValue"),
             123L);
-
     Attributes expectedAttributes =
         new Attributes().put(SERVICE_NAME, "fooService").put("specificKey", "specificValue");
     Count expectedMetric = new Count("metricName", 123L, 9_000L, 10_000L, expectedAttributes);
 
+    MetricData metricData = buildMetricData(longPoint, MetricData.Type.MONOTONIC_LONG);
     Collection<Metric> result =
-        metricPointAdapter.buildMetricsFromPoint(
-            metricDescriptor, Type.MONOTONIC_LONG, commonAttributes, longPoint);
+        metricPointAdapter.buildMetricsFromPoint(metricData, commonAttributes, longPoint);
 
     assertEquals(singleton(expectedMetric), result);
   }
@@ -69,13 +66,6 @@ class MetricPointAdapterTest {
     MetricPointAdapter metricPointAdapter = new MetricPointAdapter(timeTracker);
 
     Attributes commonAttributes = new Attributes().put(SERVICE_NAME, "fooService");
-    Descriptor metricDescriptor =
-        Descriptor.create(
-            "metricName",
-            "metricDescription",
-            "units",
-            Type.NON_MONOTONIC_LONG,
-            Labels.of("commonKey", "commonValue"));
 
     LongPoint longPoint =
         LongPoint.create(
@@ -83,14 +73,13 @@ class MetricPointAdapterTest {
             TimeUnit.MILLISECONDS.toNanos(10_000L),
             Labels.of("specificKey", "specificValue"),
             123L);
-
+    MetricData metricData = buildMetricData(longPoint, MetricData.Type.NON_MONOTONIC_LONG);
     Attributes expectedAttributes =
         new Attributes().put(SERVICE_NAME, "fooService").put("specificKey", "specificValue");
     Gauge expectedMetric = new Gauge("metricName", 123L, 10_000L, expectedAttributes);
 
     Collection<Metric> result =
-        metricPointAdapter.buildMetricsFromPoint(
-            metricDescriptor, Type.NON_MONOTONIC_LONG, commonAttributes, longPoint);
+        metricPointAdapter.buildMetricsFromPoint(metricData, commonAttributes, longPoint);
 
     assertEquals(singleton(expectedMetric), result);
   }
@@ -108,21 +97,14 @@ class MetricPointAdapterTest {
             TimeUnit.MILLISECONDS.toNanos(10_000L),
             Labels.of("specificKey", "specificValue"),
             123.55d);
-    Descriptor metricDescriptor =
-        Descriptor.create(
-            "metricName",
-            "metricDescription",
-            "units",
-            Type.MONOTONIC_DOUBLE,
-            Labels.of("commonKey", "commonValue"));
-
     Attributes expectedAttributes =
         new Attributes().put(SERVICE_NAME, "fooService").put("specificKey", "specificValue");
     Count expectedMetric = new Count("metricName", 123.55d, 9_000L, 10_000L, expectedAttributes);
 
+    MetricData metricData = buildMetricData(doublePoint, MetricData.Type.MONOTONIC_DOUBLE);
+
     Collection<Metric> result =
-        metricPointAdapter.buildMetricsFromPoint(
-            metricDescriptor, Type.MONOTONIC_DOUBLE, commonAttributes, doublePoint);
+        metricPointAdapter.buildMetricsFromPoint(metricData, commonAttributes, doublePoint);
 
     assertEquals(singleton(expectedMetric), result);
   }
@@ -133,13 +115,6 @@ class MetricPointAdapterTest {
     MetricPointAdapter metricPointAdapter = new MetricPointAdapter(timeTracker);
 
     Attributes commonAttributes = new Attributes().put(SERVICE_NAME, "fooService");
-    Descriptor metricDescriptor =
-        Descriptor.create(
-            "metricName",
-            "metricDescription",
-            "units",
-            Type.NON_MONOTONIC_DOUBLE,
-            Labels.of("commonKey", "commonValue"));
     DoublePoint doublePoint =
         DoublePoint.create(
             100,
@@ -151,9 +126,10 @@ class MetricPointAdapterTest {
         new Attributes().put(SERVICE_NAME, "fooService").put("specificKey", "specificValue");
     Gauge expectedMetric = new Gauge("metricName", 123.55d, 10_000L, expectedAttributes);
 
+    MetricData metricData = buildMetricData(doublePoint, MetricData.Type.NON_MONOTONIC_DOUBLE);
+
     Collection<Metric> result =
-        metricPointAdapter.buildMetricsFromPoint(
-            metricDescriptor, Type.NON_MONOTONIC_DOUBLE, commonAttributes, doublePoint);
+        metricPointAdapter.buildMetricsFromPoint(metricData, commonAttributes, doublePoint);
 
     assertEquals(singleton(expectedMetric), result);
   }
@@ -167,13 +143,6 @@ class MetricPointAdapterTest {
     Attributes commonAttributes = new Attributes().put(SERVICE_NAME, "fooService");
     ValueAtPercentile min = ValueAtPercentile.create(0.0, 5.5d);
     ValueAtPercentile max = ValueAtPercentile.create(100.0, 100.01d);
-    Descriptor metricDescriptor =
-        Descriptor.create(
-            "metricName",
-            "metricDescription",
-            "units",
-            Type.SUMMARY,
-            Labels.of("commonKey", "commonValue"));
 
     SummaryPoint summary =
         SummaryPoint.create(
@@ -189,10 +158,28 @@ class MetricPointAdapterTest {
     Summary expectedMetric =
         new Summary("metricName", 200, 123.55d, 5.5d, 100.01d, 9000L, 10000L, expectedAttributes);
 
+    MetricData metricData = buildMetricData(summary, MetricData.Type.SUMMARY);
+
     Collection<Metric> result =
-        metricPointAdapter.buildMetricsFromPoint(
-            metricDescriptor, Type.SUMMARY, commonAttributes, summary);
+        metricPointAdapter.buildMetricsFromPoint(metricData, commonAttributes, summary);
 
     assertEquals(singleton(expectedMetric), result);
+  }
+
+  private MetricData buildMetricData(MetricData.Point point, MetricData.Type type) {
+    io.opentelemetry.common.Attributes attrs =
+        io.opentelemetry.common.Attributes.newBuilder()
+            .setAttribute("awesomeAttr", "thebest")
+            .build();
+    Resource resource = Resource.create(attrs);
+
+    return MetricData.create(
+        resource,
+        libraryInfo,
+        "metricName",
+        "metricDescription",
+        "units",
+        type,
+        Collections.singletonList(point));
   }
 }

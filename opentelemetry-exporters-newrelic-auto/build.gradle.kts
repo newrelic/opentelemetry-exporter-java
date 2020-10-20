@@ -9,14 +9,14 @@ apply(plugin = "com.github.johnrengelman.shadow")
 dependencies {
     repositories {
         maven("https://dl.bintray.com/open-telemetry/maven")
-//    jcenter()
+        jcenter()
     }
 
     annotationProcessor("com.google.auto.service:auto-service:1.0-rc7")
     api("com.google.auto.service:auto-service-annotations:1.0-rc7")
     api(project(":opentelemetry-exporters-newrelic"))
     implementation("io.opentelemetry.instrumentation.auto:opentelemetry-javaagent-tooling:0.8.0")
-    implementation("io.opentelemetry:opentelemetry-sdk:0.8.0")
+    implementation("io.opentelemetry:opentelemetry-sdk:0.9.1")
 
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.4.2")
     testRuntimeOnly("org.slf4j:slf4j-simple:1.7.26")

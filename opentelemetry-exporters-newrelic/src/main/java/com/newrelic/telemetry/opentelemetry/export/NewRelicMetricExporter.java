@@ -22,8 +22,6 @@ import com.newrelic.telemetry.metrics.MetricBuffer;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.internal.MillisClock;
 import io.opentelemetry.sdk.metrics.data.MetricData;
-import io.opentelemetry.sdk.metrics.data.MetricData.Descriptor;
-import io.opentelemetry.sdk.metrics.data.MetricData.Descriptor.Type;
 import io.opentelemetry.sdk.metrics.data.MetricData.Point;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import java.net.MalformedURLException;
@@ -93,15 +91,13 @@ public class NewRelicMetricExporter implements MetricExporter {
   public CompletableResultCode export(Collection<MetricData> metrics) {
     MetricBuffer buffer = MetricBuffer.builder().attributes(commonAttributes).build();
     for (MetricData metric : metrics) {
-      Descriptor descriptor = metric.getDescriptor();
-      Type type = descriptor.getType();
 
       Attributes attributes = buildCommonAttributes(metric);
 
       Collection<Point> points = metric.getPoints();
       for (Point point : points) {
         Collection<Metric> metricsFromPoint =
-            metricPointAdapter.buildMetricsFromPoint(descriptor, type, attributes.copy(), point);
+            metricPointAdapter.buildMetricsFromPoint(metric, attributes.copy(), point);
         metricsFromPoint.forEach(buffer::addMetric);
       }
     }
@@ -126,10 +122,8 @@ public class NewRelicMetricExporter implements MetricExporter {
     AttributesSupport.addResourceAttributes(attributes, metric.getResource());
     AttributesSupport.populateLibraryInfo(attributes, metric.getInstrumentationLibraryInfo());
 
-    Descriptor descriptor = metric.getDescriptor();
-    attributes.put(DESCRIPTOR_DESCRIPTION, descriptor.getDescription());
-    attributes.put(DESCRIPTOR_UNIT, descriptor.getUnit());
-    descriptor.getConstantLabels().forEach(attributes::put);
+    attributes.put(DESCRIPTOR_DESCRIPTION, metric.getDescription());
+    attributes.put(DESCRIPTOR_UNIT, metric.getUnit());
     return attributes;
   }
 
