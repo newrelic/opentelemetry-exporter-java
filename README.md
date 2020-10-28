@@ -140,6 +140,15 @@ java -javaagent:path/to/opentelemetry-javaagent-<version>-all.jar \
      -Dotel.exporter.newrelic.service.name=best-service-ever \
      -jar myapp.jar
 ```
+:warning: If you encounter an error like this:
+
+```
+[main] WARN io.opentelemetry.auto.tooling.TracerInstaller - No span exporter found in opentelemetry-exporters-newrelic-auto-0.8.1.jar
+```
+
+Check our [release notes](https://github.com/newrelic/opentelemetry-exporter-java/releases) and verify the version of your `opentelemetry-exporter-newrelic-auto-<version>.jar` supports the version of `opentelemetry-javaagent-all.jar`.
+
+
 
 If you wish to turn on debug logging for the exporter running in the auto-instrumentation agent, use the following system property:
 ```
@@ -175,9 +184,9 @@ repositories {
 
 ```
 implementation("com.newrelic.telemetry:opentelemetry-exporters-newrelic:0.8.1")
-implementation("io.opentelemetry:opentelemetry-sdk:0.8.0")
-implementation("com.newrelic.telemetry:telemetry-core:0.7.0")
-implementation("com.newrelic.telemetry:telemetry-http-okhttp:0.7.0")
+implementation("io.opentelemetry:opentelemetry-sdk:0.9.1")
+implementation("com.newrelic.telemetry:telemetry-core:0.9.0")
+implementation("com.newrelic.telemetry:telemetry-http-okhttp:0.9.0")
 ```
 
 ## Getting Started

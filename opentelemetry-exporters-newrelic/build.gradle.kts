@@ -1,5 +1,5 @@
 dependencies {
-    val newRelicTelemetrySdkVersion = "0.7.0"
+    val newRelicTelemetrySdkVersion = "0.9.0"
     val openTelemetryVersion = "0.9.1"
 
     api("com.newrelic.telemetry:telemetry:$newRelicTelemetrySdkVersion")
