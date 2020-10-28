@@ -11,10 +11,10 @@ import com.google.auto.service.AutoService;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.opentelemetry.export.NewRelicMetricExporter;
 import com.newrelic.telemetry.opentelemetry.export.NewRelicMetricExporter.Builder;
-import io.opentelemetry.javaagent.tooling.exporter.ExporterConfig;
-import io.opentelemetry.javaagent.tooling.exporter.MetricExporterFactory;
+import io.opentelemetry.javaagent.spi.exporter.MetricExporterFactory;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import java.net.URI;
+import java.util.Properties;
 
 /**
  * A {@link MetricExporterFactory} that creates a {@link MetricExporter} that sends metrics to New
@@ -30,7 +30,7 @@ public class NewRelicMetricExporterFactory implements MetricExporterFactory {
    * @return An implementation of a {@link MetricExporter}
    */
   @Override
-  public MetricExporter fromConfig(ExporterConfig config) {
+  public MetricExporter fromConfig(Properties config) {
     NewRelicConfiguration newRelicConfiguration = new NewRelicConfiguration(config);
 
     Builder builder =

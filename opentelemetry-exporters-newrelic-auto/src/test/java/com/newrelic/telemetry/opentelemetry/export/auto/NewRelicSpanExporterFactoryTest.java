@@ -13,8 +13,8 @@ import static com.newrelic.telemetry.opentelemetry.export.auto.NewRelicConfigura
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
-import io.opentelemetry.javaagent.tooling.exporter.ExporterConfig;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
+import java.util.Properties;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -23,7 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class NewRelicSpanExporterFactoryTest {
 
-  @Mock private ExporterConfig config;
+  @Mock private Properties config;
 
   @Test
   void testFromConfig_HappyPath() {
@@ -32,12 +32,13 @@ class NewRelicSpanExporterFactoryTest {
     String serviceNameValue = "best service ever";
     String uriOverrideValue = "http://test.domain.com";
 
-    when(config.getString(NEW_RELIC_API_KEY, "")).thenReturn(apiKeyValue);
-    when(config.getBoolean(NEW_RELIC_ENABLE_AUDIT_LOGGING, false)).thenReturn(true);
-    when(config.getString(NEW_RELIC_SERVICE_NAME, defaultServiceName)).thenReturn(serviceNameValue);
-    when(config.getString(NEW_RELIC_TRACE_URI_OVERRIDE, "")).thenReturn(uriOverrideValue);
+    when(config.getProperty(NEW_RELIC_API_KEY, "")).thenReturn(apiKeyValue);
+    when(config.getProperty(NEW_RELIC_ENABLE_AUDIT_LOGGING, "false")).thenReturn("true");
+    when(config.getProperty(NEW_RELIC_SERVICE_NAME, defaultServiceName))
+        .thenReturn(serviceNameValue);
+    when(config.getProperty(NEW_RELIC_TRACE_URI_OVERRIDE, "")).thenReturn(uriOverrideValue);
     // this is the legacy key which we should get rid of as soon as we can
-    when(config.getString(NEW_RELIC_URI_OVERRIDE, "")).thenReturn("");
+    when(config.getProperty(NEW_RELIC_URI_OVERRIDE, "")).thenReturn("");
 
     NewRelicSpanExporterFactory newRelicSpanExporterFactory = new NewRelicSpanExporterFactory();
     SpanExporter spanExporter = newRelicSpanExporterFactory.fromConfig(config);
@@ -52,12 +53,13 @@ class NewRelicSpanExporterFactoryTest {
     String serviceNameValue = "best service ever";
     String uriOverrideValue = "http://test.domain.com";
 
-    when(config.getString(NEW_RELIC_API_KEY, "")).thenReturn(apiKeyValue);
-    when(config.getBoolean(NEW_RELIC_ENABLE_AUDIT_LOGGING, false)).thenReturn(true);
-    when(config.getString(NEW_RELIC_SERVICE_NAME, defaultServiceName)).thenReturn(serviceNameValue);
+    when(config.getProperty(NEW_RELIC_API_KEY, "")).thenReturn(apiKeyValue);
+    when(config.getProperty(NEW_RELIC_ENABLE_AUDIT_LOGGING, "false")).thenReturn("true");
+    when(config.getProperty(NEW_RELIC_SERVICE_NAME, defaultServiceName))
+        .thenReturn(serviceNameValue);
     // this is the legacy key which we should get rid of as soon as we can
-    when(config.getString(NEW_RELIC_URI_OVERRIDE, "")).thenReturn(uriOverrideValue);
-    when(config.getString(NEW_RELIC_TRACE_URI_OVERRIDE, uriOverrideValue))
+    when(config.getProperty(NEW_RELIC_URI_OVERRIDE, "")).thenReturn(uriOverrideValue);
+    when(config.getProperty(NEW_RELIC_TRACE_URI_OVERRIDE, uriOverrideValue))
         .thenReturn(uriOverrideValue);
 
     NewRelicSpanExporterFactory newRelicSpanExporterFactory = new NewRelicSpanExporterFactory();
