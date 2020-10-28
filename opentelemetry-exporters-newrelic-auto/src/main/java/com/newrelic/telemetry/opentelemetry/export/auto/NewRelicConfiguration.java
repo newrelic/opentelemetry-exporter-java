@@ -5,7 +5,7 @@
 
 package com.newrelic.telemetry.opentelemetry.export.auto;
 
-import io.opentelemetry.javaagent.tooling.exporter.ExporterConfig;
+import java.util.Properties;
 
 class NewRelicConfiguration {
   static final String NEW_RELIC_API_KEY = "newrelic.api.key";
@@ -19,26 +19,26 @@ class NewRelicConfiguration {
   // for any users who might still be using it.
   static final String NEW_RELIC_URI_OVERRIDE = "newrelic.uri.override";
 
-  private final ExporterConfig config;
+  private final Properties config;
 
-  NewRelicConfiguration(ExporterConfig config) {
+  NewRelicConfiguration(Properties config) {
     this.config = config;
   }
 
   String getApiKey() {
-    return config.getString(NEW_RELIC_API_KEY, "");
+    return config.getProperty(NEW_RELIC_API_KEY, "");
   }
 
   boolean shouldEnableAuditLogging() {
-    return config.getBoolean(NEW_RELIC_ENABLE_AUDIT_LOGGING, false);
+    return Boolean.parseBoolean(config.getProperty(NEW_RELIC_ENABLE_AUDIT_LOGGING, "false"));
   }
 
   // note: newrelic.service.name key will not required once service.name is guaranteed to be
   // provided via the Resource in the SDK.  See
   // https://github.com/newrelic/opentelemetry-exporter-java/issues/62
   // for the tracking issue.
-  static String getServiceName(ExporterConfig config) {
-    return config.getString(NEW_RELIC_SERVICE_NAME, DEFAULT_NEW_RELIC_SERVICE_NAME);
+  static String getServiceName(Properties config) {
+    return config.getProperty(NEW_RELIC_SERVICE_NAME, DEFAULT_NEW_RELIC_SERVICE_NAME);
   }
 
   String getServiceName() {
@@ -50,7 +50,7 @@ class NewRelicConfiguration {
   }
 
   String getMetricUri() {
-    return config.getString(NEW_RELIC_METRIC_URI_OVERRIDE, "");
+    return config.getProperty(NEW_RELIC_METRIC_URI_OVERRIDE, "");
   }
 
   boolean isTraceUriSpecified() {
@@ -58,8 +58,8 @@ class NewRelicConfiguration {
   }
 
   String getTraceUri() {
-    String deprecatedUriOverride = config.getString(NEW_RELIC_URI_OVERRIDE, "");
-    return config.getString(NEW_RELIC_TRACE_URI_OVERRIDE, deprecatedUriOverride);
+    String deprecatedUriOverride = config.getProperty(NEW_RELIC_URI_OVERRIDE, "");
+    return config.getProperty(NEW_RELIC_TRACE_URI_OVERRIDE, deprecatedUriOverride);
   }
 
   private boolean isSpecified(String s) {

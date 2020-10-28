@@ -12,8 +12,8 @@ import static com.newrelic.telemetry.opentelemetry.export.auto.NewRelicConfigura
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
-import io.opentelemetry.javaagent.tooling.exporter.ExporterConfig;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
+import java.util.Properties;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -22,7 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class NewRelicMetricExporterFactoryTest {
 
-  @Mock private ExporterConfig config;
+  @Mock private Properties config;
 
   @Test
   void testFromConfig_HappyPath() {
@@ -31,10 +31,11 @@ class NewRelicMetricExporterFactoryTest {
     String serviceNameValue = "best service ever";
     String uriOverrideValue = "http://test.domain.com";
 
-    when(config.getString(NEW_RELIC_API_KEY, "")).thenReturn(apiKeyValue);
-    when(config.getBoolean(NEW_RELIC_ENABLE_AUDIT_LOGGING, false)).thenReturn(true);
-    when(config.getString(NEW_RELIC_SERVICE_NAME, defaultServiceName)).thenReturn(serviceNameValue);
-    when(config.getString(NEW_RELIC_METRIC_URI_OVERRIDE, "")).thenReturn(uriOverrideValue);
+    when(config.getProperty(NEW_RELIC_API_KEY, "")).thenReturn(apiKeyValue);
+    when(config.getProperty(NEW_RELIC_ENABLE_AUDIT_LOGGING, "false")).thenReturn("true");
+    when(config.getProperty(NEW_RELIC_SERVICE_NAME, defaultServiceName))
+        .thenReturn(serviceNameValue);
+    when(config.getProperty(NEW_RELIC_METRIC_URI_OVERRIDE, "")).thenReturn(uriOverrideValue);
 
     NewRelicMetricExporterFactory newRelicSpanExporterFactory = new NewRelicMetricExporterFactory();
     MetricExporter metricExporter = newRelicSpanExporterFactory.fromConfig(config);
