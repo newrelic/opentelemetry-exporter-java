@@ -24,11 +24,7 @@ allprojects {
         mavenCentral()
         maven(url = "https://oss.sonatype.org/content/repositories/snapshots")
         // this is only needed for the working against unreleased otel-java snapshots
-        maven("https://oss.jfrog.org/artifactory/oss-snapshot-local") {
-//            mavenContent {
-//                snapshotsOnly()
-//            }
-        }
+        maven("https://oss.jfrog.org/artifactory/oss-snapshot-local")
     }
     tasks.withType<Test> {
         useJUnitPlatform()
