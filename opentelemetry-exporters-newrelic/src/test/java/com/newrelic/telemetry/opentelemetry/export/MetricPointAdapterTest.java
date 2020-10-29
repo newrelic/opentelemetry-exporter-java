@@ -16,7 +16,7 @@ import com.newrelic.telemetry.metrics.Count;
 import com.newrelic.telemetry.metrics.Gauge;
 import com.newrelic.telemetry.metrics.Metric;
 import com.newrelic.telemetry.metrics.Summary;
-import io.opentelemetry.common.Labels;
+import io.opentelemetry.api.common.Labels;
 import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.data.MetricData.DoublePoint;
@@ -167,9 +167,9 @@ class MetricPointAdapterTest {
   }
 
   private MetricData buildMetricData(MetricData.Point point, MetricData.Type type) {
-    io.opentelemetry.common.Attributes attrs =
-        io.opentelemetry.common.Attributes.newBuilder()
-            .setAttribute("awesomeAttr", "thebest")
+    io.opentelemetry.api.common.Attributes attrs =
+        io.opentelemetry.api.common.Attributes.builder()
+            .put("awesomeAttr", "thebest")
             .build();
     Resource resource = Resource.create(attrs);
 

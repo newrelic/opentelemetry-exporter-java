@@ -8,8 +8,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.newrelic.telemetry.Attributes;
-import io.opentelemetry.common.AttributeKey;
-import io.opentelemetry.common.ReadableAttributes;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.ReadableAttributes;
 import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
 import io.opentelemetry.sdk.resources.Resource;
 import java.util.Arrays;
@@ -62,7 +62,7 @@ class AttributesSupportTest {
   void addResourceAttributes_happyPath() {
     Attributes attributes = new Attributes().put("a", "b");
     ReadableAttributes resourceAttributes =
-        io.opentelemetry.common.Attributes.of(
+        io.opentelemetry.api.common.Attributes.of(
             AttributeKey.stringKey("r1"),
             "v1",
             AttributeKey.longKey("r2"),
@@ -81,7 +81,7 @@ class AttributesSupportTest {
   void addResourceAttributes_resourceWinsVsInput() {
     Attributes attributes = new Attributes().put("r1", "v77");
     ReadableAttributes resourceAttributes =
-        io.opentelemetry.common.Attributes.of(
+        io.opentelemetry.api.common.Attributes.of(
             AttributeKey.stringKey("r1"),
             "v1",
             AttributeKey.longKey("r2"),
@@ -99,7 +99,7 @@ class AttributesSupportTest {
   void putInAttributes_allTypes() {
     Attributes attrs = new Attributes().put("y", "z");
     ReadableAttributes original =
-        io.opentelemetry.common.Attributes.of(
+        io.opentelemetry.api.common.Attributes.of(
             AttributeKey.stringKey("r1"),
             "v1",
             AttributeKey.longKey("r2"),

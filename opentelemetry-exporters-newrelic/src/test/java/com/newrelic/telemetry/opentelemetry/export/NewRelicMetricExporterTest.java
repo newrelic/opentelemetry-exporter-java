@@ -22,8 +22,8 @@ import com.newrelic.telemetry.TelemetryClient;
 import com.newrelic.telemetry.metrics.Count;
 import com.newrelic.telemetry.metrics.Gauge;
 import com.newrelic.telemetry.metrics.MetricBatch;
-import io.opentelemetry.common.AttributeKey;
-import io.opentelemetry.common.Labels;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Labels;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
 import io.opentelemetry.sdk.metrics.data.MetricData;
@@ -50,7 +50,7 @@ class NewRelicMetricExporterTest {
 
     Resource resource =
         Resource.create(
-            io.opentelemetry.common.Attributes.of(
+            io.opentelemetry.api.common.Attributes.of(
                 AttributeKey.stringKey(SERVICE_NAME), "myService"));
     InstrumentationLibraryInfo libraryInfo =
         InstrumentationLibraryInfo.create("instrumentationName", "1.0");
@@ -70,8 +70,8 @@ class NewRelicMetricExporterTest {
     Count metric1 = new Count("count", 3d, 100, 200, new Attributes());
     Gauge metric2 = new Gauge("gauge", 3d, 200, new Attributes());
 
-    io.opentelemetry.common.Attributes attrs =
-        io.opentelemetry.common.Attributes.newBuilder().setAttribute("not sure", "huh").build();
+    io.opentelemetry.api.common.Attributes attrs =
+        io.opentelemetry.api.common.Attributes.builder().put("not sure", "huh").build();
 
     MetricData metricData =
         MetricData.create(

@@ -5,15 +5,15 @@
 
 package com.newrelic.telemetry.opentelemetry.export;
 
-import io.opentelemetry.common.Attributes;
-import io.opentelemetry.common.ReadableAttributes;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.common.ReadableAttributes;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanId;
+import io.opentelemetry.api.trace.TraceFlags;
+import io.opentelemetry.api.trace.TraceState;
 import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.data.SpanData;
-import io.opentelemetry.trace.Span;
-import io.opentelemetry.trace.SpanId;
-import io.opentelemetry.trace.TraceFlags;
-import io.opentelemetry.trace.TraceState;
 import java.util.List;
 
 public class TestSpanData implements SpanData {
@@ -127,12 +127,12 @@ public class TestSpanData implements SpanData {
   }
 
   @Override
-  public boolean getHasRemoteParent() {
+  public boolean hasRemoteParent() {
     return false;
   }
 
   @Override
-  public boolean getHasEnded() {
+  public boolean hasEnded() {
     return hasEnded;
   }
 
