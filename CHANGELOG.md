@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Coming soon
+- tbd
+
+## [0.9.0] - 2020-10-29
+- Updates compatibility with `opentelemetry-java` 0.9.1
+- Updates compatibility with `opentelemetry-javaagent-spi` 0.9.0
 
 ## [0.8.1] - 2020-09-10
 - Fixes the inability to use the exporter with the auto-instrumentation agent version 0.8.0
