@@ -280,8 +280,7 @@ class SpanBatchAdapterTest {
     SpanBatchAdapter testClass =
         new SpanBatchAdapter(new Attributes().put("host", "localhost"), "instanceId");
 
-    SpanData inputSpan =
-        buildSpan(SpanData.Status.create(StatusCode.ERROR, "it's broken"));
+    SpanData inputSpan = buildSpan(SpanData.Status.create(StatusCode.ERROR, "it's broken"));
 
     Collection<SpanBatch> result =
         testClass.adaptToSpanBatches(Collections.singletonList(inputSpan));

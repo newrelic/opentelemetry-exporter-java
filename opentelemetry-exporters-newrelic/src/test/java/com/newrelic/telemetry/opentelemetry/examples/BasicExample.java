@@ -16,7 +16,6 @@ import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.api.trace.Tracer;
-import io.opentelemetry.api.trace.TracingContextUtils;
 import io.opentelemetry.context.Scope;
 import java.util.Random;
 
@@ -64,7 +63,8 @@ public class BasicExample {
             .build();
 
     // 5. Optionally, you can pre-bind a set of labels, rather than passing them in every time.
-    LongValueRecorder.BoundLongValueRecorder boundTimer = spanTimer.bind(Labels.of("spanName", "testSpan"));
+    LongValueRecorder.BoundLongValueRecorder boundTimer =
+        spanTimer.bind(Labels.of("spanName", "testSpan"));
 
     // 6. use these to instrument some work
     doSomeSimulatedWork(tracer, spanCounter, upDownCounter, boundTimer);

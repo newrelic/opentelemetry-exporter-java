@@ -54,7 +54,8 @@ public class NewRelicExporters {
         IntervalMetricReader.builder()
             .setExportIntervalMillis(configuration.collectionIntervalSeconds * 1000)
             .setMetricExporter(metricExporterBuilder.build())
-            .setMetricProducers(singleton(OpenTelemetrySdk.getGlobalMeterProvider().getMetricProducer()))
+            .setMetricProducers(
+                singleton(OpenTelemetrySdk.getGlobalMeterProvider().getMetricProducer()))
             .build();
   }
 

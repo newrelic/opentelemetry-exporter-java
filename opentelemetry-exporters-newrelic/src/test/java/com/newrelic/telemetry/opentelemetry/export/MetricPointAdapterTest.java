@@ -168,9 +168,7 @@ class MetricPointAdapterTest {
 
   private MetricData buildMetricData(MetricData.Point point, MetricData.Type type) {
     io.opentelemetry.api.common.Attributes attrs =
-        io.opentelemetry.api.common.Attributes.builder()
-            .put("awesomeAttr", "thebest")
-            .build();
+        io.opentelemetry.api.common.Attributes.builder().put("awesomeAttr", "thebest").build();
     Resource resource = Resource.create(attrs);
 
     return MetricData.create(
