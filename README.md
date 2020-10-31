@@ -136,8 +136,8 @@ To instrument tracers and meters using the [opentelemetry-javaagent](https://git
 ```bash
 java -javaagent:path/to/opentelemetry-javaagent-<version>-all.jar \
      -Dotel.exporter.jar=path/to/opentelemetry-exporter-newrelic-auto-<version>.jar \
-     -Dotel.exporter.newrelic.api.key=${INSIGHTS_INSERT_KEY} \
-     -Dotel.exporter.newrelic.service.name=best-service-ever \
+     -Dnewrelic.api.key=${INSIGHTS_INSERT_KEY} \
+     -Dnewrelic.service.name=best-service-ever \
      -jar myapp.jar
 ```
 :warning: If you encounter an error like this:
