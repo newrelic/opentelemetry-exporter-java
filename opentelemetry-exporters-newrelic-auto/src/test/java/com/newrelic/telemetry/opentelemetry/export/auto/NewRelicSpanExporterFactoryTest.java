@@ -5,12 +5,12 @@
 
 package com.newrelic.telemetry.opentelemetry.export.auto;
 
-import io.opentelemetry.sdk.trace.export.SpanExporter;
-import org.junit.jupiter.api.Test;
-
 import static com.newrelic.telemetry.opentelemetry.export.auto.NewRelicConfiguration.NEW_RELIC_TRACE_URI_OVERRIDE;
 import static com.newrelic.telemetry.opentelemetry.export.auto.NewRelicConfiguration.NEW_RELIC_URI_OVERRIDE;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import io.opentelemetry.sdk.trace.export.SpanExporter;
+import org.junit.jupiter.api.Test;
 
 class NewRelicSpanExporterFactoryTest extends AbstractExporterFactoryTest {
 

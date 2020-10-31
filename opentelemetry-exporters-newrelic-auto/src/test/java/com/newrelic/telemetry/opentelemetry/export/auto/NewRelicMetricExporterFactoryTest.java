@@ -5,11 +5,11 @@
 
 package com.newrelic.telemetry.opentelemetry.export.auto;
 
-import io.opentelemetry.sdk.metrics.export.MetricExporter;
-import org.junit.jupiter.api.Test;
-
 import static com.newrelic.telemetry.opentelemetry.export.auto.NewRelicConfiguration.NEW_RELIC_METRIC_URI_OVERRIDE;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import io.opentelemetry.sdk.metrics.export.MetricExporter;
+import org.junit.jupiter.api.Test;
 
 class NewRelicMetricExporterFactoryTest extends AbstractExporterFactoryTest {
 
