@@ -10,21 +10,16 @@ import static com.newrelic.telemetry.opentelemetry.export.auto.NewRelicConfigura
 import static com.newrelic.telemetry.opentelemetry.export.auto.NewRelicConfiguration.NEW_RELIC_SERVICE_NAME;
 
 import java.util.Properties;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-@ExtendWith(MockitoExtension.class)
-abstract class AbstractExporterFactoryTest {
+class TestProperties {
 
-  protected Properties config;
-  protected String defaultUriOverride = "http://test.domain.com";
+  protected static final String defaultUriOverride = "http://test.domain.com";
 
-  @BeforeEach
-  void setup() {
-    config = new Properties();
+  static Properties newTestProperties() {
+    Properties config = new Properties();
     config.setProperty(NEW_RELIC_API_KEY, "test-key");
     config.setProperty(NEW_RELIC_ENABLE_AUDIT_LOGGING, "true");
     config.setProperty(NEW_RELIC_SERVICE_NAME, "best service ever");
+    return config;
   }
 }

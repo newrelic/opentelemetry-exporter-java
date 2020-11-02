@@ -10,12 +10,17 @@ import static com.newrelic.telemetry.opentelemetry.export.auto.NewRelicConfigura
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import io.opentelemetry.sdk.trace.export.SpanExporter;
+import java.util.Properties;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-class NewRelicSpanExporterFactoryTest extends AbstractExporterFactoryTest {
+@ExtendWith(MockitoExtension.class)
+class NewRelicSpanExporterFactoryTest {
 
   @Test
   void testFromConfig_HappyPath() {
+    Properties config = TestProperties.newTestProperties();
     config.setProperty(NEW_RELIC_TRACE_URI_OVERRIDE, "http://test.domain.com");
     NewRelicSpanExporterFactory newRelicSpanExporterFactory = new NewRelicSpanExporterFactory();
     SpanExporter spanExporter = newRelicSpanExporterFactory.fromConfig(config);
@@ -25,6 +30,7 @@ class NewRelicSpanExporterFactoryTest extends AbstractExporterFactoryTest {
 
   @Test
   void testFromConfig_OldUriProperty() {
+    Properties config = TestProperties.newTestProperties();
     config.setProperty(NEW_RELIC_URI_OVERRIDE, "http://test.domain.com");
     config.setProperty(NEW_RELIC_TRACE_URI_OVERRIDE, "http://test.domain.com");
     NewRelicSpanExporterFactory newRelicSpanExporterFactory = new NewRelicSpanExporterFactory();
