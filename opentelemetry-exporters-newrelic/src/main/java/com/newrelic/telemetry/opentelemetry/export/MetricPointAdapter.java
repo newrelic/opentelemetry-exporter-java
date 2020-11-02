@@ -14,7 +14,7 @@ import com.newrelic.telemetry.metrics.Count;
 import com.newrelic.telemetry.metrics.Gauge;
 import com.newrelic.telemetry.metrics.Metric;
 import com.newrelic.telemetry.metrics.Summary;
-import io.opentelemetry.common.Labels;
+import io.opentelemetry.api.common.Labels;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.data.MetricData.DoublePoint;
 import io.opentelemetry.sdk.metrics.data.MetricData.LongPoint;

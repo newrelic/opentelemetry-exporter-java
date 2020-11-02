@@ -11,11 +11,10 @@ import static org.mockito.Mockito.when;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.TelemetryClient;
 import com.newrelic.telemetry.spans.SpanBatch;
+import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.sdk.trace.data.ImmutableStatus;
 import io.opentelemetry.sdk.trace.data.SpanData;
-import io.opentelemetry.trace.Span.Kind;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -49,10 +48,10 @@ class NewRelicSpanExporterTest {
     return TestSpanData.newBuilder()
         .setTraceId(traceId)
         .setSpanId(spanId)
-        .setResource(Resource.create(io.opentelemetry.common.Attributes.empty()))
+        .setResource(Resource.create(io.opentelemetry.api.common.Attributes.empty()))
         .setName("spanName")
-        .setKind(Kind.SERVER)
-        .setStatus(ImmutableStatus.OK)
+        .setKind(Span.Kind.SERVER)
+        .setStatus(SpanData.Status.ok())
         .setStartEpochNanos(456_001_000L)
         .setEndEpochNanos(456_001_100L)
         .setHasEnded(true)

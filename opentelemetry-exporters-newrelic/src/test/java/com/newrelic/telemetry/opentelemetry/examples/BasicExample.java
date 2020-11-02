@@ -7,18 +7,16 @@ package com.newrelic.telemetry.opentelemetry.examples;
 
 import com.newrelic.telemetry.opentelemetry.export.NewRelicExporters;
 import com.newrelic.telemetry.opentelemetry.export.NewRelicExporters.Configuration;
-import io.opentelemetry.OpenTelemetry;
-import io.opentelemetry.common.Labels;
+import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.common.Labels;
+import io.opentelemetry.api.metrics.LongCounter;
+import io.opentelemetry.api.metrics.LongUpDownCounter;
+import io.opentelemetry.api.metrics.LongValueRecorder;
+import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.StatusCode;
+import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
-import io.opentelemetry.metrics.LongCounter;
-import io.opentelemetry.metrics.LongUpDownCounter;
-import io.opentelemetry.metrics.LongValueRecorder;
-import io.opentelemetry.metrics.LongValueRecorder.BoundLongValueRecorder;
-import io.opentelemetry.metrics.Meter;
-import io.opentelemetry.trace.Span;
-import io.opentelemetry.trace.Span.Kind;
-import io.opentelemetry.trace.StatusCanonicalCode;
-import io.opentelemetry.trace.Tracer;
 import java.util.Random;
 
 public class BasicExample {
@@ -38,8 +36,8 @@ public class BasicExample {
 
     // 2. Create an OpenTelemetry `Tracer` and a `Meter` and use them for some manual
     // instrumentation.
-    Tracer tracer = OpenTelemetry.getTracerProvider().get("sample-app", "1.0");
-    Meter meter = OpenTelemetry.getMeterProvider().get("sample-app", "1.0");
+    Tracer tracer = OpenTelemetry.getGlobalTracerProvider().get("sample-app", "1.0");
+    Meter meter = OpenTelemetry.getGlobalMeterProvider().get("sample-app", "1.0");
 
     // 3. Here is an example of a counter
     LongCounter spanCounter =
@@ -65,7 +63,8 @@ public class BasicExample {
             .build();
 
     // 5. Optionally, you can pre-bind a set of labels, rather than passing them in every time.
-    BoundLongValueRecorder boundTimer = spanTimer.bind(Labels.of("spanName", "testSpan"));
+    LongValueRecorder.BoundLongValueRecorder boundTimer =
+        spanTimer.bind(Labels.of("spanName", "testSpan"));
 
     // 6. use these to instrument some work
     doSomeSimulatedWork(tracer, spanCounter, upDownCounter, boundTimer);
@@ -79,17 +78,17 @@ public class BasicExample {
       Tracer tracer,
       LongCounter spanCounter,
       LongUpDownCounter upDownCounter,
-      BoundLongValueRecorder boundTimer)
+      LongValueRecorder.BoundLongValueRecorder boundTimer)
       throws InterruptedException {
     Random random = new Random();
     for (int i = 0; i < 10; i++) {
       long startTime = System.currentTimeMillis();
       Span span =
-          tracer.spanBuilder("testSpan").setSpanKind(Kind.INTERNAL).setNoParent().startSpan();
-      try (Scope ignored = tracer.withSpan(span)) {
+          tracer.spanBuilder("testSpan").setSpanKind(Span.Kind.INTERNAL).setNoParent().startSpan();
+      try (Scope ignored = span.makeCurrent()) {
         boolean markAsError = random.nextBoolean();
         if (markAsError) {
-          span.setStatus(StatusCanonicalCode.ERROR, "internalError");
+          span.setStatus(StatusCode.ERROR, "internalError");
         }
         spanCounter.add(1, Labels.of("spanName", "testSpan", "isItAnError", "" + markAsError));
         upDownCounter.add(random.nextInt(100) - 50);

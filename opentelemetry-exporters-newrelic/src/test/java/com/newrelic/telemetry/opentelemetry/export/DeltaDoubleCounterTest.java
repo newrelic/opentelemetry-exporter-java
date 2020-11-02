@@ -7,7 +7,7 @@ package com.newrelic.telemetry.opentelemetry.export;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import io.opentelemetry.common.Labels;
+import io.opentelemetry.api.common.Labels;
 import io.opentelemetry.sdk.metrics.data.MetricData.DoublePoint;
 import org.junit.jupiter.api.Test;
 
