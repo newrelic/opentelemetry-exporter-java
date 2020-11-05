@@ -4,7 +4,7 @@ dependencies {
     api("com.newrelic.telemetry:telemetry:$newRelicTelemetrySdkVersion")
     implementation("org.slf4j:slf4j-api:1.7.26")
     implementation("com.newrelic.telemetry:telemetry-http-okhttp:$newRelicTelemetrySdkVersion")
-    implementation("io.opentelemetry:opentelemetry-sdk:0.10.0-20201029.153044-108")
+    implementation("io.opentelemetry:opentelemetry-sdk:0.10.0")
 
     testRuntimeOnly("org.slf4j:slf4j-simple:1.7.26")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.4.2")
