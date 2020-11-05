@@ -47,7 +47,7 @@ public class AttributesSupport {
     originalAttributes.forEach(
         new AttributeConsumer() {
           @Override
-          public <T> void consume(AttributeKey<T> key, T value) {
+          public <T> void accept(AttributeKey<T> key, T value) {
             switch (key.getType()) {
               case STRING:
                 attributes.put(key.getKey(), (String) value);
