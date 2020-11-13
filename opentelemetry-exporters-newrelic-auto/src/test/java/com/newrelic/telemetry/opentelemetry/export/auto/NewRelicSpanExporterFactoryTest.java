@@ -7,9 +7,11 @@ package com.newrelic.telemetry.opentelemetry.export.auto;
 
 import static com.newrelic.telemetry.opentelemetry.export.auto.NewRelicConfiguration.NEW_RELIC_TRACE_URI_OVERRIDE;
 import static com.newrelic.telemetry.opentelemetry.export.auto.NewRelicConfiguration.NEW_RELIC_URI_OVERRIDE;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import io.opentelemetry.sdk.trace.export.SpanExporter;
+import java.util.Collections;
 import java.util.Properties;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,5 +39,11 @@ class NewRelicSpanExporterFactoryTest {
     SpanExporter spanExporter = newRelicSpanExporterFactory.fromConfig(config);
 
     assertNotNull(spanExporter);
+  }
+
+  @Test
+  void testGetNames() {
+    NewRelicSpanExporterFactory factory = new NewRelicSpanExporterFactory();
+    assertEquals(Collections.singleton("newrelic"), factory.getNames());
   }
 }

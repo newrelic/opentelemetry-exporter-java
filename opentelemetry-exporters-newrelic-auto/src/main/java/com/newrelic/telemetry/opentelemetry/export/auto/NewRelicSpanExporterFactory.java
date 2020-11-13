@@ -13,13 +13,20 @@ import com.newrelic.telemetry.opentelemetry.export.NewRelicSpanExporter;
 import io.opentelemetry.javaagent.spi.exporter.SpanExporterFactory;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.net.URI;
+import java.util.Collections;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * A {@link SpanExporterFactory} that creates a {@link SpanExporter} that sends spans to New Relic.
  */
 @AutoService(SpanExporterFactory.class)
 public class NewRelicSpanExporterFactory implements SpanExporterFactory {
+
+  @Override
+  public Set<String> getNames() {
+    return Collections.singleton("newrelic");
+  }
 
   /**
    * Creates an instance of a {@link SpanExporter} based on the provided configuration.
