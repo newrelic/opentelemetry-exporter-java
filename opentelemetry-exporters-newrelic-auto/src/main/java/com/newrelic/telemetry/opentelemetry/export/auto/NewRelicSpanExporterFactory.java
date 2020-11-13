@@ -24,7 +24,7 @@ public class NewRelicSpanExporterFactory implements SpanExporterFactory {
 
   @Override
   public Set<String> getNames() {
-    return Set.of("newr" + "elic");
+    return Set.of("newrelic");
   }
 
   /**
