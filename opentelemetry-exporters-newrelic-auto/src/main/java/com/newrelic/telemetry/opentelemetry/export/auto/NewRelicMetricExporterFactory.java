@@ -15,6 +15,7 @@ import io.opentelemetry.javaagent.spi.exporter.MetricExporterFactory;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import java.net.URI;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * A {@link MetricExporterFactory} that creates a {@link MetricExporter} that sends metrics to New
@@ -22,6 +23,11 @@ import java.util.Properties;
  */
 @AutoService(MetricExporterFactory.class)
 public class NewRelicMetricExporterFactory implements MetricExporterFactory {
+
+  @Override
+  public Set<String> getNames() {
+    return Set.of("newrelic");
+  }
 
   /**
    * Creates an instance of a {@link MetricExporter} based on the provided configuration.

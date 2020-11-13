@@ -15,7 +15,7 @@ dependencies {
     annotationProcessor("com.google.auto.service:auto-service:1.0-rc7")
     api("com.google.auto.service:auto-service-annotations:1.0-rc7")
     api(project(":opentelemetry-exporters-newrelic"))
-    implementation("io.opentelemetry.javaagent:opentelemetry-javaagent-spi:0.9.0")
+    implementation("io.opentelemetry.javaagent:opentelemetry-javaagent-spi:0.10.1")
     implementation("io.opentelemetry:opentelemetry-sdk:0.10.0")
 
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.4.2")

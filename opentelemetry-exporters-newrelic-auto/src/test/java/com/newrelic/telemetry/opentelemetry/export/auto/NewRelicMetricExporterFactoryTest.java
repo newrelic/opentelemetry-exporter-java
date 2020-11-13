@@ -6,10 +6,12 @@
 package com.newrelic.telemetry.opentelemetry.export.auto;
 
 import static com.newrelic.telemetry.opentelemetry.export.auto.NewRelicConfiguration.NEW_RELIC_METRIC_URI_OVERRIDE;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import java.util.Properties;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -25,5 +27,11 @@ class NewRelicMetricExporterFactoryTest {
     MetricExporter metricExporter = newRelicSpanExporterFactory.fromConfig(config);
 
     assertNotNull(metricExporter);
+  }
+
+  @Test
+  void testGetNames() {
+    NewRelicMetricExporterFactory factory = new NewRelicMetricExporterFactory();
+    assertEquals(Set.of("newrelic"), factory.getNames());
   }
 }
