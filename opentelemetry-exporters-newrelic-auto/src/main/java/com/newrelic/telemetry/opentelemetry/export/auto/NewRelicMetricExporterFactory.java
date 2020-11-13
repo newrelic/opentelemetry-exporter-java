@@ -14,6 +14,7 @@ import com.newrelic.telemetry.opentelemetry.export.NewRelicMetricExporter.Builde
 import io.opentelemetry.javaagent.spi.exporter.MetricExporterFactory;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import java.net.URI;
+import java.util.Collections;
 import java.util.Properties;
 import java.util.Set;
 
@@ -26,7 +27,7 @@ public class NewRelicMetricExporterFactory implements MetricExporterFactory {
 
   @Override
   public Set<String> getNames() {
-    return Set.of("newrelic");
+    return Collections.singleton("newrelic");
   }
 
   /**

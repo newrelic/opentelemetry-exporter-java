@@ -13,6 +13,7 @@ import com.newrelic.telemetry.opentelemetry.export.NewRelicSpanExporter;
 import io.opentelemetry.javaagent.spi.exporter.SpanExporterFactory;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.net.URI;
+import java.util.Collections;
 import java.util.Properties;
 import java.util.Set;
 
@@ -24,7 +25,7 @@ public class NewRelicSpanExporterFactory implements SpanExporterFactory {
 
   @Override
   public Set<String> getNames() {
-    return Set.of("newrelic");
+    return Collections.singleton("newrelic");
   }
 
   /**
