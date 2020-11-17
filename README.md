@@ -14,6 +14,19 @@ To send spans or metrics to New Relic, you will need an [Insights Insert API Key
 Note: There is an example [BasicExample.java](opentelemetry-exporters-newrelic/src/test/java/com/newrelic/telemetry/opentelemetry/examples/BasicExample.java)  
 in the test source code hierarchy that matches this example code. It should be considered as the canonical code for this example, since OpenTelemetry internal SDK APIs are still a work in progress.
 
+### Configuration
+
+Currently, the New Relic OpenTelemetry exporter supports the following configuration via system properties. 
+
+| System property                                                                  | Purpose                                                                                                                                                                                                            |
+|----------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `newrelic.api.key`                                                               | **[Required]** The [Insights insert key](https://docs.newrelic.com/docs/telemetry-data-platform/ingest-manage-data/ingest-apis/use-event-api-report-custom-events#register) to report telemetry data to New Relic. |
+| `newrelic.service.name`                                                          | **[Recommended]** The service name of this JVM instance, default is `(unknown service)`.                                                                                                                           |
+| `newrelic.trace.uri.override`                                                    | The New Relic endpoint to connect to for reporting Spans, default is US Prod. For the EU region use: https://trace-api.eu.newrelic.com/trace/v1                                                                    |
+| `newrelic.metric.uri.override`                                                   | The New Relic endpoint to connect to for reporting metrics, default is US Prod. For the EU region use: https://metric-api.eu.newrelic.com/metric/v1                                                                |
+| `newrelic.enable.audit.logging`                                                  | Enable verbose audit logging to display the JSON batches sent each harvest.                                                                                                                                        |
+| `io.opentelemetry.javaagent.slf4j.simpleLogger.log.com.newrelic.telemetry=debug` | Enable `debug` logging for the exporter when running in the auto-instrumentation agent.                                                                                                                            |
+
 ## Installation
 
 If you need more flexibility, you can set up the individual exporters and the SDK by hand:
