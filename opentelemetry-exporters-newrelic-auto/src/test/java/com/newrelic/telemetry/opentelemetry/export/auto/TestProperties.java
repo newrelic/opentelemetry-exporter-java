@@ -5,9 +5,7 @@
 
 package com.newrelic.telemetry.opentelemetry.export.auto;
 
-import static com.newrelic.telemetry.opentelemetry.export.auto.NewRelicConfiguration.NEW_RELIC_API_KEY;
-import static com.newrelic.telemetry.opentelemetry.export.auto.NewRelicConfiguration.NEW_RELIC_ENABLE_AUDIT_LOGGING;
-import static com.newrelic.telemetry.opentelemetry.export.auto.NewRelicConfiguration.NEW_RELIC_SERVICE_NAME;
+import static com.newrelic.telemetry.opentelemetry.export.auto.NewRelicConfiguration.*;
 
 import java.util.Properties;
 
@@ -17,9 +15,9 @@ class TestProperties {
 
   static Properties newTestProperties() {
     Properties config = new Properties();
-    config.setProperty(NEW_RELIC_API_KEY, "test-key");
-    config.setProperty(NEW_RELIC_ENABLE_AUDIT_LOGGING, "true");
-    config.setProperty(NEW_RELIC_SERVICE_NAME, "best service ever");
+    config.setProperty(NEW_RELIC_API_KEY_PROP, "test-key");
+    config.setProperty(NEW_RELIC_ENABLE_AUDIT_LOGGING_PROP, "true");
+    config.setProperty(NEW_RELIC_SERVICE_NAME_PROP, "best service ever");
     return config;
   }
 }

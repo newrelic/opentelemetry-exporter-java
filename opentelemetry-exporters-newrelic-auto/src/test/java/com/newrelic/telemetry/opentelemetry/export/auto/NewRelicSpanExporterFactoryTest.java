@@ -5,8 +5,7 @@
 
 package com.newrelic.telemetry.opentelemetry.export.auto;
 
-import static com.newrelic.telemetry.opentelemetry.export.auto.NewRelicConfiguration.NEW_RELIC_TRACE_URI_OVERRIDE;
-import static com.newrelic.telemetry.opentelemetry.export.auto.NewRelicConfiguration.NEW_RELIC_URI_OVERRIDE;
+import static com.newrelic.telemetry.opentelemetry.export.auto.NewRelicConfiguration.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -23,7 +22,7 @@ class NewRelicSpanExporterFactoryTest {
   @Test
   void testFromConfig_HappyPath() {
     Properties config = TestProperties.newTestProperties();
-    config.setProperty(NEW_RELIC_TRACE_URI_OVERRIDE, "http://test.domain.com");
+    config.setProperty(NEW_RELIC_TRACE_URI_OVERRIDE_PROP, "http://test.domain.com");
     NewRelicSpanExporterFactory newRelicSpanExporterFactory = new NewRelicSpanExporterFactory();
     SpanExporter spanExporter = newRelicSpanExporterFactory.fromConfig(config);
 
@@ -33,8 +32,8 @@ class NewRelicSpanExporterFactoryTest {
   @Test
   void testFromConfig_OldUriProperty() {
     Properties config = TestProperties.newTestProperties();
-    config.setProperty(NEW_RELIC_URI_OVERRIDE, "http://test.domain.com");
-    config.setProperty(NEW_RELIC_TRACE_URI_OVERRIDE, "http://test.domain.com");
+    config.setProperty(NEW_RELIC_URI_OVERRIDE_PROP, "http://deprecated.test.domain.com");
+    config.setProperty(NEW_RELIC_TRACE_URI_OVERRIDE_PROP, "http://test.domain.com");
     NewRelicSpanExporterFactory newRelicSpanExporterFactory = new NewRelicSpanExporterFactory();
     SpanExporter spanExporter = newRelicSpanExporterFactory.fromConfig(config);
 
@@ -46,4 +45,6 @@ class NewRelicSpanExporterFactoryTest {
     NewRelicSpanExporterFactory factory = new NewRelicSpanExporterFactory();
     assertEquals(Collections.singleton("newrelic"), factory.getNames());
   }
+
+  // TODO similar tests but for env vars
 }

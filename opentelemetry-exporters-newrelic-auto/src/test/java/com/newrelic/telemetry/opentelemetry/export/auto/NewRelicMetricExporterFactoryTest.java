@@ -5,7 +5,7 @@
 
 package com.newrelic.telemetry.opentelemetry.export.auto;
 
-import static com.newrelic.telemetry.opentelemetry.export.auto.NewRelicConfiguration.NEW_RELIC_METRIC_URI_OVERRIDE;
+import static com.newrelic.telemetry.opentelemetry.export.auto.NewRelicConfiguration.NEW_RELIC_METRIC_URI_OVERRIDE_PROP;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -22,7 +22,7 @@ class NewRelicMetricExporterFactoryTest {
   @Test
   void testFromConfig_HappyPath() {
     Properties config = TestProperties.newTestProperties();
-    config.setProperty(NEW_RELIC_METRIC_URI_OVERRIDE, TestProperties.defaultUriOverride);
+    config.setProperty(NEW_RELIC_METRIC_URI_OVERRIDE_PROP, TestProperties.defaultUriOverride);
     NewRelicMetricExporterFactory newRelicSpanExporterFactory = new NewRelicMetricExporterFactory();
     MetricExporter metricExporter = newRelicSpanExporterFactory.fromConfig(config);
 
