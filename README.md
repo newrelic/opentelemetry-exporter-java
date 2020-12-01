@@ -1,20 +1,214 @@
 [![Community Project header](https://github.com/newrelic/open-source-office/raw/master/examples/categories/images/Community_Project.png)](https://github.com/newrelic/open-source-office/blob/master/examples/categories/index.md#community-project)
 
 # New Relic OpenTelemetry exporter
-An [OpenTelemetry](https://github.com/open-telemetry/opentelemetry-java) reporter for sending spans and metrics
+An [OpenTelemetry](https://github.com/open-telemetry/opentelemetry-java) exporter for sending spans and metrics
 to New Relic using the New Relic Java Telemetry SDK.
 
 For the details on how OpenTelemetry data is mapped to New Relic data, see documentation in
 [Our exporter specifications documentation](https://github.com/newrelic/newrelic-exporter-specs)
 
-### How to use
+## How to use
 
-To send spans or metrics to New Relic, you will need an [Insights Insert API Key](https://docs.newrelic.com/docs/insights/insights-data-sources/custom-data/introduction-event-api#).
+The New Relic OpenTelemetry exporter can be used in two capacities: 
 
-Note: There is an example [BasicExample.java](opentelemetry-exporters-newrelic/src/test/java/com/newrelic/telemetry/opentelemetry/examples/BasicExample.java)  
-in the test source code hierarchy that matches this example code. It should be considered as the canonical code for this example, since OpenTelemetry internal SDK APIs are still a work in progress.
+1. [Programmatically](#Programmatic-Usage) - an application takes a dependency on the exporter library, and manually invokes its APIs to report OpenTelemetry data to New Relic.
+2. [Auto Instrumentation](#Auto-Instrumentation-Usage) - configure an application to use the OpenTelemetry Java Agent for automatic instrumentation, and report the data to New Relic via the exporter.
 
-### Configuration
+In either case, to send the resulting spans and metrics to New Relic, you will need an 
+[Insights Insert API Key](https://docs.newrelic.com/docs/insights/insights-data-sources/custom-data/introduction-event-api#).
+
+### Programmatic Usage
+
+The New Relic OpenTelemetry exporter can be used programmatically, allowing an application to invoke its APIs as needed to report OpenTelemetry data to New Relic.
+
+The workflow for programmatic use is as follows:
+- Create exporters for the data types to be reported. The exporter currently supports spans and metrics.
+- Register the exporters using OpenTelemetry APIs.
+- Use the OpenTelemetry APIs to record data, which will be exported to New Relic.
+- At the end of the application's lifecycle, call shutdown APIs to stop OpenTelemetry and exporter activity.
+
+[BasicExample.java](opentelemetry-exporters-newrelic/src/test/java/com/newrelic/telemetry/opentelemetry/examples/BasicExample.java) gives a good end to end
+demonstration of this workflow. It should be considered the canonical code for this type of workflow since OpenTelemetry internal SDK APIs are still a work in 
+progress.
+
+The easiest way to get started using the OpenTelemetry SDK with the New Relic exporters is as follows:
+
+Add required dependencies in `build.gradle` (see [Published Artifacts](#Published-Artifacts) for versions):
+```
+repositories {
+    maven {
+        url = "https://oss.sonatype.org/content/repositories/snapshots"
+    }
+}
+
+dependencies {
+    implementation("com.newrelic.telemetry:opentelemetry-exporters-newrelic:{version}")
+    implementation("io.opentelemetry:opentelemetry-sdk:{version}")
+    implementation("com.newrelic.telemetry:telemetry-core:{version")
+    implementation("com.newrelic.telemetry:telemetry-http-okhttp:{version}")
+}
+```
+
+Call the APIs in the application:
+```java
+    // Create a configuration object
+    NewRelicExporters.Configuration configuration =
+      new NewRelicExporters.Configuration(apiKey, "My Service Name")
+        .enableAuditLogging()           // Optionally enable audit logging
+        .collectionIntervalSeconds(10); // Set the reporting interval for metrics and spans to 10 seconds
+    
+    // Call start with the configuration
+    NewRelicExporters.start(configuration);
+    
+    // Call the OpenTelemetry SDK to obtain tracers and meters to record data
+    Tracer tracer = OpenTelemetry.getGlobalTracerProvider().get("sample-app", "1.0");
+    Meter meter = OpenTelemetry.getGlobalMeterProvider().get("sample-app", "1.0");
+
+    // ... when the application is complete, be sure call shutdown to stop the exporters
+    NewRelicExporters.shutdown();
+```
+
+The previous code hides some boilerplate code that can be further customized if more flexibility is required. [Recording Spans](#Recording-Spans) and 
+[Recording Metrics](#Recording-Metrics) describe this and how to use the APIs to record data in more detail.
+
+#### Recording Spans
+ 
+[BasicExample.java](opentelemetry-exporters-newrelic/src/test/java/com/newrelic/telemetry/opentelemetry/examples/BasicExample.java) demonstrates the easiest way
+to configure the span exporter. If your application needs more flexibility, it can be further configured as follows:
+
+```java
+    // Create a NewRelicSpanExporter
+    NewRelicSpanExporter exporter = NewRelicSpanExporter.newBuilder()
+        .apiKey(System.getenv("INSIGHTS_INSERT_KEY"))
+        .commonAttributes(new Attributes().put(SERVICE_NAME, "best service ever"))
+        .build();
+    
+    // Use the NewRelicSpanExporter to build a OpenTelemetry BatchSpansProcessor
+    BatchSpanProcessor spanProcessor = BatchSpanProcessor.newBuilder(exporter)
+        .setScheduleDelayMillis(10_000) // Optionally override the default schedule delay
+        .build();
+
+    // Register the span processor with the default TracerSdkManagement of the OpenTelemetrySdk
+   OpenTelemetrySdk.getTracerManagement().tracerManagement.addSpanProcessor(spanProcessor);
+```
+
+Once the span exporter has been registered with the `OpenTelemetrySdk`, spans can be recorded as follows:
+
+```java
+    // Create an OpenTelemetry Tracer and use it to record spans
+    Tracer tracer = OpenTelemetry.getTracerProvider().get("sample-app", "1.0");
+    
+    Span span = tracer.spanBuilder("testSpan").setSpanKind(Kind.INTERNAL).startSpan();
+    try (Scope scope = tracer.withSpan(span)) {
+      //do some work
+      Thread.sleep(1000);
+      span.end();
+    }
+```
+
+Find your spans in New Relic One: go to [New Relic One](https://one.newrelic.com/) and select **Distributed Tracing**.
+
+#### Recording Metrics
+
+[BasicExample.java](opentelemetry-exporters-newrelic/src/test/java/com/newrelic/telemetry/opentelemetry/examples/BasicExample.java) demonstrates the easiest way
+to configure the metric exporter. If your application needs more flexibility, it can be further configured as follows:
+
+```java
+    // Create a NewRelicMetricExporter
+    MetricExporter metricExporter =
+        NewRelicMetricExporter.newBuilder()
+          .apiKey(System.getenv("INSIGHTS_INSERT_KEY"))
+          .commonAttributes(new Attributes().put(SERVICE_NAME, "best service ever"))
+          .build();
+
+    // Create an IntervalMetricReader configured to batch up metrics every 5 seconds
+    IntervalMetricReader intervalMetricReader =
+        IntervalMetricReader.builder()
+            .setMetricProducers(
+                Collections.singleton(OpenTelemetrySdk.getMeterProvider().getMetricProducer()))
+            .setExportIntervalMillis(5000) // Batch up metrics every 5 seconds, or on whatever schedule the application requires
+            .setMetricExporter(metricExporter)
+            .build();
+```
+
+Once the `IntervalMetricReader` has been setup with the metric exporter, metrics can be recorded as follows:
+
+```java
+    // Recording metrics starts with obtaining a meter. The meter can then be used to obtain instruments
+    // to which the application reports measurements.
+    Meter meter = OpenTelemetry.getMeterProvider().get("sample-app", "1.0");
+
+    // Obtain a counter from the meter
+    LongCounter spanCounter =
+        meter
+            .longCounterBuilder("spanCounter")
+            .setUnit("one")
+            .setDescription("Counting all the spans")
+            .setMonotonic(true)
+            .build();
+
+    // Obtain a measure from the meter
+    LongMeasure spanTimer =
+        meter
+            .longMeasureBuilder("spanTimer")
+            .setUnit("ms")
+            .setDescription("How long the spans take")
+            .setAbsolute(true)
+            .build();
+    
+    // Use the instruments to record measurements
+   spanCounter.add(1, "spanName", "testSpan", "isItAnError", "true");
+   spanTimer.record(1000, "spanName", "testSpan"); 
+```
+
+To find your metrics in New Relic One, go to [New Relic One](https://one.newrelic.com/) and locate your service in the **Entity explorer** 
+(based on the `"service.name"` attributes you've used).
+
+### Auto Instrumentation Usage
+
+In order to automatically instrument an application, it must be configured to use the OpenTelemetry Java Agent and to use the New Relic OpenTelemetry exporter 
+by passing several `options` to the `java [options] -jar <mainclass>> [args..]` command.
+
+The OpenTelemetry Java Agent must be downloaded (various versions available [here](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases)),
+ and specified via: 
+
+`-javaagent:path/to/opentelemetry-javaagent-<version>-all.jar`
+
+The New Relic OpenTelemetry Exporter must be downloaded 
+(various versions available [here](https://repo1.maven.org/maven2/com/newrelic/telemetry/opentelemetry-exporters-newrelic-auto/)), and specified via:
+
+`-Dotel.exporter.jar=path/to/opentelemetry-exporter-newrelic-auto-<version>.jar`
+
+A New Relic Insights Insert API key must be specified via:
+
+`-Dnewrelic.api.key=${INSIGHTS_INSERT_KEY}`
+
+The application's service name _should_ be specified via:
+
+`-Dnewrelic.service.name=best-service-ever`
+
+The configuration can be optionally further customized using the available [system properties](#Configuration-System-Properties).
+
+Bringing it all together, the command to run the application will look something like:
+
+```bash
+java -javaagent:path/to/opentelemetry-javaagent-<version>-all.jar \
+     -Dotel.exporter.jar=path/to/opentelemetry-exporter-newrelic-auto-<version>.jar \
+     -Dnewrelic.api.key=${INSIGHTS_INSERT_KEY} \
+     -Dnewrelic.service.name=best-service-ever \
+     -jar myapp.jar
+```
+
+:warning: If you encounter an error like this:
+
+```
+[main] WARN io.opentelemetry.auto.tooling.TracerInstaller - No span exporter found in opentelemetry-exporters-newrelic-auto-0.8.1.jar
+```
+
+Check our [release notes](https://github.com/newrelic/opentelemetry-exporter-java/releases) and verify the version of your 
+`opentelemetry-exporter-newrelic-auto-<version>.jar` supports the version of `opentelemetry-javaagent-all.jar`.
+
+#### Configuration System Properties
 
 Currently, the New Relic OpenTelemetry exporter supports the following configuration via system properties. 
 
@@ -26,199 +220,29 @@ Currently, the New Relic OpenTelemetry exporter supports the following configura
 | `newrelic.metric.uri.override`                                                   | The New Relic endpoint to connect to for reporting metrics, default is US Prod. For the EU region use: https://metric-api.eu.newrelic.com/metric/v1                                                                |
 | `newrelic.enable.audit.logging`                                                  | Enable verbose audit logging to display the JSON batches sent each harvest.                                                                                                                                        |
 | `io.opentelemetry.javaagent.slf4j.simpleLogger.log.com.newrelic.telemetry=debug` | Enable `debug` logging for the exporter when running in the auto-instrumentation agent.                                                                                                                            |
+| `otel.exporter.newrelic.enable.audit.logging=true`                               | Enable audit logging for the exporter running in the auto-instrumentation agent.                                                                                                                                   |
 
-## Installation
+## Published Artifacts
 
-If you need more flexibility, you can set up the individual exporters and the SDK by hand:
+This project publishes two artifacts in alignment with the two workflows for using the exporter described in [How to use](#How-to-use):
 
-### For spans:
+|Group                 |Name                                 |Link                                                                                                   |Description                                                  |
+|----------------------|-------------------------------------|-------------------------------------------------------------------------------------------------------|-------------------------------------------------------------|
+|com.newrelic.telemetry|opentelemetry-exporters-newrelic     |[Maven](https://search.maven.org/artifact/com.newrelic.telemetry/opentelemetry-exporters-newrelic)     |For [Programmatic Usage](#Programmatic-Usage)                |
+|com.newrelic.telemetry|opentelemetry-exporters-newrelic-auto|[Maven](https://search.maven.org/artifact/com.newrelic.telemetry/opentelemetry-exporters-newrelic-auto)|For [Auto Instrumentation Usage](#Auto-Instrumentation-Usage)|
 
-Important: If you are using [auto-instrumentation](#auto-instrumentation), or you have used the
-[quickstart](#quickstart) you should skip the configuration of the SDK, and go right to the next
-section.
+Release notes are available [here](https://github.com/newrelic/opentelemetry-exporter-java/releases).
 
-1. Create a `NewRelicSpanExporter`
-```java
-    NewRelicSpanExporter exporter = NewRelicSpanExporter.newBuilder()
-        .apiKey(System.getenv("INSIGHTS_INSERT_KEY"))
-        .commonAttributes(new Attributes().put(SERVICE_NAME, "best service ever")).build();
-```
+Javadoc for this project can be found here: [![Javadocs][javadoc-image]][javadoc-url]
 
-2. Build the OpenTelemetry `BatchSpansProcessor` with the `NewRelicSpanExporter` 
-```java
-    BatchSpanProcessor spanProcessor = BatchSpanProcessor.newBuilder(exporter).build();
-```
+## Find and use your data
 
-3. Add the span processor to the default TracerSdkManagement:
-```java
-   TracerSdkManagement tracerManagement = OpenTelemetrySdk.getTracerManagement();
-   tracerManagement.addSpanProcessor(spanProcessor);
-```
-
-### Use the APIs to record some spans
-
-1. Create the OpenTelemetry `Tracer` and use it for recording spans.
-```java
-    Tracer tracer = OpenTelemetry.getTracerProvider().get("sample-app", "1.0");
-    
-    Span span = tracer.spanBuilder("testSpan").setSpanKind(Kind.INTERNAL).startSpan();
-    try (Scope scope = tracer.withSpan(span)) {
-      //do some work
-      Thread.sleep(1000);
-      span.end();
-    }
-```
-
-2. Find your spans in New Relic One: go to https://one.newrelic.com/ and select **Distributed Tracing**.
-
-### For metrics:
-
-Important: If you are using [auto-instrumentation](#auto-instrumentation), or you have used the
-[quickstart](#quickstart) you should skip the configuration of the SDK, and go right to the next
-section.
-
-1. Create a `NewRelicMetricExporter`
-
-```java
-    MetricExporter metricExporter =
-        NewRelicMetricExporter.newBuilder()
-          .apiKey(System.getenv("INSIGHTS_INSERT_KEY"))
-          .commonAttributes(new Attributes().put(SERVICE_NAME, "best service ever"))
-          .build();
-```
-
-2. Create an `IntervalMetricReader` that will batch up metrics every 5 seconds:
-
-```java
-    IntervalMetricReader intervalMetricReader =
-        IntervalMetricReader.builder()
-            .setMetricProducers(
-                Collections.singleton(OpenTelemetrySdk.getMeterProvider().getMetricProducer()))
-            .setExportIntervalMillis(5000)
-            .setMetricExporter(metricExporter)
-            .build();
-```
-
-### Use the APIs to record some metrics
-
-1. Create a sample Meter:
-
-```java
-    Meter meter = OpenTelemetry.getMeterProvider().get("sample-app", "1.0");
-```
-
-2. Here is an example of a counter:
-
-```java
-    LongCounter spanCounter =
-        meter
-            .longCounterBuilder("spanCounter")
-            .setUnit("one")
-            .setDescription("Counting all the spans")
-            .setMonotonic(true)
-            .build();
-```
-
-3. Here is an example of a measure:
-
-```java
-    LongMeasure spanTimer =
-        meter
-            .longMeasureBuilder("spanTimer")
-            .setUnit("ms")
-            .setDescription("How long the spans take")
-            .setAbsolute(true)
-            .build();
-```
-
-4. Use these instruments for recording some metrics:
-
-```java
-   spanCounter.add(1, "spanName", "testSpan", "isItAnError", "true");
-   spanTimer.record(1000, "spanName", "testSpan")
-```
-
-5. Find your metrics in New Relic One: go to https://one.newrelic.com/ and locate your service
-in the **Entity explorer** (based on the `"service.name"` attributes you've used).
-
-### Auto-Instrumentation
-
-To instrument tracers and meters using the [opentelemetry-javaagent](https://github.com/open-telemetry/opentelemetry-java-instrumentation),
-`opentelemetry-exporter-newrelic-auto-<version>.jar` can be used to provide opentelemetry exporters. Here is an example.
-
-```bash
-java -javaagent:path/to/opentelemetry-javaagent-<version>-all.jar \
-     -Dotel.exporter.jar=path/to/opentelemetry-exporter-newrelic-auto-<version>.jar \
-     -Dnewrelic.api.key=${INSIGHTS_INSERT_KEY} \
-     -Dnewrelic.service.name=best-service-ever \
-     -jar myapp.jar
-```
-:warning: If you encounter an error like this:
-
-```
-[main] WARN io.opentelemetry.auto.tooling.TracerInstaller - No span exporter found in opentelemetry-exporters-newrelic-auto-0.8.1.jar
-```
-
-Check our [release notes](https://github.com/newrelic/opentelemetry-exporter-java/releases) and verify the version of your `opentelemetry-exporter-newrelic-auto-<version>.jar` supports the version of `opentelemetry-javaagent-all.jar`.
-
-
-
-If you wish to turn on debug logging for the exporter running in the auto-instrumentation agent, use the following system property:
-```
--Dio.opentelemetry.javaagent.slf4j.simpleLogger.log.com.newrelic.telemetry=debug
-```
-
-And, if you wish to enable audit logging for the exporter running in the auto-instrumentaiotn agent, use this system property:
-```
--Dotel.exporter.newrelic.enable.audit.logging=true
-```
-
-### Javadoc for this project can be found here: [![Javadocs][javadoc-image]][javadoc-url]
-
-### Find and use your data
-
-For tips on how to find and query your data in New Relic, see [Find trace/span data](https://docs.newrelic.com/docs/understand-dependencies/distributed-tracing/trace-api/introduction-trace-api#view-data). 
+For tips on how to find and query your data in New Relic, see 
+[Find trace/span data](https://docs.newrelic.com/docs/understand-dependencies/distributed-tracing/trace-api/introduction-trace-api#view-data). 
 
 For general querying information, see:
 - [Query New Relic data](https://docs.newrelic.com/docs/using-new-relic/data/understand-data/query-new-relic-data)
 - [Intro to NRQL](https://docs.newrelic.com/docs/query-data/nrql-new-relic-query-language/getting-started/introduction-nrql)
-
-
-### Gradle
-`build.gradle`:
-
-```
-repositories {
-    maven {
-        url = "https://oss.sonatype.org/content/repositories/snapshots"
-    }
-}
-```
-
-```
-implementation("com.newrelic.telemetry:opentelemetry-exporters-newrelic:0.10.0")
-implementation("io.opentelemetry:opentelemetry-sdk:0.10.0")
-implementation("com.newrelic.telemetry:telemetry-core:0.9.0")
-implementation("com.newrelic.telemetry:telemetry-http-okhttp:0.9.0")
-```
-
-## Getting Started
-
-If you want to get started quickly, the easiest way is to configure the OpenTelemetry SDK and the New Relic exporters like this:
-
-```java
-    NewRelicExporters.Configuration configuration =
-      new NewRelicExporters.Configuration(apiKey, "My Service Name")
-        .enableAuditLogging()
-        .collectionIntervalSeconds(10);
-    NewRelicExporters.start(configuration);
-```
-
-Be sure to shut down the exporters when your application finishes:
-
-```
-   NewRelicExporters.shutdown();
-```
 
 ## Building
 
