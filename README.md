@@ -220,7 +220,6 @@ Currently, the New Relic OpenTelemetry exporter supports the following configura
 | `newrelic.metric.uri.override`                                                   | The New Relic endpoint to connect to for reporting metrics, default is US Prod. For the EU region use: https://metric-api.eu.newrelic.com/metric/v1                                                                |
 | `newrelic.enable.audit.logging`                                                  | Enable verbose audit logging to display the JSON batches sent each harvest.                                                                                                                                        |
 | `io.opentelemetry.javaagent.slf4j.simpleLogger.log.com.newrelic.telemetry=debug` | Enable `debug` logging for the exporter when running in the auto-instrumentation agent.                                                                                                                            |
-| `otel.exporter.newrelic.enable.audit.logging=true`                               | Enable audit logging for the exporter running in the auto-instrumentation agent.                                                                                                                                   |
 
 ## Published Artifacts
 
