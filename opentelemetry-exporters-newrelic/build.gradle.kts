@@ -31,6 +31,13 @@ tasks {
     build {
         dependsOn("generateVersionResource")
     }
+
+    publishMavenJavaPublicationToMavenLocal {
+        dependsOn(jar)
+    }
+    publishMavenJavaPublicationToMavenRepository {
+        dependsOn(jar)
+    }
 }
 
 
