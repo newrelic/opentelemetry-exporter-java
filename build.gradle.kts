@@ -79,7 +79,7 @@ listOf(":opentelemetry-exporters-newrelic", ":opentelemetry-exporters-newrelic-a
         configure<PublishingExtension> {
             publications {
                 create<MavenPublication>("mavenJava") {
-                    from(components["java"])
+                    artifact(file("$buildDir/libs/${project.name}-${project.version}.jar"))
                     artifact(tasks["sourcesJar"])
                     artifact(tasks["javadocJar"])
                     pom {
