@@ -276,7 +276,7 @@ For general querying information, see:
 
 ## Building
 
-Requires Java 9+ to build.
+Requires Java 8+ to build.
 
 CI builds are run on Github Actions:
 
