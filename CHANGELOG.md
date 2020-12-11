@@ -5,7 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Coming soon
-- tbd
+- Updates compatibility with `io.opentelemetry:opentelemetry-sdk:0.12.1`
+- Updates compatibility with `io.opentelemetry.javaagent:opentelemetry-javaagent-spi:0.12.1`
 
 ## [0.11.0] - 2020-12-10
 - Updates compatibility with `io.opentelemetry:opentelemetry-sdk:0.11.0`
