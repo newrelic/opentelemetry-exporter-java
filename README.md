@@ -34,6 +34,7 @@ progress.
 The easiest way to get started using the OpenTelemetry SDK with the New Relic exporters is as follows:
 
 Add required dependencies in `build.gradle` (see [Published Artifacts](#Published-Artifacts) for versions):
+
 ```
 repositories {
     maven {
@@ -49,60 +50,80 @@ dependencies {
 }
 ```
 
-Call the APIs in the application:
+Use the provided APIs in your application to set up exporters to record and send OpenTelemetry trace and metric data:
+
 ```java
-    // Create a configuration object
+    // Configure the New Relic exporters.
     NewRelicExporters.Configuration configuration =
-      new NewRelicExporters.Configuration(apiKey, "My Service Name")
-        .enableAuditLogging()           // Optionally enable audit logging
-        .collectionIntervalSeconds(10); // Set the reporting interval for metrics and spans to 10 seconds
-    
-    // Call start with the configuration
+        new NewRelicExporters.Configuration(apiKey, "My Service Name")
+            .enableAuditLogging() // Optionally enable audit logging
+            .collectionIntervalSeconds(
+                10); // Set the reporting interval for metrics/spans to 10 seconds
+
+    // Start the exporters with the supplied configuration. This starts both a NewRelicSpanExporter
+    // and a NewRelicMetricExporter as well as a BatchSpanProcessor and an IntervalMetricReader, the
+    // latter of which manage the batching and sending of their respective telemetry data types.
     NewRelicExporters.start(configuration);
-    
-    // Call the OpenTelemetry SDK to obtain tracers and meters to record data
+
+    // Now that we've got the SDK configured and the exporters started, let's write some very simple
+    // instrumentation to demonstrate how it all works.
+
+    // Call the OpenTelemetry SDK to obtain tracers and meters to record data.
+    // A Tracer is used to create Spans that form traces.
     Tracer tracer = OpenTelemetry.getGlobalTracerProvider().get("sample-app", "1.0");
+    // A Meter is used to create different instruments to record metrics.
     Meter meter = OpenTelemetry.getGlobalMeterProvider().get("sample-app", "1.0");
 
-    // ... when the application is complete, be sure call shutdown to stop the exporters
+    // Use the tracer and meter to record telemetry data for your application. See the sections 
+    // in the README on Recording Spans and Recording Metrics for specific usage examples. 
+
+    // When the application is complete, be sure to call shutdown to stop the exporters.
+    // This will flush any data from the exporters before they exit.
     NewRelicExporters.shutdown();
 ```
 
-The previous code hides some boilerplate code that can be further customized if more flexibility is required. [Recording Spans](#Recording-Spans) and 
-[Recording Metrics](#Recording-Metrics) describe this and how to use the APIs to record data in more detail.
+The previous example hides some boilerplate code that can be further customized if more flexibility is required. Specifically the call to 
+`NewRelicExporters.start(configuration)` automatically starts both a `NewRelicSpanExporter` and a `NewRelicMetricExporter` for you using the same configuration 
+for both. If you wish to configure each exporter separately, or simply don't need to export both spans and metrics, then [Recording Spans](#Recording-Spans) 
+and [Recording Metrics](#Recording-Metrics) sections describe how to do this as well as how to use the Tracer and Meter APIs to record telemetry data.
 
 #### Recording Spans
  
 [BasicExample.java](opentelemetry-exporters-newrelic/src/test/java/com/newrelic/telemetry/opentelemetry/examples/BasicExample.java) demonstrates the easiest way
-to configure the span exporter. If your application needs more flexibility, it can be further configured as follows:
+to configure the span exporter. If your application needs more flexibility, it can be further configured as follows (see the `NewRelicSpanExporter` 
+and `BatchSpanProcessor` APIs for all configuration options):
 
 ```java
-    // Create a NewRelicSpanExporter
-    NewRelicSpanExporter exporter = NewRelicSpanExporter.newBuilder()
-        .apiKey(System.getenv("INSIGHTS_INSERT_KEY"))
-        .commonAttributes(new Attributes().put(SERVICE_NAME, "best service ever"))
-        .build();
-    
-    // Use the NewRelicSpanExporter to build a OpenTelemetry BatchSpansProcessor
-    BatchSpanProcessor spanProcessor = BatchSpanProcessor.newBuilder(exporter)
-        .setScheduleDelayMillis(10_000) // Optionally override the default schedule delay
-        .build();
+    // Explicitly create and configure a NewRelicSpanExporter.
+    NewRelicSpanExporter exporter =
+        NewRelicSpanExporter.newBuilder()
+            .apiKey(System.getenv("INSIGHTS_INSERT_KEY"))
+            .commonAttributes(new Attributes().put(SERVICE_NAME, "best service ever"))
+            .build();
 
-    // Register the span processor with the default TracerSdkManagement of the OpenTelemetrySdk
-   OpenTelemetrySdk.getTracerManagement().tracerManagement.addSpanProcessor(spanProcessor);
+    // Use the NewRelicSpanExporter to create and configure a BatchSpansProcessor.
+    BatchSpanProcessor spanProcessor =
+        BatchSpanProcessor.builder(exporter)
+            .setScheduleDelayMillis(10_000) // Optionally override the default schedule delay
+            .build();
+
+    // Register the span processor with the default TracerSdkManagement of the OpenTelemetrySdk.
+    OpenTelemetrySdk.getGlobalTracerManagement().addSpanProcessor(spanProcessor);
 ```
 
 Once the span exporter has been registered with the `OpenTelemetrySdk`, spans can be recorded as follows:
 
 ```java
-    // Create an OpenTelemetry Tracer and use it to record spans
-    Tracer tracer = OpenTelemetry.getTracerProvider().get("sample-app", "1.0");
-    
-    Span span = tracer.spanBuilder("testSpan").setSpanKind(Kind.INTERNAL).startSpan();
-    try (Scope scope = tracer.withSpan(span)) {
-      //do some work
-      Thread.sleep(1000);
-      span.end();
+    // Create an OpenTelemetry Tracer and use it to record spans.
+    Tracer tracer = OpenTelemetry.getGlobalTracerProvider().get("sample-app", "1.0");
+
+    Span span = tracer.spanBuilder("testSpan").setSpanKind(Span.Kind.INTERNAL).startSpan();
+    try (Scope scope = span.makeCurrent()) {
+        // do some work
+    } catch (Throwable t) {
+        span.setStatus(StatusCode.ERROR, "error description"); // record error details.
+    } finally {
+        span.end(); // closing the scope does not end the span, this has to be done manually.
     }
 ```
 
@@ -111,21 +132,22 @@ Find your spans in New Relic One: go to [New Relic One](https://one.newrelic.com
 #### Recording Metrics
 
 [BasicExample.java](opentelemetry-exporters-newrelic/src/test/java/com/newrelic/telemetry/opentelemetry/examples/BasicExample.java) demonstrates the easiest way
-to configure the metric exporter. If your application needs more flexibility, it can be further configured as follows:
+to configure the metric exporter. If your application needs more flexibility, it can be further configured as follows (see the `NewRelicMetricExporter` 
+and `IntervalMetricReader` APIs for all configuration options):
 
 ```java
-    // Create a NewRelicMetricExporter
+    // Explicitly create and configure a NewRelicMetricExporter.
     MetricExporter metricExporter =
         NewRelicMetricExporter.newBuilder()
           .apiKey(System.getenv("INSIGHTS_INSERT_KEY"))
           .commonAttributes(new Attributes().put(SERVICE_NAME, "best service ever"))
           .build();
 
-    // Create an IntervalMetricReader configured to batch up metrics every 5 seconds
+    // Use the NewRelicMetricExporter to create and configure an IntervalMetricReader.
     IntervalMetricReader intervalMetricReader =
         IntervalMetricReader.builder()
             .setMetricProducers(
-                Collections.singleton(OpenTelemetrySdk.getMeterProvider().getMetricProducer()))
+                Collections.singleton(OpenTelemetrySdk.getGlobalMeterProvider().getMetricProducer()))
             .setExportIntervalMillis(5000) // Batch up metrics every 5 seconds, or on whatever schedule the application requires
             .setMetricExporter(metricExporter)
             .build();
@@ -134,31 +156,40 @@ to configure the metric exporter. If your application needs more flexibility, it
 Once the `IntervalMetricReader` has been setup with the metric exporter, metrics can be recorded as follows:
 
 ```java
-    // Recording metrics starts with obtaining a meter. The meter can then be used to obtain instruments
-    // to which the application reports measurements.
-    Meter meter = OpenTelemetry.getMeterProvider().get("sample-app", "1.0");
+    // A Meter is used to create different instruments to record metrics.
+    Meter meter = OpenTelemetry.getGlobalMeterProvider().get("sample-app", "1.0");
 
-    // Obtain a counter from the meter
+    // Use the meter to create a LongCounter instrument to record metrics.
     LongCounter spanCounter =
         meter
             .longCounterBuilder("spanCounter")
             .setUnit("one")
             .setDescription("Counting all the spans")
-            .setMonotonic(true)
             .build();
 
-    // Obtain a measure from the meter
-    LongMeasure spanTimer =
+    // Use the meter to create a LongValueRecorder instrument to record metrics.
+    LongValueRecorder spanTimer =
         meter
-            .longMeasureBuilder("spanTimer")
+            .longValueRecorderBuilder("spanTimer")
             .setUnit("ms")
             .setDescription("How long the spans take")
-            .setAbsolute(true)
             .build();
     
-    // Use the instruments to record measurements
-   spanCounter.add(1, "spanName", "testSpan", "isItAnError", "true");
-   spanTimer.record(1000, "spanName", "testSpan"); 
+    // Use the meter to create a LongUpDownCounter instrument to record metrics.
+    LongUpDownCounter upDownCounter =
+        meter
+            .longUpDownCounterBuilder("jim")
+            .setDescription("some good testing")
+            .setUnit("1")
+            .build();
+
+    // Use the instruments to record metric measurements.
+    spanCounter.add(1, Labels.of("spanName", "testSpan", "isItAnError", "" + markAsError));
+    upDownCounter.add(random.nextInt(100) - 50);
+
+    // Optionally, you can pre-bind a set of labels, rather than passing them in every time.
+    LongValueRecorder.BoundLongValueRecorder boundTimer = spanTimer.bind(Labels.of("spanName", "testSpan"));
+    boundTimer.record(System.currentTimeMillis() - startTime);
 ```
 
 To find your metrics in New Relic One, go to [New Relic One](https://one.newrelic.com/) and locate your service in the **Entity explorer** 
@@ -244,6 +275,8 @@ For general querying information, see:
 - [Intro to NRQL](https://docs.newrelic.com/docs/query-data/nrql-new-relic-query-language/getting-started/introduction-nrql)
 
 ## Building
+
+Requires Java 8+ to build.
 
 CI builds are run on Github Actions:
 

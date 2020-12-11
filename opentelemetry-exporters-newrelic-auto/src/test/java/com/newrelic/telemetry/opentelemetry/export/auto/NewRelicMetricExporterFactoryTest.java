@@ -10,8 +10,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
+import java.util.Collections;
 import java.util.Properties;
-import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -32,6 +32,6 @@ class NewRelicMetricExporterFactoryTest {
   @Test
   void testGetNames() {
     NewRelicMetricExporterFactory factory = new NewRelicMetricExporterFactory();
-    assertEquals(Set.of("newrelic"), factory.getNames());
+    assertEquals(Collections.singleton("newrelic"), factory.getNames());
   }
 }
