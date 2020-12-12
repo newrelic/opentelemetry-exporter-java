@@ -6,8 +6,8 @@
 package com.newrelic.telemetry.opentelemetry.export;
 
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.common.ReadableAttributes;
 import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.SpanId;
 import io.opentelemetry.api.trace.TraceFlags;
 import io.opentelemetry.api.trace.TraceState;
@@ -23,6 +23,7 @@ public class TestSpanData implements SpanData {
   private final long startEpochNanos;
   private final long endEpochNanos;
   private final String parentSpanId;
+  private final SpanContext parentSpanContext;
   private final String spanName;
   private final Span.Kind kind;
   private final Status status;
@@ -38,6 +39,7 @@ public class TestSpanData implements SpanData {
     this.startEpochNanos = builder.startEpochNanos;
     this.endEpochNanos = builder.endEpochNanos;
     this.parentSpanId = builder.parentSpanId;
+    this.parentSpanContext = builder.parentSpanContext;
     this.spanName = builder.spanName;
     this.kind = builder.kind;
     this.status = builder.status;
@@ -72,6 +74,11 @@ public class TestSpanData implements SpanData {
   }
 
   @Override
+  public SpanContext getParentSpanContext() {
+    return parentSpanContext;
+  }
+
+  @Override
   public String getParentSpanId() {
     return parentSpanId;
   }
@@ -102,7 +109,7 @@ public class TestSpanData implements SpanData {
   }
 
   @Override
-  public ReadableAttributes getAttributes() {
+  public io.opentelemetry.api.common.Attributes getAttributes() {
     return attributes;
   }
 
@@ -157,6 +164,8 @@ public class TestSpanData implements SpanData {
     private String spanId;
     private long startEpochNanos;
     private String parentSpanId = SpanId.getInvalid();
+    private SpanContext parentSpanContext;
+
     private long endEpochNanos;
     private String spanName;
     private Status status;
@@ -183,6 +192,11 @@ public class TestSpanData implements SpanData {
 
     public Builder setParentSpanId(String parentSpanId) {
       this.parentSpanId = parentSpanId;
+      return this;
+    }
+
+    public Builder setParentSpanContext(SpanContext parentSpanContext) {
+      this.parentSpanContext = parentSpanContext;
       return this;
     }
 

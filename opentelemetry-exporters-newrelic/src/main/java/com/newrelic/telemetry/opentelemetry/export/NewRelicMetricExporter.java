@@ -20,7 +20,7 @@ import com.newrelic.telemetry.metrics.Metric;
 import com.newrelic.telemetry.metrics.MetricBatchSender;
 import com.newrelic.telemetry.metrics.MetricBuffer;
 import io.opentelemetry.sdk.common.CompletableResultCode;
-import io.opentelemetry.sdk.internal.MillisClock;
+import io.opentelemetry.sdk.internal.SystemClock;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.data.MetricData.Point;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
@@ -207,7 +207,7 @@ public class NewRelicMetricExporter implements MetricExporter {
      * @return a new {@link NewRelicMetricExporter} instance
      */
     public NewRelicMetricExporter build() {
-      TimeTracker timeTracker = new TimeTracker(MillisClock.getInstance());
+      TimeTracker timeTracker = new TimeTracker(SystemClock.getInstance());
       if (telemetryClient != null) {
         return new NewRelicMetricExporter(
             telemetryClient,
