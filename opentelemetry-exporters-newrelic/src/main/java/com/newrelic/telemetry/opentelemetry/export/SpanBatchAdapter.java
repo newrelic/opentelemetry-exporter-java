@@ -20,7 +20,6 @@ import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.spans.Span;
 import com.newrelic.telemetry.spans.Span.SpanBuilder;
 import com.newrelic.telemetry.spans.SpanBatch;
-import io.opentelemetry.api.common.ReadableAttributes;
 import io.opentelemetry.api.trace.SpanId;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.data.SpanData;
@@ -101,7 +100,7 @@ class SpanBatchAdapter {
   }
 
   private static Attributes createIntrinsicAttributes(SpanData span, Attributes attributes) {
-    ReadableAttributes originalAttributes = span.getAttributes();
+    io.opentelemetry.api.common.Attributes originalAttributes = span.getAttributes();
     putInAttributes(attributes, originalAttributes);
     attributes.put(SPAN_KIND, span.getKind().name());
     return attributes;
@@ -117,7 +116,7 @@ class SpanBatchAdapter {
 
   private static String getErrorMessage(SpanData.Status status) {
     String description = status.getDescription();
-    return isNullOrEmpty(description) ? status.getCanonicalCode().name() : description;
+    return isNullOrEmpty(description) ? status.getStatusCode().name() : description;
   }
 
   private static boolean isNullOrEmpty(String string) {

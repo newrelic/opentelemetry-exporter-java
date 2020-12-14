@@ -9,9 +9,6 @@ import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.INSTRUM
 import static com.newrelic.telemetry.opentelemetry.export.AttributeNames.INSTRUMENTATION_VERSION;
 
 import com.newrelic.telemetry.Attributes;
-import io.opentelemetry.api.common.AttributeConsumer;
-import io.opentelemetry.api.common.AttributeKey;
-import io.opentelemetry.api.common.ReadableAttributes;
 import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
 import io.opentelemetry.sdk.resources.Resource;
 import java.util.UUID;
@@ -37,29 +34,27 @@ public class AttributesSupport {
 
   static Attributes addResourceAttributes(Attributes attributes, Resource resource) {
     if (resource != null) {
-      ReadableAttributes labelsMap = resource.getAttributes();
+      io.opentelemetry.api.common.Attributes labelsMap = resource.getAttributes();
       putInAttributes(attributes, labelsMap);
     }
     return attributes;
   }
 
-  static void putInAttributes(Attributes attributes, ReadableAttributes originalAttributes) {
+  static void putInAttributes(
+      Attributes attributes, io.opentelemetry.api.common.Attributes originalAttributes) {
     originalAttributes.forEach(
-        new AttributeConsumer() {
-          @Override
-          public <T> void accept(AttributeKey<T> key, T value) {
-            switch (key.getType()) {
-              case STRING:
-                attributes.put(key.getKey(), (String) value);
-                break;
-              case BOOLEAN:
-                attributes.put(key.getKey(), (Boolean) value);
-                break;
-              case LONG:
-              case DOUBLE:
-                attributes.put(key.getKey(), (Number) value);
-                break;
-            }
+        (key, value) -> {
+          switch (key.getType()) {
+            case STRING:
+              attributes.put(key.getKey(), (String) value);
+              break;
+            case BOOLEAN:
+              attributes.put(key.getKey(), (Boolean) value);
+              break;
+            case LONG:
+            case DOUBLE:
+              attributes.put(key.getKey(), (Number) value);
+              break;
           }
         });
   }

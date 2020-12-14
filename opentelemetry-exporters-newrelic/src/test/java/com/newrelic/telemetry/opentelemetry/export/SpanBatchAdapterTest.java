@@ -21,6 +21,7 @@ import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.spans.SpanBatch;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
 import io.opentelemetry.sdk.resources.Resource;
@@ -37,6 +38,7 @@ class SpanBatchAdapterTest {
   private final String spanId = "000000000012d685";
   private final String traceId = "000000000063d76f0000000037fe0393";
   private final String parentSpanId = "000000002e5a40d9";
+  private final SpanContext noOpParentSpanContext = SpanContext.getInvalid();
 
   @Test
   void testSendBatchWithSingleSpan() {
@@ -81,6 +83,7 @@ class SpanBatchAdapterTest {
             .setSpanId(spanId)
             .setStartEpochNanos(1_000_456_001_000L)
             .setParentSpanId(parentSpanId)
+            .setParentSpanContext(noOpParentSpanContext)
             .setEndEpochNanos(1_001_789_021_111L)
             .setName("spanName")
             .setStatus(SpanData.Status.ok())
@@ -119,6 +122,7 @@ class SpanBatchAdapterTest {
             .setSpanId(spanId)
             .setStartEpochNanos(1_000_456_001_000L)
             .setParentSpanId(parentSpanId)
+            .setParentSpanContext(noOpParentSpanContext)
             .setEndEpochNanos(1_001_789_021_111L)
             .setName("spanName")
             .setStatus(SpanData.Status.ok())
@@ -134,6 +138,7 @@ class SpanBatchAdapterTest {
             .setSpanId(spanId)
             .setStartEpochNanos(1_000_456_001_000L)
             .setParentSpanId(parentSpanId)
+            .setParentSpanContext(noOpParentSpanContext)
             .setEndEpochNanos(1_001_789_021_111L)
             .setName("spanName")
             .setStatus(SpanData.Status.ok())
