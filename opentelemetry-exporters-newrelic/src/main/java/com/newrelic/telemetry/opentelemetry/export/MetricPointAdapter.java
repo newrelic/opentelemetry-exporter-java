@@ -102,7 +102,7 @@ public class MetricPointAdapter {
     if (isNonMonotonic(metric)) {
       return singleton(
           new Gauge(metric.getName(), value, NANOSECONDS.toMillis(epochNanos), attributes));
-    } else {
+    } else if (!isNonMonotonic(metric)) {
       return singleton(
           new Count(
               metric.getName(),
@@ -111,6 +111,8 @@ public class MetricPointAdapter {
               NANOSECONDS.toMillis(epochNanos),
               attributes));
     }
+    // unhandled types
+    return emptyList();
   }
 
   private Collection<Metric> buildSummaryPointMetrics(
