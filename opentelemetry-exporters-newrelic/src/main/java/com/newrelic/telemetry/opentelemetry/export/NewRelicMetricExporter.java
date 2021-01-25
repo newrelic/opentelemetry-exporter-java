@@ -113,8 +113,9 @@ public class NewRelicMetricExporter implements MetricExporter {
   }
 
   @Override
-  public void shutdown() {
+  public CompletableResultCode shutdown() {
     telemetryClient.shutdown();
+    return CompletableResultCode.ofSuccess();
   }
 
   private Attributes buildCommonAttributes(MetricData metric) {

@@ -73,19 +73,15 @@ class NewRelicMetricExporterTest {
     io.opentelemetry.api.common.Attributes attrs =
         io.opentelemetry.api.common.Attributes.builder().put("not sure", "huh").build();
 
-    MetricData metricData =
-        MetricData.create(
-            resource,
-            libraryInfo,
-            "metricName",
-            "metricDescription",
-            "units",
-            MetricData.Type.SUMMARY,
-            Arrays.asList(point1, point2));
+    MetricData.DoubleSummaryData doubleSummaryData = MetricData.DoubleSummaryData.create(points);
 
-    when(metricPointAdapter.buildMetricsFromPoint(metricData, updatedAttributes, point1))
+    MetricData doubleSummary =
+        MetricData.createDoubleSummary(
+            resource, libraryInfo, "metricName", "metricDescription", "units", doubleSummaryData);
+
+    when(metricPointAdapter.buildMetricsFromPoint(doubleSummary, updatedAttributes, point1))
         .thenReturn(singleton(metric1));
-    when(metricPointAdapter.buildMetricsFromPoint(metricData, updatedAttributes, point2))
+    when(metricPointAdapter.buildMetricsFromPoint(doubleSummary, updatedAttributes, point2))
         .thenReturn(singleton(metric2));
 
     Attributes amendedGlobalAttributes =
@@ -95,13 +91,17 @@ class NewRelicMetricExporterTest {
             .put(COLLECTOR_NAME, "newrelic-opentelemetry-exporter")
             .put(SERVICE_INSTANCE_ID, "instanceId");
 
-    CompletableResultCode result = newRelicMetricExporter.export(singleton(metricData));
+    CompletableResultCode result = newRelicMetricExporter.export(singleton(doubleSummary));
 
     assertTrue(result.isSuccess());
 
     InOrder inOrder = inOrder(metricPointAdapter, timeTracker, telemetryClient);
-    inOrder.verify(metricPointAdapter).buildMetricsFromPoint(metricData, updatedAttributes, point1);
-    inOrder.verify(metricPointAdapter).buildMetricsFromPoint(metricData, updatedAttributes, point2);
+    inOrder
+        .verify(metricPointAdapter)
+        .buildMetricsFromPoint(doubleSummary, updatedAttributes, point1);
+    inOrder
+        .verify(metricPointAdapter)
+        .buildMetricsFromPoint(doubleSummary, updatedAttributes, point2);
     inOrder.verify(timeTracker).tick();
     inOrder
         .verify(telemetryClient)

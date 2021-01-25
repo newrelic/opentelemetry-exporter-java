@@ -17,9 +17,9 @@ import com.newrelic.telemetry.metrics.Summary;
 import io.opentelemetry.api.common.Labels;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.data.MetricData.DoublePoint;
+import io.opentelemetry.sdk.metrics.data.MetricData.DoubleSummaryPoint;
 import io.opentelemetry.sdk.metrics.data.MetricData.LongPoint;
 import io.opentelemetry.sdk.metrics.data.MetricData.Point;
-import io.opentelemetry.sdk.metrics.data.MetricData.SummaryPoint;
 import io.opentelemetry.sdk.metrics.data.MetricData.Type;
 import io.opentelemetry.sdk.metrics.data.MetricData.ValueAtPercentile;
 import java.util.Collection;
@@ -48,20 +48,26 @@ public class MetricPointAdapter {
     if (point instanceof DoublePoint) {
       return buildDoublePointMetrics(metric, attributes, (DoublePoint) point);
     }
-    if (point instanceof SummaryPoint) {
-      return buildSummaryPointMetrics(metric, attributes, (SummaryPoint) point);
+    if (point instanceof DoubleSummaryPoint) {
+      return buildSummaryPointMetrics(metric, attributes, (DoubleSummaryPoint) point);
     }
     return emptyList();
   }
 
+  // See MetricData#DoubleSumData and MetricData#LongSumData
   private boolean isNonMonotonic(MetricData metric) {
     Type type = metric.getType();
-    return type != Type.NON_MONOTONIC_DOUBLE && type != Type.NON_MONOTONIC_LONG;
+    if (type == Type.LONG_SUM) {
+      return !metric.getLongSumData().isMonotonic();
+    }
+    if (type == Type.DOUBLE_SUM) {
+      return !metric.getDoubleSumData().isMonotonic();
+    }
+    return false;
   }
 
   private Collection<Metric> buildDoublePointMetrics(
       MetricData metric, Attributes attributes, DoublePoint point) {
-
     double value = point.getValue();
     if (isNonMonotonic(metric)) {
       DeltaDoubleCounter deltaDoubleCounter =
@@ -92,31 +98,23 @@ public class MetricPointAdapter {
       double value,
       long epochNanos,
       long startEpochNanos) {
-    switch (metric.getType()) {
-      case NON_MONOTONIC_LONG:
-      case NON_MONOTONIC_DOUBLE:
-        return singleton(
-            new Gauge(metric.getName(), value, NANOSECONDS.toMillis(epochNanos), attributes));
 
-      case MONOTONIC_LONG:
-      case MONOTONIC_DOUBLE:
-        return singleton(
-            new Count(
-                metric.getName(),
-                value,
-                NANOSECONDS.toMillis(startEpochNanos),
-                NANOSECONDS.toMillis(epochNanos),
-                attributes));
-
-      default:
-        // maybe log something about unhandled types?
-        break;
+    if (isNonMonotonic(metric)) {
+      return singleton(
+          new Gauge(metric.getName(), value, NANOSECONDS.toMillis(epochNanos), attributes));
+    } else {
+      return singleton(
+          new Count(
+              metric.getName(),
+              value,
+              NANOSECONDS.toMillis(startEpochNanos),
+              NANOSECONDS.toMillis(epochNanos),
+              attributes));
     }
-    return emptyList();
   }
 
   private Collection<Metric> buildSummaryPointMetrics(
-      MetricData metric, Attributes attributes, SummaryPoint point) {
+      MetricData metric, Attributes attributes, DoubleSummaryPoint point) {
     List<ValueAtPercentile> percentileValues = point.getPercentileValues();
 
     double min = Double.NaN;
