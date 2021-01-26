@@ -1,10 +1,10 @@
 dependencies {
-    val newRelicTelemetrySdkVersion = "0.9.0"
+    val newRelicTelemetrySdkVersion = "0.10.0"
 
     api("com.newrelic.telemetry:telemetry:$newRelicTelemetrySdkVersion")
     implementation("org.slf4j:slf4j-api:1.7.26")
     implementation("com.newrelic.telemetry:telemetry-http-okhttp:$newRelicTelemetrySdkVersion")
-    implementation("io.opentelemetry:opentelemetry-sdk:0.12.0")
+    implementation("io.opentelemetry:opentelemetry-sdk:0.13.1")
 
     testRuntimeOnly("org.slf4j:slf4j-simple:1.7.26")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.4.2")

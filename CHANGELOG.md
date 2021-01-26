@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Coming soon
 - tbd
 
+## [0.13.0] - 2020-12-14
+- Updates compatibility with `io.opentelemetry:opentelemetry-sdk:0.13.1`
+- Updates compatibility with `io.opentelemetry.javaagent:opentelemetry-javaagent-spi:0.13.1`
+- Updates compatibility with `com.newrelic.telemetry:telemetry::0.10.0`
+- Updates compatibility with `com.newrelic.telemetry:telemetry-http-okhttp::0.10.0`
+
 ## [0.12.0] - 2020-12-14
 - Updates compatibility with `io.opentelemetry:opentelemetry-sdk:0.12.0`
 - Updates compatibility with `io.opentelemetry.javaagent:opentelemetry-javaagent-spi:0.12.1`

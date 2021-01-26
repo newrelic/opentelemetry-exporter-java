@@ -20,8 +20,8 @@ import io.opentelemetry.api.common.Labels;
 import io.opentelemetry.sdk.common.InstrumentationLibraryInfo;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.data.MetricData.DoublePoint;
+import io.opentelemetry.sdk.metrics.data.MetricData.DoubleSummaryPoint;
 import io.opentelemetry.sdk.metrics.data.MetricData.LongPoint;
-import io.opentelemetry.sdk.metrics.data.MetricData.SummaryPoint;
 import io.opentelemetry.sdk.metrics.data.MetricData.ValueAtPercentile;
 import io.opentelemetry.sdk.resources.Resource;
 import java.util.Arrays;
@@ -34,6 +34,9 @@ class MetricPointAdapterTest {
 
   final InstrumentationLibraryInfo libraryInfo =
       InstrumentationLibraryInfo.create("testin", "99.67");
+  final Resource resource =
+      Resource.create(
+          io.opentelemetry.api.common.Attributes.builder().put("awesomeAttr", "thebest").build());
 
   @Test
   void testLongPoint() {
@@ -53,9 +56,18 @@ class MetricPointAdapterTest {
         new Attributes().put(SERVICE_NAME, "fooService").put("specificKey", "specificValue");
     Count expectedMetric = new Count("metricName", 123L, 9_000L, 10_000L, expectedAttributes);
 
-    MetricData metricData = buildMetricData(longPoint, MetricData.Type.MONOTONIC_LONG);
+    MetricData.LongSumData longSumData =
+        MetricData.LongSumData.create(
+            true,
+            MetricData.AggregationTemporality.CUMULATIVE,
+            Collections.singletonList(longPoint));
+
+    MetricData longSum =
+        MetricData.createLongSum(
+            resource, libraryInfo, "metricName", "metricDescription", "units", longSumData);
+
     Collection<Metric> result =
-        metricPointAdapter.buildMetricsFromPoint(metricData, commonAttributes, longPoint);
+        metricPointAdapter.buildMetricsFromPoint(longSum, commonAttributes, longPoint);
 
     assertEquals(singleton(expectedMetric), result);
   }
@@ -73,13 +85,23 @@ class MetricPointAdapterTest {
             TimeUnit.MILLISECONDS.toNanos(10_000L),
             Labels.of("specificKey", "specificValue"),
             123L);
-    MetricData metricData = buildMetricData(longPoint, MetricData.Type.NON_MONOTONIC_LONG);
+
     Attributes expectedAttributes =
         new Attributes().put(SERVICE_NAME, "fooService").put("specificKey", "specificValue");
     Gauge expectedMetric = new Gauge("metricName", 123L, 10_000L, expectedAttributes);
 
+    MetricData.LongSumData longSumData =
+        MetricData.LongSumData.create(
+            false,
+            MetricData.AggregationTemporality.CUMULATIVE,
+            Collections.singletonList(longPoint));
+
+    MetricData longSum =
+        MetricData.createLongSum(
+            resource, libraryInfo, "metricName", "metricDescription", "units", longSumData);
+
     Collection<Metric> result =
-        metricPointAdapter.buildMetricsFromPoint(metricData, commonAttributes, longPoint);
+        metricPointAdapter.buildMetricsFromPoint(longSum, commonAttributes, longPoint);
 
     assertEquals(singleton(expectedMetric), result);
   }
@@ -101,10 +123,18 @@ class MetricPointAdapterTest {
         new Attributes().put(SERVICE_NAME, "fooService").put("specificKey", "specificValue");
     Count expectedMetric = new Count("metricName", 123.55d, 9_000L, 10_000L, expectedAttributes);
 
-    MetricData metricData = buildMetricData(doublePoint, MetricData.Type.MONOTONIC_DOUBLE);
+    MetricData.DoubleSumData doubleSumData =
+        MetricData.DoubleSumData.create(
+            true,
+            MetricData.AggregationTemporality.CUMULATIVE,
+            Collections.singletonList(doublePoint));
+
+    MetricData doubleSum =
+        MetricData.createDoubleSum(
+            resource, libraryInfo, "metricName", "metricDescription", "units", doubleSumData);
 
     Collection<Metric> result =
-        metricPointAdapter.buildMetricsFromPoint(metricData, commonAttributes, doublePoint);
+        metricPointAdapter.buildMetricsFromPoint(doubleSum, commonAttributes, doublePoint);
 
     assertEquals(singleton(expectedMetric), result);
   }
@@ -126,10 +156,18 @@ class MetricPointAdapterTest {
         new Attributes().put(SERVICE_NAME, "fooService").put("specificKey", "specificValue");
     Gauge expectedMetric = new Gauge("metricName", 123.55d, 10_000L, expectedAttributes);
 
-    MetricData metricData = buildMetricData(doublePoint, MetricData.Type.NON_MONOTONIC_DOUBLE);
+    MetricData.DoubleSumData doubleSumData =
+        MetricData.DoubleSumData.create(
+            false,
+            MetricData.AggregationTemporality.CUMULATIVE,
+            Collections.singletonList(doublePoint));
+
+    MetricData doubleSum =
+        MetricData.createDoubleSum(
+            resource, libraryInfo, "metricName", "metricDescription", "units", doubleSumData);
 
     Collection<Metric> result =
-        metricPointAdapter.buildMetricsFromPoint(metricData, commonAttributes, doublePoint);
+        metricPointAdapter.buildMetricsFromPoint(doubleSum, commonAttributes, doublePoint);
 
     assertEquals(singleton(expectedMetric), result);
   }
@@ -144,8 +182,8 @@ class MetricPointAdapterTest {
     ValueAtPercentile min = ValueAtPercentile.create(0.0, 5.5d);
     ValueAtPercentile max = ValueAtPercentile.create(100.0, 100.01d);
 
-    SummaryPoint summary =
-        SummaryPoint.create(
+    DoubleSummaryPoint doubleSummaryPoint =
+        DoubleSummaryPoint.create(
             TimeUnit.MILLISECONDS.toNanos(9_000L),
             TimeUnit.MILLISECONDS.toNanos(10_000L),
             Labels.of("specificKey", "specificValue"),
@@ -158,26 +196,17 @@ class MetricPointAdapterTest {
     Summary expectedMetric =
         new Summary("metricName", 200, 123.55d, 5.5d, 100.01d, 9000L, 10000L, expectedAttributes);
 
-    MetricData metricData = buildMetricData(summary, MetricData.Type.SUMMARY);
+    MetricData.DoubleSummaryData doubleSummaryData =
+        MetricData.DoubleSummaryData.create(Collections.singletonList(doubleSummaryPoint));
+
+    MetricData doubleSummary =
+        MetricData.createDoubleSummary(
+            resource, libraryInfo, "metricName", "metricDescription", "units", doubleSummaryData);
 
     Collection<Metric> result =
-        metricPointAdapter.buildMetricsFromPoint(metricData, commonAttributes, summary);
+        metricPointAdapter.buildMetricsFromPoint(
+            doubleSummary, commonAttributes, doubleSummaryPoint);
 
     assertEquals(singleton(expectedMetric), result);
-  }
-
-  private MetricData buildMetricData(MetricData.Point point, MetricData.Type type) {
-    io.opentelemetry.api.common.Attributes attrs =
-        io.opentelemetry.api.common.Attributes.builder().put("awesomeAttr", "thebest").build();
-    Resource resource = Resource.create(attrs);
-
-    return MetricData.create(
-        resource,
-        libraryInfo,
-        "metricName",
-        "metricDescription",
-        "units",
-        type,
-        Collections.singletonList(point));
   }
 }
