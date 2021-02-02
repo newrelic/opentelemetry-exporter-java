@@ -9,7 +9,9 @@ import static java.util.Collections.singleton;
 
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.opentelemetry.export.NewRelicSpanExporter.Builder;
+import io.opentelemetry.api.metrics.GlobalMetricsProvider;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.export.IntervalMetricReader;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 
@@ -19,12 +21,19 @@ public class NewRelicExporters {
 
   /**
    * Start up the New Relic Metric and Span exporters with the provided API key and service name.
+   *
+   * @param apiKey API key
+   * @param serviceName Service name
    */
   public static void start(String apiKey, String serviceName) {
     start(new Configuration(apiKey, serviceName));
   }
 
-  /** Start up the New Relic Metric and Span exporters with the provided configuration. */
+  /**
+   * Start up the New Relic Metric and Span exporters with the provided configuration.
+   *
+   * @param configuration Configuration
+   */
   public static void start(Configuration configuration) {
     Attributes serviceNameAttributes =
         new Attributes().put("service.name", configuration.serviceName);
@@ -55,7 +64,7 @@ public class NewRelicExporters {
             .setExportIntervalMillis(configuration.collectionIntervalSeconds * 1000)
             .setMetricExporter(metricExporterBuilder.build())
             .setMetricProducers(
-                singleton(OpenTelemetrySdk.getGlobalMeterProvider().getMetricProducer()))
+                singleton(((SdkMeterProvider) GlobalMetricsProvider.get()).getMetricProducer()))
             .build();
   }
 
@@ -90,6 +99,8 @@ public class NewRelicExporters {
      * Turn on audit logging for the exporters. Please note that this will expose all your telemetry
      * data to your logging system. Requires the slf4j "com.newrelic.telemetry" logger to be enabled
      * at DEBUG level. Defaults to being off.
+     *
+     * @return Configuration
      */
     public Configuration enableAuditLogging() {
       this.enableAuditLogging = true;
@@ -98,6 +109,9 @@ public class NewRelicExporters {
 
     /**
      * Set the collection interval, in seconds, for both metrics and spans. Defaults to 5 seconds.
+     *
+     * @param interval Interval in seconds
+     * @return Configuration
      */
     public Configuration collectionIntervalSeconds(int interval) {
       collectionIntervalSeconds = interval;

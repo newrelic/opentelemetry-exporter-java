@@ -14,18 +14,6 @@ apply(plugin = "signing")
 
 apply(plugin = "com.github.sherter.google-java-format")
 
-tasks.withType<JavaCompile>().configureEach {
-    javaCompiler.set(javaToolchains.compilerFor {
-        languageVersion.set(JavaLanguageVersion.of(8))
-    })
-}
-
-tasks.withType<Test>().configureEach {
-    javaLauncher.set(javaToolchains.launcherFor {
-        languageVersion.set(JavaLanguageVersion.of(11))
-    })
-}
-
 allprojects {
     group = "com.newrelic.telemetry"
 
@@ -38,11 +26,21 @@ allprojects {
         // this is only needed for the working against unreleased otel-java snapshots
         maven("https://oss.jfrog.org/artifactory/oss-snapshot-local")
     }
-    tasks.withType<Test> {
+    tasks.withType<JavaCompile>().configureEach {
+        // compile all projects with Java 8
+        javaCompiler.set(javaToolchains.compilerFor {
+            languageVersion.set(JavaLanguageVersion.of(8))
+        })
+    }
+    tasks.withType<Test>().configureEach {
         useJUnitPlatform()
         testLogging {
             events("passed", "skipped", "failed")
         }
+        // run tests in all projects with Java 11
+        javaLauncher.set(javaToolchains.launcherFor {
+            languageVersion.set(JavaLanguageVersion.of(11))
+        })
     }
 }
 
