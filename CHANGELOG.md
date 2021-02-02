@@ -7,17 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Coming soon
 - tbd
 
+## [0.13.1] - 2021-2-2
+- Fixes a build issue that was causing the project to be compiled with Java 11 which would cause an `UnsupportedClassVersionError` when using the exporter on
+earlier JREs. The project is once again built and published using Java 8.
+
 ## [0.13.0] - 2020-12-14
+**Note:** Due to an issue with the build pipeline this version of the exporter only supports Java 11 and above. If you need the exporter to be compatible with
+JRE 8 - 10 please use [version v0.13.1+ of the exporter](https://github.com/newrelic/opentelemetry-exporter-java/releases/tag/v0.13.1) as
+the issue has been resolved as of that release.
+---
 - Updates compatibility with `io.opentelemetry:opentelemetry-sdk:0.13.1`
 - Updates compatibility with `io.opentelemetry.javaagent:opentelemetry-javaagent-spi:0.13.1`
 - Updates compatibility with `com.newrelic.telemetry:telemetry::0.10.0`
 - Updates compatibility with `com.newrelic.telemetry:telemetry-http-okhttp::0.10.0`
 
 ## [0.12.0] - 2020-12-14
+**Note:** Due to an issue with the build pipeline this version of the exporter only supports Java 11 and above. If you need the exporter to be compatible with
+JRE 8 - 10 please use [version v0.13.1+ of the exporter](https://github.com/newrelic/opentelemetry-exporter-java/releases/tag/v0.13.1) as
+the issue has been resolved as of that release.
+---
 - Updates compatibility with `io.opentelemetry:opentelemetry-sdk:0.12.0`
 - Updates compatibility with `io.opentelemetry.javaagent:opentelemetry-javaagent-spi:0.12.1`
 
 ## [0.11.0] - 2020-12-10
+**Note:** Due to an issue with the build pipeline this version of the exporter only supports Java 11 and above. If you need the exporter to be compatible with
+JRE 8 - 10 please use [version v0.13.1+ of the exporter](https://github.com/newrelic/opentelemetry-exporter-java/releases/tag/v0.13.1) as
+the issue has been resolved as of that release.
+---
 - Updates compatibility with `io.opentelemetry:opentelemetry-sdk:0.11.0`
 - Updates compatibility with `io.opentelemetry.javaagent:opentelemetry-javaagent-spi:0.11.0`
 
