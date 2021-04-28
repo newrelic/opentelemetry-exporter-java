@@ -1,5 +1,23 @@
 [![Community Plus header](https://github.com/newrelic/opensource-website/raw/master/src/images/categories/Community_Plus.png)](https://opensource.newrelic.com/oss-category/#community-plus)
 
+# Archival Notice
+
+❗Notice: This project has been archived _as is_ and is no longer actively maintained.
+
+Rather than developing a Java specific OpenTelemetry exporter New Relic has adopted a language agnostic approach that facilitates data collection from all OpenTelemetry data sources.
+
+The current recommended approaches for sending OpenTelemetry data to the New Relic platform are as follows:
+* Configure your OpenTelemetry data source to send data to the [OpenTelemetry Collector](https://docs.newrelic.com/docs/integrations/open-source-telemetry-integrations/opentelemetry/introduction-opentelemetry-new-relic/#collector) using the OpenTelemetry Protocol (OTLP) and configure the collector to forward the data using the [New Relic collector exporter](https://github.com/newrelic-forks/opentelemetry-collector-contrib/tree/newrelic-main/exporter/newrelicexporter).
+* Configure your OpenTelemetry data source to send data to the native OpenTelemetry Protocol (OTLP) data ingestion endpoint. [OTLP](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/otlp.md) is an open source gRPC based protocol for sending telemetry data. The protocol is vendor agnostic and open source.
+
+For more details please see:
+* [OpenTelemetry quick start](https://docs.newrelic.com/docs/integrations/open-source-telemetry-integrations/opentelemetry/opentelemetry-quick-start/)
+* [Introduction to OpenTelemetry with New Relic](https://docs.newrelic.com/docs/integrations/open-source-telemetry-integrations/opentelemetry/introduction-opentelemetry-new-relic/)
+* [Native OpenTelemetry Protocol (OTLP) support](https://docs.newrelic.com/whats-new/2021/04/native-support-opentelemetry/)
+
+---
+
+
 # New Relic OpenTelemetry exporter
 An [OpenTelemetry](https://github.com/open-telemetry/opentelemetry-java) exporter for sending spans and metrics
 to New Relic using the New Relic Java Telemetry SDK.
